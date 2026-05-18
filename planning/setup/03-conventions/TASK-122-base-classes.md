@@ -1,81 +1,52 @@
-# TASK-122: Nền tảng Chia sẻ: Chuẩn hóa Base Classes & Tiện ích (Foundation: Shared Base Classes & Utility Standardization)
+# TASK-122: Shared Base Classes & Utilities
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
-> **Intent:** BaseEntity, BaseRepository, utilities.
-> **Single Source of Truth:** ../CONVENTIONS.md (§11)
-> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
->
-> _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
+> ⚠️ **STUB** — Convention canonical: [`../CONVENTIONS.md §11`](../CONVENTIONS.md) (Base Classes & Shared Utilities)
 
 ---
 
-## 📋 Metadata
+## 🎯 Intent
 
-- **Task ID**: TASK-122
-- **Độ ưu tiên**: 🔵 TRUNG BÌNH (Development Efficiency)
-- **Phụ thuộc**: TASK-106 (Database Schema)
-- **Trạng thái**: ⏳ Not started
+Chuẩn hóa **BaseEntity** + **BaseRepository** + utilities chung. Mọi entity domain kế thừa BaseEntity → không bao giờ thiếu `createdAt/updatedAt/deletedAt`. Mọi repository kế thừa BaseRepository → có sẵn 5 method chuẩn, service mock được cho unit test.
 
 ---
 
-## 🎯 CHIẾN LƯỢC TÁI SỬ DỤNG (Reuse Strategy)
+## ✅ Acceptance Criteria
 
-### 💡 Tại sao Chuẩn hóa Base Classes quan trọng?
+### BaseEntity (interface/mixin cho Prisma model)
 
-Việc lặp lại các đoạn mã cấu trúc cơ bản cho mỗi Entity hay DTO không chỉ gây lãng phí thời gian mà còn tạo ra sự không nhất quán. Chuẩn hóa giúp mọi thành phần trong hệ thống nói cùng một "ngôn ngữ" kỹ thuật.
+- [ ] Mọi model trong `schema.prisma` có 4 field bắt buộc:
+      - `id String @id @default(uuid())` — UUID v4, không auto-increment.
+      - `createdAt DateTime @default(now())`.
+      - `updatedAt DateTime @updatedAt`.
+      - `deletedAt DateTime?` — soft-delete; default query lọc `deletedAt IS NULL`.
 
-- **DRY (Don't Repeat Yourself)**: Tập trung các thuộc tính chung vào một nơi duy nhất.
-- **Structural Integrity**: Đảm bảo mọi bản ghi đều có vết thời gian (Timestamp) và định danh (UUID) chuẩn.
-- **Development Speed**: Giúp lập trình viên tập trung vào logic nghiệp vụ thay vì các boilerplate code.
+### BaseRepository<T>
 
----
+- [ ] Abstract class ở `src/common/repositories/base.repository.ts`.
+- [ ] Method chuẩn (mọi repo concrete kế thừa):
+      - `findById(id: string): Promise<T | null>` — auto-filter soft-deleted.
+      - `findMany(filter, pagination): Promise<{ data, total }>`.
+      - `create(data): Promise<T>`.
+      - `update(id, data): Promise<T>`.
+      - `softDelete(id): Promise<void>` — set `deletedAt = now()`.
+- [ ] Cấm dùng `prisma` trực tiếp trong service nếu có repository tương ứng. Lint rule hoặc code-review enforce.
 
-## 🏗️ CẤU TRÚC KẾ THỪA (Inheritance Map)
+### Shared utilities (ở `src/shared/utils/`)
 
-```mermaid
-graph TD
-    A[BaseEntity] --> B[User Entity]
-    A --> C[Product Entity]
-    A --> D[Category Entity]
+- [ ] `slugify(text: string): string` — URL-safe, lowercase, ASCII fold.
+- [ ] `formatCurrency(amount: number, locale?: string): string` — default `vi-VN` VND.
+- [ ] `generateId(prefix: string): string` — chỉ dùng cho ID nghiệp vụ (vd `ORD-2026-000123`), không thay UUID.
 
-    E[BaseRepository] --> F[ProductRepository]
-    E --> G[OrderRepository]
+### Tests
 
-    H[Common Utilities] --> I[Slugify]
-    H --> J[Currency Formatter]
-    H --> K[ID Generator]
-```
-
----
-
-## 📄 QUY TẮC QUẢN TRỊ (Standardization Rules)
-
-### 1. Thực thể Cơ bản (Base Entity)
-
-- Mọi thực thể trong hệ thống phải kế thừa từ `BaseEntity` để sở hữu các trường: `id` (Primary Key), `createdAt`, `updatedAt`, và `deletedAt` (cho Soft Delete).
-
-### 2. Tiêu chuẩn Phân trang (Pagination Standard)
-
-- Áp dụng một cấu trúc chung cho mọi yêu cầu và phản hồi có phân trang (`PaginationDto` & `PaginatedResponseDto`) để đảm bảo Frontend không cần viết lại logic xử lý danh sách.
-
-### 3. Thư viện Tiện ích (Utility Governance)
-
-- Các tác vụ lặp đi lặp lại như: Tạo mã đơn hàng (Order Number), Định dạng tiền tệ, hoặc Tạo SEO Slugs phải được tập trung vào thư viện `common/utils`. Tuyệt đối không viết ad-hoc nội bộ trong từng module.
+- [ ] Soft-delete user → `findById` trả `null`, raw `SELECT *` thấy `deletedAt` set.
+- [ ] `slugify("Điện Thoại 15 Pro")` → `"dien-thoai-15-pro"`.
+- [ ] BaseRepository mock được bằng `jest.fn()` cho unit test service.
 
 ---
 
-## ✅ TIÊU CHUẨN THÀNH CÔNG (Definition of Success)
+## 🔗 Canonical references
 
-- [ ] **Zero Redundancy**: Không có thực thể nào phải tự khai báo `id` hay `timestamp` thủ công.
-- [ ] **Global Consistency**: Mọi API trả về danh sách đều có định dạng meta-data (total, page, limit) giống hệt nhau.
-- [ ] **Centralized Logic**: Các thay đổi về định dạng tiền tệ hoặc quy tắc tạo slug chỉ cần sửa ở 1 file duy nhất.
-
----
-
-## 🧪 TDD PLANNING (Standardization Scenarios)
-
-| Kịch bản                  | Mong đợi                                                                                                                     |
-| :------------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
-| **New Entity Creation**   | Tạo `ReviewEntity` kế thừa `BaseEntity` -> Tự động có cột `id`, `createdAt`, `updatedAt` -> Thành công.                      |
-| **Consistent Pagination** | Gọi API Product & API User -> Cả hai đều trả về metadata `{ total: X, limit: Y }` -> Frontend tái sử dụng được UI component. |
-| **Utility Update**        | Thay đổi quy tắc tạo Slug -> Tất cả các module Product, Category, Post đều áp dụng quy tắc mới ngay lập tức.                 |
+- [`../CONVENTIONS.md §11`](../CONVENTIONS.md) — Base classes & utilities reference.
+- [`../CONVENTIONS.md §8`](../CONVENTIONS.md) — Prisma best practices.
+- [`./README.md`](./README.md) — Group DoD.

@@ -1,67 +1,41 @@
-# TASK-105: Quản trị Chất lượng & Kiến trúc Phòng thủ (Global Quality & Defensive Governance)
+# TASK-105: Global Validation & Error Handling
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
-> **Intent:** Global ValidationPipe và Error schema.
-> **Single Source of Truth:** ../CONVENTIONS.md (§3, §5, §14)
-> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
->
-> _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
+> ⚠️ **STUB** — Convention canonical: [`../CONVENTIONS.md §3, §5, §14`](../CONVENTIONS.md) (Type safety, Error strategy, Validation pipeline)
 
 ---
 
-## 📋 Metadata
+## 🎯 Intent
 
-- **Task ID**: TASK-105
-- **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Quality Core)
-- **Phụ thuộc**: TASK-102, TASK-104
-- **Trạng thái**: ⏳ Not started
+Bật **ValidationPipe global** + **GlobalExceptionFilter** để mọi DTO sai và mọi exception đều trả response theo **schema đóng băng** mà FE có thể parse theo `code` (UPPER_SNAKE).
 
----
-
-## 🎯 CHIẾN LƯỢC PHÒNG THỦ (Defensive Coding Strategy)
-
-### 💡 Tại sao Task này quan trọng?
-
-Validation và Error Handling là "hàng rào bảo vệ" đầu tiên, ngăn chặn dữ liệu rác và các cuộc tấn công injection từ vòng ngoài.
-
-- **Data Integrity (Whitelist)**: Áp dụng chính sách "Chỉ chấp nhận dữ liệu đã đăng ký". Mọi thuộc tính dư thừa trong request sẽ bị loại bỏ tự động, ngăn chặn các cuộc tấn công Mass Assignment.
-- **Zero-Trust Validation**: Mọi dữ liệu đi vào (Input) từ Client phải được kiểm tra kiểu dữ liệu và ràng buộc logic (Regex, Range, Enum) trước khi chạm tới Business Logic.
-- **Consistent DX (Developer Experience)**: Cung cấp một cấu trúc phản hồi lỗi (Error Schema) đồng nhất cho toàn bộ API, giúp đội ngũ Frontend xử lý exception một cách tự động và chính xác.
+Không có 2 thứ này thì FE bị break vô tội vạ khi BE deploy.
 
 ---
 
-## 🏗️ TIÊU CHUẨN CHẤT LƯỢNG (Quality Standards)
+## ✅ Acceptance Criteria
 
-### 1. Chính sách Xác thực Dữ liệu (Validation Policy)
-
-- **Automatic Transformation**: Dữ liệu từ URL (String) phải được tự động chuyển đổi sang đúng kiểu dữ liệu nghiệp vụ (Number, Date, ID) để đảm bảo tính nhất quán.
-- **Whitelist Enforcement**: Hệ thống từ chối mọi thuộc tính không được định nghĩa trong mô hình dữ liệu (DTO).
-- **Custom Guardrails**: Xây dựng các bộ quy tắc riêng cho thông tin nhạy cảm:
-  - **Strong Password**: Ràng buộc về độ dài, ký tự đặc biệt và độ phức tạp.
-  - **Identity Formats**: Ràng buộc cho số điện thoại, Email, và Slugs (SEO-friendly).
-
-### 2. Quản trị Ngoại lệ (Exception Governance)
-
-- **Unified Error Schema**: Mọi lỗi (404, 401, 500) phải trả về cùng một format JSON bao gồm: `statusCode`, `message`, `error` (type), và `timestamp`.
-- **Sensitive Shielding**: Trong môi trường Production, các thông tin chi tiết về lỗi hệ thống (Stack-trace) phải được ẩn đi để không tiết lộ cấu trúc hạ tầng.
-- **Audit Logging**: Mọi Exception phải được ghi nhật ký (Internal Log) kèm theo Path và Method để phục vụ truy vết.
-
----
-
-## ✅ ĐÁNH GIÁ KẾT QUẢ (Definition of Done)
-
-- [ ] **Defensive**: Hệ thống tự động từ chối request nếu chứa field lạ.
-- [ ] **Consistent**: Response lỗi của hệ thống đồng nhất trên toàn bộ các Endpoint.
-- [ ] **Secure**: Các quy tắc cho mật khẩu mạnh và định dạng dữ liệu đã được áp dụng.
-- [ ] **Clean**: Class-transformer được tích hợp để xử lý chuyển đổi kiểu dữ liệu tự động.
+- [ ] `main.ts` đăng ký `ValidationPipe` global với options:
+      - `whitelist: true` (drop field không có decorator).
+      - `forbidNonWhitelisted: true` (reject request có field thừa — chống Mass Assignment).
+      - `transform: true` + `transformOptions.enableImplicitConversion: true`.
+- [ ] `GlobalExceptionFilter` (file ở `src/common/filters/`) catch:
+      - `HttpException` (NestJS built-in).
+      - `PrismaClientKnownRequestError` (P2002 unique, P2025 not found...).
+      - `Error` (unknown — log + trả 500 generic, không leak stack).
+- [ ] Response error schema đóng băng — xem `CONVENTIONS.md §14`:
+      ```json
+      { "statusCode", "code", "message", "errors": [...], "timestamp", "path", "requestId" }
+      ```
+- [ ] Mã `code` UPPER_SNAKE bắt buộc (ví dụ `VALIDATION_FAILED`, `USER_NOT_FOUND`). FE parse `code`, KHÔNG parse `message`.
+- [ ] Test: POST sai body → response status `422`, có `errors[]` đầy đủ field-level error.
+- [ ] Test: route không tồn tại → `404` cùng schema (không leak Express HTML).
+- [ ] Test: throw `new NotFoundException('User not found')` → filter format đúng schema.
 
 ---
 
-## 🧪 TDD Planning (Validation Logic)
+## 🔗 Canonical references
 
-| Kịch bản                   | Mong đợi                                                                                |
-| :------------------------- | :-------------------------------------------------------------------------------------- |
-| **Field Injection Attack** | Gửi kèm field `isAdmin: true` trong request đăng ký -> Hệ thống phải loại bỏ field này. |
-| **Logic Validation**       | Nhập mật khẩu là `123456` -> Hệ thống trả lỗi "Password too weak" (400).                |
-| **Structural Integrity**   | Truy cập link không tồn tại -> Trả về JSON chuẩn (không phải HTML error của Server).    |
-| **Type Resilience**        | Gửi `page="abc"` thay vì số -> Trả lỗi 400 kèm thông báo kiểu dữ liệu không hợp lệ.     |
+- [`../CONVENTIONS.md §3`](../CONVENTIONS.md) — Type safety + DTO rules.
+- [`../CONVENTIONS.md §5`](../CONVENTIONS.md) — Error handling strategy.
+- [`../CONVENTIONS.md §14`](../CONVENTIONS.md) — Validation pipe config + error response schema chi tiết + custom validators.
+- [`./README.md`](./README.md) — Group DoD.

@@ -1,78 +1,49 @@
-# TASK-117: Rào chắn Kiểm soát Truy cập & Chiến lược Middleware (Access Control Guardrails & Middleware Strategy)
+# TASK-117: Auth Guards & Decorators
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
-> **Intent:** Auth middleware mechanism (Guards/Decorators).
-> **Single Source of Truth:** ../CONVENTIONS.md (§12)
-> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
->
-> _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
+> ⚠️ **STUB** — Convention canonical: [`../CONVENTIONS.md §12`](../CONVENTIONS.md) (Auth Middleware Stack)
 
 ---
 
-## 📋 Metadata
+## 🎯 Intent
 
-- **Task ID**: TASK-117
-- **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Security Architecture)
-- **Phụ thuộc**: TASK-114 (JWT Architecture)
-- **Trạng thái**: ⏳ Not started
+Cơ chế **fail-by-default**: mọi route require JWT trừ khi đánh dấu `@Public()`. Cung cấp decorator chuẩn (`@Roles`, `@CurrentUser`) cho mọi feature module dùng — không cần tự re-implement.
 
----
-
-## 🎯 CHIẾN LƯỢC PHÒNG THỦ ĐA LỚP (Layered Defense)
-
-### 💡 Tại sao Guardrails quan trọng?
-
-Hệ thống không được phép tin cậy bất kỳ Request nào từ bên ngoài mà chưa qua kiểm duyệt. Các rào chắn (Guards) đóng vai trò là "Người gác cổng" tự động, đảm bảo mọi tài nguyên đều được bảo vệ đúng mức.
-
-- **Fail-by-Default**: Theo mặc định, mọi API đều bị khóa. Chỉ những API được đánh dấu tường minh (Public) mới có thể truy cập mà không cần Token.
-- **Granular Authorization**: Không chỉ kiểm tra "Bạn là ai" (Authentication), hệ thống còn kiểm tra "Bạn có quyền làm gì" (Authorization) dựa trên vai trò (Roles) và quyền hạn cụ thể.
-- **Context Injection**: Tự động trích xuất thông tin định danh từ Token và gắn vào ngữ cảnh xử lý (Request Context) để các Business Service có thể sử dụng an toàn.
+Đây là **mechanism**, không phải feature Auth (Auth feature ở `business/01-identity/`).
 
 ---
 
-## 🏗️ KIẾN TRÚC MIDDLWARE STACK
+## ✅ Acceptance Criteria
 
-```mermaid
-graph TD
-    Request[HTTP Request] --> GlobalGuard[Global Auth Guard]
-    GlobalGuard -- Invalid Token --> Refuse[401 Unauthorized]
-    GlobalGuard -- Valid Token --> IdentityContext[Inject Identity Context]
-    IdentityContext --> RoleGuard[Role-based Access Guard]
-    RoleGuard -- Permission Denied --> Forbid[403 Forbidden]
-    RoleGuard -- Authorized --> Controller[Business Controller]
+### Guards
+
+- [ ] `JwtAuthGuard` đăng ký global ở `APP_GUARD` (trong `AppModule.providers`). KHÔNG khai báo từng controller.
+- [ ] Guard đọc Bearer token, verify chữ ký + expiry, attach `user` vào `request.user`.
+- [ ] `RolesGuard` đăng ký global sau `JwtAuthGuard`. Check `@Roles(...)` metadata.
+- [ ] Token expired → `401` với code `TOKEN_EXPIRED`. Sai signature → `401` `TOKEN_INVALID`.
+
+### Decorators (ở `src/common/decorators/`)
+
+- [ ] `@Public()` — đánh dấu route không cần auth (set metadata `IS_PUBLIC: true`).
+- [ ] `@Roles(...roles: Role[])` — yêu cầu role cụ thể.
+- [ ] `@CurrentUser()` — param decorator inject `request.user` vào handler.
+
+### Middleware order (theo CONVENTIONS §12)
+
+```
+1. Helmet → 2. CORS → 3. ValidationPipe → 4. JwtAuthGuard
+→ 5. RolesGuard → 6. Controller → 7. ResponseInterceptor → 8. ExceptionFilter
 ```
 
----
+### Tests
 
-## 📄 QUY TẮC VẬN HÀNH (Enforcement Patterns)
-
-### 1. Phân tách Trách nhiệm (Separation of Concerns)
-
-- **Authentication Guard**: Chịu trách nhiệm Verify tính hợp lệ của Token (Signature, Expiration).
-- **Authorization Guard**: Chịu trách nhiệm so khớp Metadata của API (ví dụ: yêu cầu quyền `ADMIN`) với Metadata của User.
-
-### 2. Thuộc tính Truy cập (Access Decorators)
-
-Hệ thống sử dụng các bộ "Nhãn" (Decorators) để khai báo quyền hạn ngay tại tầng Controller, giúp code minh bạch và dễ bảo trì:
-
-- `@Public()`: Gỡ bỏ rào chắn bảo mật cho API.
-- `@Roles(ADMIN)`: Giới hạn truy cập cho nhóm người quản trị.
-- `@CurrentUser()`: Trình trích xuất thông tin người dùng an toàn.
+- [ ] `GET /health` có `@Public()` → không token vẫn `200`.
+- [ ] `GET /me` không có `@Public()` → không token → `401`.
+- [ ] Endpoint `@Roles(Role.ADMIN)` → user role USER → `403`.
 
 ---
 
-## ✅ TIÊU CHUẨN AN TOÀN (Definition of Success)
+## 🔗 Canonical references
 
-- [ ] **Zero-Trust**: Mọi API nhạy cảm đều yêu cầu Token hợp lệ.
-- [ ] **RBAC Enforced**: Admin không được truy cập vào dữ liệu cá nhân của User khác trừ khi có quyền đặc biệt.
-- [ ] **Audit Ready**: Mỗi yêu cầu bị từ chối đều được log lại để phục vụ điều tra bảo mật.
-
----
-
-## 🧪 TDD PLANNING (Security Scenarios)
-
-| Kịch bản                    | Mong đợi                                                                                       |
-| :-------------------------- | :--------------------------------------------------------------------------------------------- |
-| **Bypass Attempt**          | Truy cập `/admin/users` mà không gửi Token -> Trả lỗi 401.                                     |
-| **Insufficient Privileges** | Tài khoản `USER` cố truy cập API dành cho `ADMIN` -> Trả lỗi 403.                              |
-| **Context Extraction**      | Sử dụng `@CurrentUser()` trong Service -> Phải nhận được đúng Object User tương ứng với Token. |
+- [`../CONVENTIONS.md §12`](../CONVENTIONS.md) — Full auth middleware stack.
+- [`../../business/01-identity/TASK-114-jwt-auth.md`](../../business/01-identity/TASK-114-jwt-auth.md) — JWT strategy feature (dùng cơ chế này).
+- [`./README.md`](./README.md) — Group DoD.

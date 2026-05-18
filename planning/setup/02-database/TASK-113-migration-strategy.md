@@ -1,54 +1,40 @@
-# TASK-113: Kiến trúc Tiến hóa & An toàn Production (Evolution Architecture & Production Safety)
+# TASK-113: Migration Strategy & Best Practices
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
-> **Intent:** Migration strategy & rollback rules.
-> **Single Source of Truth:** ../CONVENTIONS.md (§13)
-> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
->
-> _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
+> ⚠️ **STUB** — Convention canonical: [`../CONVENTIONS.md §13`](../CONVENTIONS.md) (Migration Strategy & Best Practices)
 
 ---
 
-## 📋 Metadata
+## 🎯 Intent
 
-- **Task ID**: TASK-113
-- **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Stability)
-- **Phụ thuộc**: TASK-112 (Migration Governance)
-- **Trạng thái**: ⏳ Not started
+Thiết lập **kỷ luật migration một chiều** cho production. Migration đã merge vào main = bất biến; sửa = tạo migration mới revert.
 
----
-
-## 🎯 CHIẾN LƯỢC TIẾN HÓA (Evolutionary Strategy)
-
-### 1. Nguyên tắc Không gián đoạn (Zero-Downtime Principles)
-
-Mọi thay đổi Schema trên môi trường Production phải tuân thủ triết lý "Mở rộng trước, Thu hẹp sau":
-
-- **Giai đoạn 1**: Thêm các cột hoặc bảng mới (Non-blocking changes). Code mới bắt đầu ghi song song vào cả cũ và mới nếu cần.
-- **Giai đoạn 2**: Di chuyển dữ liệu cũ sang cấu trúc mới (Data Migration).
-- **Giai đoạn 3**: Loại bỏ cấu trúc cũ (Cleanup) sau khi đã xác nhận code mới hoạt động ổn định 100%.
-
-### 2. Quản trị Rủi ro (Risk Management)
-
-- **Transactional Safety**: Mỗi file Migration phải chạy trong một Database Transaction duy nhất. Nếu một lệnh lỗi, toàn bộ thay đổi phải được hủy bỏ tự động (Auto-rollback).
-- **Locking Awareness**: Tránh các lệnh gây khóa bảng (exclusive locks) lâu trên các bảng lớn (ví dụ: `Orders`). Ưu tiên các lệnh `ADD COLUMN` có giá trị mặc định là NULL.
-- **Data Integrity Audits**: Luôn thực hiện kiểm chính dữ liệu (Verification queries) sau mỗi lần nạp migration để đảm bảo tính toàn vẹn.
+Đây không phải task code — đây là **convention enforcement**. Sai migration ở production có thể mất data.
 
 ---
 
-## ✅ TIÊU CHUẨN ĐẦU RA (Definition of Success)
+## ✅ Acceptance Criteria
 
-- [ ] **Safe-by-Design**: Các script migration được kiểm thử tự động khả năng Rollback.
-- [ ] **Traceable**: Mỗi lần chạy migration đều được log lại thời gian bắt đầu, kết thúc và người thực hiện.
-- [ ] **Atomic**: Không bao giờ để Database ở trạng thái "lửng lơ" (nửa cũ nửa mới) khi có lỗi.
+- [ ] Quy tắc bất di bất dịch viết rõ trong `CONVENTIONS.md §13`.
+- [ ] Naming convention `<YYYYMMDDHHMMSS>_<verb>_<entity>` (ví dụ `20260518123000_add_email_verified_to_users`).
+- [ ] Pre-deploy check: `npx prisma migrate status` không có pending.
+- [ ] DDL và DML tách file: schema migration chỉ `ALTER`, data update viết script riêng idempotent.
+- [ ] Drop column/table phải 2 deploy: deprecate trước, drop sau.
+- [ ] Mọi PR đụng `prisma/schema.prisma` phải kèm migration file mới (kiểm tra trong code review).
+- [ ] Team document hóa quy tắc revert: tạo migration mới, không edit file cũ.
 
 ---
 
-## 🏗️ QUY TRÌNH KIỂM THỬ (Verification Pipeline)
+## ⚖️ Bất biến (trích từ canonical)
 
-| Bước               | Hoạt động                                           | Mục tiêu                                               |
-| :----------------- | :-------------------------------------------------- | :----------------------------------------------------- |
-| **Local Sandbox**  | Chạy trên dữ liệu giả lập.                          | Kiểm tra cú pháp SQL.                                  |
-| **Staging Replay** | Chạy trên bản copy của DB Production.               | Ước lượng thời gian chạy và đo lường độ trễ (Latency). |
-| **Rollback Drill** | Thực hiện Revert ngay sau khi nạp thành công.       | Đảm bảo đường lui luôn mở.                             |
-| **Final Audit**    | Kiểm tra số lượng Record và Ràng buộc (FK, Unique). | Xác nhận dữ liệu không bị mất mát.                     |
+1. **Migration 1 chiều**: không edit file đã merge.
+2. **DDL ≠ DML**: schema khác data.
+3. **2-phase drop**: deprecate → drop ở deploy sau.
+4. **Idempotent data scripts**: chạy lại không hỏng.
+
+---
+
+## 🔗 Canonical references
+
+- [`../CONVENTIONS.md §13`](../CONVENTIONS.md) — Full migration rules.
+- [`../COMMANDS.md`](../COMMANDS.md) — `prisma migrate dev/deploy/status/reset`.
+- [`./README.md`](./README.md) — Group DoD.
