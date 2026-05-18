@@ -1,6 +1,6 @@
 # 🔮 Future — Post-MVP Features
 
-> ⚠️ **Đọc kỹ trước khi làm**: phần lớn task ở đây là **systems engineering quy mô lớn** hoặc feature phụ thuộc nhiều stakeholder. Self-learn track ([`../../ROADMAP-SELF-LEARN.md`](../../ROADMAP-SELF-LEARN.md)) **cắt 80% phần này khỏi roadmap chính**.
+> ⚠️ **Đọc kỹ trước khi làm**: phần lớn task ở đây là **systems engineering quy mô lớn** hoặc feature phụ thuộc nhiều stakeholder. Self-learn track ([`../../docs/ROADMAP.md`](../../docs/ROADMAP.md)) **cắt 80% phần này khỏi roadmap chính**.
 
 ---
 

@@ -1,6 +1,6 @@
 # 🛠️ 05-scale-infra — Hạ tầng scale (Post-MVP)
 
-> ⚠️ Phần lớn task này **không nằm trong MVP**. Self-learn ([`../../ROADMAP-SELF-LEARN.md`](../../ROADMAP-SELF-LEARN.md)) chỉ giữ 4 task chính: TASK-301 (unit test), TASK-302 (e2e), TASK-313 (rate limit), TASK-320 (RBAC). Còn lại là backlog.
+> ⚠️ Phần lớn task này **không nằm trong MVP**. Self-learn ([`../../docs/ROADMAP.md`](../../docs/ROADMAP.md)) chỉ giữ 4 task chính: TASK-301 (unit test), TASK-302 (e2e), TASK-313 (rate limit), TASK-320 (RBAC). Còn lại là backlog.
 
 ## 🎯 Mục đích
 

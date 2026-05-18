@@ -1,6 +1,6 @@
 # 📑 Master Task Index
 
-> 📜 Glossary: [`CONTEXT.md`](./CONTEXT.md) · Convention: [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md) · Roadmap self-learn: [`ROADMAP-SELF-LEARN.md`](./ROADMAP-SELF-LEARN.md)
+> 📜 Glossary: [`CONTEXT.md`](./docs/CONTEXT.md) · Convention: [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md) · Roadmap self-learn: [`ROADMAP.md`](./docs/ROADMAP.md)
 
 Tài liệu chia 2 nhánh:
 
@@ -149,4 +149,4 @@ Tài liệu chia 2 nhánh:
 
 **Tổng: 79 task active + 1 deprecated** (TASK-216 merged into TASK-219).
 
-> Self-learn không làm toàn bộ 79 task. Theo `ROADMAP-SELF-LEARN.md`: MVP ≈ 35 task chính, còn lại là backlog/cut.
+> Self-learn không làm toàn bộ 79 task. Theo `ROADMAP.md`: MVP ≈ 35 task chính, còn lại là backlog/cut.

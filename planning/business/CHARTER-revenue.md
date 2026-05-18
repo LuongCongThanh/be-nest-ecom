@@ -82,7 +82,7 @@ Phase 1 dependency: Identity hoàn tất, User entity stable, Auth guards hoạt
 
 ## 🗣️ Ngôn ngữ thống nhất
 
-Glossary domain: [`../CONTEXT.md`](../CONTEXT.md) — sections **Catalog Context**, **Commerce Context**, **Order State Machine**.
+Glossary domain: [`../docs/CONTEXT.md`](../docs/CONTEXT.md) — sections **Catalog Context**, **Commerce Context**, **Order State Machine**.
 
 ---
 

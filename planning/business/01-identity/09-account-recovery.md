@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-116 (Register/Login)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 > 🛠️ SMTP config: [`engineering §6`](../../setup/CONVENTIONS.md) ([`TASK-102`](../../setup/01-project/02-env-config.md))
 
 ---

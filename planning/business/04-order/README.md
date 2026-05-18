@@ -1,6 +1,6 @@
 # 📦 Order — Đơn hàng
 
-> Bounded context **Commerce / Order**. Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Commerce Context* + *Order State Machine*.
+> Bounded context **Commerce / Order**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Commerce Context* + *Order State Machine*.
 
 ---
 
@@ -62,7 +62,7 @@ grandTotal       = afterDiscount + shippingFee
 8. **User soft-deleted (`deletedAt`)** → Order vẫn tồn tại, dùng `customerEmailSnapshot` để liên hệ.
 9. **Idempotency**: `POST /orders` BẮT BUỘC header `Idempotency-Key` (UUID FE sinh khi mở trang checkout). Cùng key trong 24h → trả Order cũ. Body khác key cũ → `409 IDEMPOTENCY_KEY_REUSED`. Chống double-click + mobile retry.
 10. **Money type**: mọi field tiền `BigInt` đơn vị đồng VND. Không float, không Decimal.
-11. **Address Snapshot**: User chọn `Address` từ profile (xem [`../../CONTEXT.md`](../../CONTEXT.md) — Address Context). Server đọc Address → snapshot toàn bộ vào `shippingAddressSnapshot` JSONB. Sau đó sửa/xóa Address gốc KHÔNG ảnh hưởng Order.
+11. **Address Snapshot**: User chọn `Address` từ profile (xem [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — Address Context). Server đọc Address → snapshot toàn bộ vào `shippingAddressSnapshot` JSONB. Sau đó sửa/xóa Address gốc KHÔNG ảnh hưởng Order.
 12. **VAT MVP = 0**: schema có `vatRate`, `vatAmount`, `vatTotal` nhưng MVP set `0`. Bật VAT sau qua flag, không cần migration historical.
 
 ---

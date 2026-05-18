@@ -34,13 +34,19 @@ Refactor thành **roadmap 12 tuần** theo learning curve, mỗi tuần một **
 
 ```
 planning/
-├── ROADMAP-SELF-LEARN.md           ← FILE NÀY (entry point mới cho self-learn)
-├── QUICKSTART.md                   ← giữ nguyên (dành cho dev đã quen)
-├── setup/                          ← hạ tầng, convention, tooling (HOW)
-└── business/                       ← domain, feature (WHAT)
+├── README.md           ← entry root
+├── docs/               ← spec, glossary, meta (file này nằm đây)
+│   ├── README.md
+│   ├── CONTEXT.md      ← glossary + design decisions
+│   ├── REQUIREMENTS.md ← BRD
+│   ├── ROADMAP.md      ← FILE NÀY
+│   ├── STATUS.md
+│   └── TASK_INDEX.md
+├── setup/              ← hạ tầng, convention, tooling (HOW)
+└── business/           ← domain, feature (WHAT)
 ```
 
-Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫn đường** trỏ vào TASK-xxx có sẵn.
+Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở `setup/` và `business/`.
 
 ---
 
@@ -358,8 +364,8 @@ Không xóa file — chỉ dán nhãn "Out of scope for self-learn track" trong 
 ### Cấu trúc tài liệu
 
 - **Giữ nguyên nội dung** mọi file `TASK-xxx.md` + `CHARTER.md` + `CONTEXT.md` + `CONVENTIONS.md` + `DATABASE_SCHEMA.md`. Refactor chỉ **sắp xếp lại vị trí** (setup/ vs business/), không sửa nội dung spec.
-- **Thêm file mới**: `ROADMAP-SELF-LEARN.md` (file này) — entry point cho người tự học.
-- **Cập nhật**: `QUICKSTART.md` thêm 1 dòng "Tự học BE? → đọc `ROADMAP-SELF-LEARN.md`".
+- **Thêm file mới**: `ROADMAP.md` (file này) — entry point cho người tự học.
+- **Cập nhật**: `README.md` thêm 1 dòng "Tự học BE? → đọc `ROADMAP.md`".
 
 ### Học liệu mapping
 
@@ -437,7 +443,7 @@ Convention `setup/CONVENTIONS.md` §9 đã định nghĩa AAA pattern + `@goleve
 1. Đọc roadmap này một lượt (15 phút).
 2. Bắt đầu **Tuần 0** ngay hôm nay (cài tools).
 3. Tuần 1 vào ngày mai, code line đầu tiên.
-4. Mỗi cuối tuần: cập nhật progress vào `PROJECT_STATUS.md` (chỉ tick task tương ứng).
+4. Mỗi cuối tuần: cập nhật progress vào `STATUS.md` (chỉ tick task tương ứng).
 5. Khi vướng concept nào — tra `CONTEXT.md` (glossary) hoặc `setup/CONVENTIONS.md` (rule).
 
 **Triết lý cuối**: học BE không phải đọc 80 task. Là gõ phím, gặp lỗi, fix, hiểu. File này chỉ là bản đồ. Đi mới là điều quan trọng.

@@ -70,4 +70,4 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 
 - **Single source of truth**: nội dung trùng với `CONVENTIONS.md` / `DATABASE_*.md` → các file canonical là chuẩn. Task chỉ giữ **intent + acceptance criteria + link**.
 - **Task ID giữ nguyên** (101→321) để truy vết lịch sử lên kế hoạch ban đầu. KHÔNG renumber.
-- Với người tự học: bám `../ROADMAP-SELF-LEARN.md`, các task `05-scale-infra` chỉ làm sau khi xong MVP.
+- Với người tự học: bám `../docs/ROADMAP.md`, các task `05-scale-infra` chỉ làm sau khi xong MVP.

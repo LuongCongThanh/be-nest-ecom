@@ -1,6 +1,6 @@
 # 💳 Payment — Thanh toán
 
-> Bounded context **Commerce / Payment**. Glossary: [`../../CONTEXT.md`](../../CONTEXT.md).
+> Bounded context **Commerce / Payment**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md).
 
 ---
 
@@ -33,14 +33,14 @@ Tích hợp **provider thanh toán bên ngoài** (VNPay, Stripe, MoMo...) và đ
 
 1. **Webhook endpoint là public** (không cần auth) NHƯNG bắt buộc verify **chữ ký HMAC** từ provider. Sai chữ ký → log + `403`, không xử lý.
 2. **Idempotent webhook**: cùng `providerTxId` gọi nhiều lần → kết quả như gọi 1 lần. Lưu `providerTxId UNIQUE`. Duplicate → trả `200` không update lại.
-3. **Idempotent checkout init**: `POST /payments/:provider/checkout/:orderId` dùng header `Idempotency-Key` (xem [`CONTEXT.md`](../../CONTEXT.md) — Idempotency Key). Cùng key 2 lần → trả URL redirect cũ, không tạo Payment mới.
+3. **Idempotent checkout init**: `POST /payments/:provider/checkout/:orderId` dùng header `Idempotency-Key` (xem [`CONTEXT.md`](../../docs/CONTEXT.md) — Idempotency Key). Cùng key 2 lần → trả URL redirect cũ, không tạo Payment mới.
 4. **Stock ĐÃ trừ ở PENDING** (eager deduction tại `POST /orders` — xem [`../04-order/`](../04-order/README.md) invariant 6). Payment SUCCESS **CHỈ** đổi `Order.status PENDING → PAID` + emit `order.paid`, **KHÔNG trừ stock lần nữa**.
 5. **Tất cả thao tác sau SUCCESS atomic** (cùng `prisma.$transaction`): update Payment status SUCCESS + đổi Order.status = PAID + emit `order.paid`. Lỗi giữa chừng → rollback Payment về FAILED, Order giữ PENDING.
 6. **Payment FAILED** sau khi Order PENDING → KHÔNG tự hoàn stock. Đợi cleanup job 15 phút timeout (xem `PENDING Order Timeout` ở CONTEXT.md) hoặc user cancel thủ công.
 7. **Không bao giờ log thông tin nhạy cảm** (số thẻ, CVV). Provider gửi `rawCallback` → lưu JSONB nhưng phải có redact filter (xem `CONVENTIONS.md §7.5`).
 8. **Replay attack**: webhook đến với timestamp cũ quá ngưỡng (5 phút) → reject `403`.
 9. **Refund flow tách**: MVP **manual** — chỉ set state REFUNDED + log "Manual VNPay refund needed for txId XXX". Admin xử lý refund qua VNPay portal. Phase 3 mới auto-call refund API.
-10. **Money type**: `amount` lưu `BigInt` đơn vị đồng VND (xem [`CONTEXT.md`](../../CONTEXT.md) — Money Type). Không bao giờ float.
+10. **Money type**: `amount` lưu `BigInt` đơn vị đồng VND (xem [`CONTEXT.md`](../../docs/CONTEXT.md) — Money Type). Không bao giờ float.
 
 ---
 

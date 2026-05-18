@@ -50,7 +50,7 @@ Phase 1 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đ�
 5. ✅ Password rule (NIST 2024): ≥8 ký tự + không trong top 100 common + check HaveIBeenPwned breach (k-anonymity). KHÔNG bắt complexity (hoa/số/đặc biệt).
 6. ✅ Role enum (`USER`/`STAFF`/`ADMIN`) đã đóng băng và có decorator phân quyền dùng được.
 7. ✅ Address: User có N Address với `isDefault` (max 1). User soft-delete → Address CASCADE soft-delete.
-8. ✅ Soft-delete cascade theo Hybrid policy (xem [`../../CONTEXT.md`](../../CONTEXT.md) — Cross-context).
+8. ✅ Soft-delete cascade theo Hybrid policy (xem [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — Cross-context).
 9. ✅ Migration của các entity Identity đã chạy thành công trên staging.
 10. ✅ Audit: không có endpoint nào trả về `password` hash trong response. `class-transformer @Exclude()` enforce.
 
@@ -69,4 +69,4 @@ Phase 1 phải hoàn tất các engineering foundation sau **trước khi** star
 
 ## 🗣️ Ngôn ngữ thống nhất
 
-Glossary domain xem [`../../CONTEXT.md`](../../CONTEXT.md). Khi viết task mới, **bắt buộc** dùng đúng thuật ngữ đã định nghĩa ở đó.
+Glossary domain xem [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md). Khi viết task mới, **bắt buộc** dùng đúng thuật ngữ đã định nghĩa ở đó.

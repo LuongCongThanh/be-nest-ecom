@@ -2,8 +2,8 @@
 
 Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 1 domain độc lập.
 
-> 📜 Glossary domain bắt buộc: [`../CONTEXT.md`](../CONTEXT.md)
-> 📋 Yêu cầu nghiệp vụ tổng: [`../BUSINESS_REQUIREMENTS.md`](../BUSINESS_REQUIREMENTS.md)
+> 📜 Glossary domain bắt buộc: [`../docs/CONTEXT.md`](../docs/CONTEXT.md)
+> 📋 Yêu cầu nghiệp vụ tổng: [`../docs/REQUIREMENTS.md`](../docs/REQUIREMENTS.md)
 
 ---
 
@@ -87,13 +87,13 @@ Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 
 | TASK-328 | Product Recommendations (ML) | Cần data + ML |
 | TASK-329 | Analytics Dashboard | Frontend job |
 
-> ⚠️ Track self-learn (`../ROADMAP-SELF-LEARN.md`) **bỏ qua** phần lớn `07-future`. Chỉ chọn 1–2 chủ đề tò mò nhất sau khi MVP xong.
+> ⚠️ Track self-learn (`../docs/ROADMAP.md`) **bỏ qua** phần lớn `07-future`. Chỉ chọn 1–2 chủ đề tò mò nhất sau khi MVP xong.
 
 ---
 
 ## 🧭 Quy tắc dùng
 
-1. Mọi task trong `business/` **bắt buộc** dùng đúng thuật ngữ từ `../CONTEXT.md`.
+1. Mọi task trong `business/` **bắt buộc** dùng đúng thuật ngữ từ `../docs/CONTEXT.md`.
 2. Khi viết feature mới đụng thuật ngữ chưa có → cập nhật `CONTEXT.md` trước, code sau.
 3. Khi feature đụng schema → cập nhật `../setup/DATABASE_SCHEMA.md` trước, code migration sau.
 4. Khi feature đụng convention (validation rule mới, error code mới) → cập nhật `../setup/CONVENTIONS.md` trước.

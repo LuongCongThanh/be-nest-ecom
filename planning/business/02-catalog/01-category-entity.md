@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-106 (Schema Strategy)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Catalog Context*
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Catalog Context*
 
 ---
 

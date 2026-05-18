@@ -7,7 +7,7 @@
 - **Phụ thuộc**: Engineering setup hoàn tất ([TASK-101..105](../../setup/README.md))
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 > 🗂️ Chi tiết ERD canonical: [`../../setup/DATABASE_SCHEMA.md`](../../setup/DATABASE_SCHEMA.md)
 > 🛠️ Migration tooling: [`../../setup/COMMANDS.md`](../../setup/COMMANDS.md) · Strategy: [`CONVENTIONS.md §13`](../../setup/CONVENTIONS.md)
 

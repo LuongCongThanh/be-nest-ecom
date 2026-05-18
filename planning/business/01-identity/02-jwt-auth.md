@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-107 (User Entity)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 > 🛠️ Middleware mechanism (Guards/Decorators) thuộc engineering: [`CONVENTIONS.md §12`](../../setup/CONVENTIONS.md) · [`TASK-117`](../../setup/03-conventions/04-guards-decorators.md)
 
 ---

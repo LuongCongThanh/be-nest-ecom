@@ -1,6 +1,6 @@
 # 📦 Catalog — Sản phẩm & Danh mục
 
-> Bounded context **Catalog**. Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Catalog Context*.
+> Bounded context **Catalog**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Catalog Context*.
 
 ---
 
@@ -20,7 +20,7 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 | Product  | Đơn vị bán được (SKU level). 1 Product = 1 SKU + 1 slug + `price` (`BigInt` đồng VND) + `comparePrice` (BigInt). |
 | Variant  | Biến thể của Product (size, màu). Mỗi variant có SKU riêng. (TASK-218, post-MVP.)           |
 | Stock    | Tồn kho thực. **Trừ EAGER tại `POST /orders` (PENDING)** trong cùng transaction — xem [`../04-order/`](../04-order/README.md). Order PENDING timeout 15 phút → hoàn stock. |
-| Image    | Lưu qua `IStorageAdapter` (local disk dev, S3 prod). 3 size (`thumb 200px / medium 800px / original`), output `.webp`. Path `/products/{productId}/{uuid}_{size}.webp`. Xem [`CONTEXT.md`](../../CONTEXT.md) — File Upload. |
+| Image    | Lưu qua `IStorageAdapter` (local disk dev, S3 prod). 3 size (`thumb 200px / medium 800px / original`), output `.webp`. Path `/products/{productId}/{uuid}_{size}.webp`. Xem [`CONTEXT.md`](../../docs/CONTEXT.md) — File Upload. |
 
 ---
 

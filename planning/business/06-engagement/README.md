@@ -1,6 +1,6 @@
 # 💬 Engagement — Tương tác khách hàng
 
-> Bounded context **Engagement** (phụ trợ doanh thu). Glossary: [`../../CONTEXT.md`](../../CONTEXT.md).
+> Bounded context **Engagement** (phụ trợ doanh thu). Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md).
 
 ---
 
@@ -25,7 +25,7 @@ Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Revi
 
 ## ⚖️ Key Invariants (cross-feature)
 
-1. **Reviews**: chỉ User có Order `DELIVERED` chứa Product đó mới được review. 1 User ↔ 1 Review per Product. Update OK, không tạo dòng mới. User soft-delete → Review **ANONYMIZE** (`userId=NULL`, `authorName="Người dùng đã xóa"`) — xem [`../../CONTEXT.md`](../../CONTEXT.md) cascade policy.
+1. **Reviews**: chỉ User có Order `DELIVERED` chứa Product đó mới được review. 1 User ↔ 1 Review per Product. Update OK, không tạo dòng mới. User soft-delete → Review **ANONYMIZE** (`userId=NULL`, `authorName="Người dùng đã xóa"`) — xem [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) cascade policy.
 2. **Coupon**:
    - Validate **trước khi tính total** ở Order creation (xem Order Math Formula).
    - **Discount trừ TRƯỚC VAT** (luật thuế VN): `afterDiscount = subtotal - discountAmount` → `vatTotal = afterDiscount * vatRate / (10000 + vatRate)`.
@@ -58,7 +58,7 @@ Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Revi
 
 ## 📅 Ưu tiên cho self-learn track
 
-Engagement **không nằm trong MVP** ([`../../ROADMAP-SELF-LEARN.md`](../../ROADMAP-SELF-LEARN.md)). Chỉ làm sau Tuần 12 nếu muốn mở rộng. Thứ tự đề xuất nếu làm:
+Engagement **không nằm trong MVP** ([`../../docs/ROADMAP.md`](../../docs/ROADMAP.md)). Chỉ làm sau Tuần 12 nếu muốn mở rộng. Thứ tự đề xuất nếu làm:
 
 1. Coupon (TASK-224) — học transaction lồng nhau.
 2. Reviews (TASK-219) — học foreign business rule (chỉ DELIVERED mới review).

@@ -1,6 +1,6 @@
 # 🛒 Cart — Giỏ hàng
 
-> Bounded context **Commerce / Cart**. Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Commerce Context*.
+> Bounded context **Commerce / Cart**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Commerce Context*.
 
 ---
 
