@@ -27,22 +27,22 @@ Mỗi task chỉ làm khi có **triệu chứng cụ thể**, không làm theo c
 
 | ID       | Topic                          | File                                                            |
 | :------- | :----------------------------- | :-------------------------------------------------------------- |
-| TASK-301 | Unit Tests                     | [link](./TASK-301-unit-tests.md)                          |
-| TASK-302 | E2E Tests                      | [link](./TASK-302-e2e-tests.md)                           |
-| TASK-304 | Database Optimization          | [link](./TASK-304-db-optimization.md)                     |
-| TASK-306 | Add Caching                    | [link](./TASK-306-caching.md)                               |
-| TASK-307 | Security Enhancements          | [link](./TASK-307-security.md)                     |
-| TASK-308 | Setup CI/CD                    | [link](./TASK-308-cicd.md)                                |
-| TASK-309 | Production Deployment          | [link](./TASK-309-prod-deploy.md)                     |
-| TASK-310 | Clean Architecture Boundaries  | [link](./TASK-310-clean-arch.md)     |
-| TASK-311 | Advanced Caching Strategy      | [link](./TASK-311-caching-advanced.md)                 |
-| TASK-312 | Logging / Monitoring / Tracing | [link](./TASK-312-observability.md)                |
-| TASK-313 | Rate Limiting                  | [link](./TASK-313-rate-limit.md)            |
-| TASK-314 | API Versioning                 | [link](./TASK-314-api-versioning.md)                            |
-| TASK-315 | Feature Flags                  | [link](./TASK-315-feature-flags.md)               |
-| TASK-316 | Elasticsearch Integration      | [link](./TASK-316-elasticsearch.md)                 |
-| TASK-320 | RBAC                           | [link](./TASK-320-rbac.md)            |
-| TASK-321 | Docker & Kubernetes            | [link](./TASK-321-docker-k8s.md)           |
+| TASK-301 | Unit Tests                     | [link](./01-unit-tests.md)                          |
+| TASK-302 | E2E Tests                      | [link](./02-e2e-tests.md)                           |
+| TASK-304 | Database Optimization          | [link](./09-db-optimization.md)                     |
+| TASK-306 | Add Caching                    | [link](./10-caching.md)                               |
+| TASK-307 | Security Enhancements          | [link](./04-security.md)                     |
+| TASK-308 | Setup CI/CD                    | [link](./06-cicd.md)                                |
+| TASK-309 | Production Deployment          | [link](./07-prod-deploy.md)                     |
+| TASK-310 | Clean Architecture Boundaries  | [link](./11-clean-arch.md)     |
+| TASK-311 | Advanced Caching Strategy      | [link](./12-caching-advanced.md)                 |
+| TASK-312 | Logging / Monitoring / Tracing | [link](./08-observability.md)                |
+| TASK-313 | Rate Limiting                  | [link](./03-rate-limit.md)            |
+| TASK-314 | API Versioning                 | [link](./13-api-versioning.md)                            |
+| TASK-315 | Feature Flags                  | [link](./14-feature-flags.md)               |
+| TASK-316 | Elasticsearch Integration      | [link](./15-elasticsearch.md)                 |
+| TASK-320 | RBAC                           | [link](./05-rbac.md)            |
+| TASK-321 | Docker & Kubernetes            | [link](./16-docker-k8s.md)           |
 
 ## 📅 Đề xuất thứ tự (nếu làm sau MVP)
 

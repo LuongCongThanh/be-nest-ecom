@@ -54,12 +54,12 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 
 | ID       | Topic                       | File                                                            |
 | :------- | :-------------------------- | :-------------------------------------------------------------- |
-| TASK-108 | Category entity             | [link](./TASK-108-category-entity.md)                           |
-| TASK-109 | Product entity              | [link](./TASK-109-product-entity.md)                            |
-| TASK-201 | Categories CRUD             | [link](./TASK-201-categories-crud.md)                 |
-| TASK-202 | Category tree & filtering   | [link](./TASK-202-category-tree.md)                   |
-| TASK-203 | Products CRUD               | [link](./TASK-203-products-crud.md)                   |
-| TASK-204 | Product filter & search     | [link](./TASK-204-products-search.md)                  |
-| TASK-205 | Stock management            | [link](./TASK-205-stock-management.md)                  |
-| TASK-206 | Product images              | [link](./TASK-206-product-images.md)                |
-| TASK-218 | Product variants            | [link](./TASK-218-product-variants.md)               |
+| TASK-108 | Category entity             | [link](./01-category-entity.md)                           |
+| TASK-109 | Product entity              | [link](./02-product-entity.md)                            |
+| TASK-201 | Categories CRUD             | [link](./03-categories-crud.md)                 |
+| TASK-202 | Category tree & filtering   | [link](./05-category-tree.md)                   |
+| TASK-203 | Products CRUD               | [link](./04-products-crud.md)                   |
+| TASK-204 | Product filter & search     | [link](./06-products-search.md)                  |
+| TASK-205 | Stock management            | [link](./07-stock-management.md)                  |
+| TASK-206 | Product images              | [link](./08-product-images.md)                |
+| TASK-218 | Product variants            | [link](./09-product-variants.md)               |

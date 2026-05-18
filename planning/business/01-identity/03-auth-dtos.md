@@ -89,5 +89,5 @@
 ## 🚫 Out of Scope
 
 - Custom validator implementation → [`engineering §14`](../../setup/CONVENTIONS.md).
-- Global error filter wiring → [`TASK-105`](../../setup/03-conventions/TASK-105-validation-error.md).
-- Swagger generation → [`TASK-215`](../../setup/04-cross-cutting/TASK-215-swagger.md).
+- Global error filter wiring → [`TASK-105`](../../setup/03-conventions/03-validation-error.md).
+- Swagger generation → [`TASK-215`](../../setup/04-cross-cutting/04-swagger.md).

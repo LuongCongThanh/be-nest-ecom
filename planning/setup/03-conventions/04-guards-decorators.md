@@ -45,5 +45,5 @@ Cơ chế **fail-by-default**: mọi route require JWT trừ khi đánh dấu `@
 ## 🔗 Canonical references
 
 - [`../CONVENTIONS.md §12`](../CONVENTIONS.md) — Full auth middleware stack.
-- [`../../business/01-identity/TASK-114-jwt-auth.md`](../../business/01-identity/TASK-114-jwt-auth.md) — JWT strategy feature (dùng cơ chế này).
+- [`../../business/01-identity/02-jwt-auth.md`](../../business/01-identity/02-jwt-auth.md) — JWT strategy feature (dùng cơ chế này).
 - [`./README.md`](./README.md) — Group DoD.

@@ -8,7 +8,7 @@
 - **Trạng thái**: ⏳ Not started
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
-> 🛠️ Storage adapter + image pipeline: [`setup/04-cross-cutting/TASK-223`](../../setup/04-cross-cutting/TASK-223-file-upload.md)
+> 🛠️ Storage adapter + image pipeline: [`setup/04-cross-cutting/TASK-223`](../../setup/04-cross-cutting/05-file-upload.md)
 
 ---
 

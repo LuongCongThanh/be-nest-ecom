@@ -10,8 +10,8 @@ Bootstrap dự án NestJS với cấu trúc thư mục chuẩn + biến môi tr�
 
 | ID       | Topic                          | File                                            | Canonical |
 | :------- | :----------------------------- | :---------------------------------------------- | :-------- |
-| TASK-101 | Bootstrap NestJS               | [link](./TASK-101-bootstrap-nestjs.md)          | `../CONVENTIONS.md §1` |
-| TASK-102 | Environment Configuration      | [link](./TASK-102-env-config.md) | — |
+| TASK-101 | Bootstrap NestJS               | [link](./01-bootstrap-nestjs.md)          | `../CONVENTIONS.md §1` |
+| TASK-102 | Environment Configuration      | [link](./02-env-config.md) | — |
 
 ## ✅ Definition of Done cho nhóm
 

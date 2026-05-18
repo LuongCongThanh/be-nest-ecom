@@ -13,7 +13,7 @@
 
 ## 🎯 Business Intent
 
-CRUD ở đây **không phải public CRUD** — là cổng vận hành dành cho `ADMIN`/`STAFF` để xử lý support ticket, vi phạm chính sách, audit. End-user dùng [`TASK-119 Profile`](./TASK-119-user-profile.md) cho thao tác cá nhân.
+CRUD ở đây **không phải public CRUD** — là cổng vận hành dành cho `ADMIN`/`STAFF` để xử lý support ticket, vi phạm chính sách, audit. End-user dùng [`TASK-119 Profile`](./06-user-profile.md) cho thao tác cá nhân.
 
 - **Mọi xóa là soft-delete** (TASK-106 AC-2/3).
 - **Admin không tự nâng quyền cho chính mình** — bắt buộc một Admin khác phê duyệt (xem AC-3).

@@ -50,9 +50,9 @@ Cart **chưa phải giao dịch** — chưa trừ kho, chưa khóa giá. Snapsho
 
 | ID       | Topic                | File                                          |
 | :------- | :------------------- | :-------------------------------------------- |
-| TASK-110 | Cart entities        | [link](./TASK-110-cart-entities.md)           |
-| TASK-207 | Shopping cart        | [link](./TASK-207-shopping-cart.md) |
-| TASK-208 | Cart calculations    | [link](./TASK-208-cart-calc.md)       |
+| TASK-110 | Cart entities        | [link](./01-cart-entities.md)           |
+| TASK-207 | Shopping cart        | [link](./02-shopping-cart.md) |
+| TASK-208 | Cart calculations    | [link](./03-cart-calc.md)       |
 
 ---
 
