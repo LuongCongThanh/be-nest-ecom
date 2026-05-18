@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-110 (Cart), TASK-106 (Snapshot strategy)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md) — section *Commerce Context*, đặc biệt *Order State Machine*
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Commerce Context*, đặc biệt *Order State Machine*
 
 ---
 

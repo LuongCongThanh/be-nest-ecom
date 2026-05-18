@@ -7,8 +7,8 @@
 - **Phụ thuộc**: TASK-107 (User Entity)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
-> 🛠️ Middleware mechanism (Guards/Decorators) thuộc engineering: [`project-conventions.vi.md §12`](../../engineering/project-conventions.vi.md) · [`TASK-117`](../../engineering/phase-1-foundation/TASK-117-Tạo-Guards-Decorators.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 🛠️ Middleware mechanism (Guards/Decorators) thuộc engineering: [`CONVENTIONS.md §12`](../../setup/CONVENTIONS.md) · [`TASK-117`](../../setup/03-conventions/TASK-117-Tạo-Guards-Decorators.md)
 
 ---
 
@@ -68,7 +68,7 @@ Task này chốt **chính sách nghiệp vụ** cho cơ chế xác thực không
 
 ## 🚫 Out of Scope
 
-- Cấu hình guards/decorators concrete → [`engineering §12`](../../engineering/project-conventions.vi.md) + TASK-117.
+- Cấu hình guards/decorators concrete → [`engineering §12`](../../setup/CONVENTIONS.md) + TASK-117.
 - Refresh token rotation logic → TASK-123.
 - Social login / OAuth → Phase 3 TASK-327.
 - 2FA → Phase 3 TASK-319.

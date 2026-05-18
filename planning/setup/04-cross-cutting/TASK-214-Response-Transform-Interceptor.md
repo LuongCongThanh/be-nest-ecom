@@ -2,8 +2,8 @@
 
 > 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
 > **Intent:** Response envelope wrapper + pagination metadata.
-> **Single Source of Truth:** ../project-conventions.vi.md (§4, §5)
-> **Charter business liên quan:** [../../ecommerce-api-doc/02-Phase-2-Revenue/CHARTER.md](../../ecommerce-api-doc/02-Phase-2-Revenue/CHARTER.md)
+> **Single Source of Truth:** ../CONVENTIONS.md (§4, §5)
+> **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

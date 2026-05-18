@@ -3,7 +3,7 @@
 > 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** Cài đặt PostgreSQL qua Docker Compose.
 > **Single Source of Truth:** ../DATABASE_SETUP.md (Step 1)
-> **Charter business liên quan:** [../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md](../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md)
+> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

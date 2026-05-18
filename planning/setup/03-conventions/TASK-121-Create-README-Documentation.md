@@ -3,7 +3,7 @@
 > 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** README & documentation convention.
 > **Single Source of Truth:** (Tài liệu này là chuẩn — chưa có doc canonical riêng)
-> **Charter business liên quan:** [../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md](../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md)
+> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

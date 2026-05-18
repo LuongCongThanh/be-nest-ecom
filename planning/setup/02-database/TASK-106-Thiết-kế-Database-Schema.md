@@ -4,12 +4,12 @@
 
 - **Task ID**: TASK-106
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Foundational Architecture)
-- **Phụ thuộc**: Engineering setup hoàn tất ([TASK-101..105](../../engineering/phase-1-foundation/README.md))
+- **Phụ thuộc**: Engineering setup hoàn tất ([TASK-101..105](../../setup/README.md))
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
-> 🗂️ Chi tiết ERD canonical: [`../../engineering/DATABASE_SCHEMA.md`](../../engineering/DATABASE_SCHEMA.md)
-> 🛠️ Migration tooling: [`../../engineering/COMMANDS.md`](../../engineering/COMMANDS.md) · Strategy: [`project-conventions.vi.md §13`](../../engineering/project-conventions.vi.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 🗂️ Chi tiết ERD canonical: [`../../setup/DATABASE_SCHEMA.md`](../../setup/DATABASE_SCHEMA.md)
+> 🛠️ Migration tooling: [`../../setup/COMMANDS.md`](../../setup/COMMANDS.md) · Strategy: [`CONVENTIONS.md §13`](../../setup/CONVENTIONS.md)
 
 ---
 
@@ -43,7 +43,7 @@ Tài liệu này quyết định **các nguyên tắc dữ liệu ở mức nghi
 ### 3. Uniqueness & Index (mức nghiệp vụ)
 
 - **Unique business identity**: `User.email`, `Product.slug`, `Order.orderNumber`.
-- Mọi FK phải có index — nguyên tắc đã ghi tại [`project-conventions.vi.md §8`](../../engineering/project-conventions.vi.md).
+- Mọi FK phải có index — nguyên tắc đã ghi tại [`CONVENTIONS.md §8`](../../setup/CONVENTIONS.md).
 
 ---
 
@@ -74,5 +74,5 @@ Tài liệu này quyết định **các nguyên tắc dữ liệu ở mức nghi
 ## 🚫 Out of Scope
 
 - Định nghĩa cột chi tiết từng entity → ERD ở `DATABASE_SCHEMA.md`.
-- Cấu hình PostgreSQL/Prisma → [`TASK-103/104`](../../engineering/phase-1-foundation/README.md).
-- Câu lệnh migration cụ thể → [`COMMANDS.md`](../../engineering/COMMANDS.md).
+- Cấu hình PostgreSQL/Prisma → [`TASK-103/104`](../../setup/README.md).
+- Câu lệnh migration cụ thể → [`COMMANDS.md`](../../setup/COMMANDS.md).

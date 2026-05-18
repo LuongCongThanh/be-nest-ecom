@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-109 (Product Entity), TASK-203 (Products CRUD)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
 
 ---
 

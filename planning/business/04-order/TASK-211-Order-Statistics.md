@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-210 (Order Lifecycle)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
 
 ---
 

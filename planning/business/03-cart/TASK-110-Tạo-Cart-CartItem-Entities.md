@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-109 (Product), TASK-218 (Variants)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md) — section *Commerce Context*
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Commerce Context*
 
 ---
 

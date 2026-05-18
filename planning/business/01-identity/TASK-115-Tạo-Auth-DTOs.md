@@ -7,8 +7,8 @@
 - **Phụ thuộc**: TASK-114 (JWT Policy)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
-> 🛠️ Validation pipeline & error schema: [`project-conventions.vi.md §3, §14`](../../engineering/project-conventions.vi.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 🛠️ Validation pipeline & error schema: [`CONVENTIONS.md §3, §14`](../../setup/CONVENTIONS.md)
 
 ---
 
@@ -88,6 +88,6 @@
 
 ## 🚫 Out of Scope
 
-- Custom validator implementation → [`engineering §14`](../../engineering/project-conventions.vi.md).
-- Global error filter wiring → [`TASK-105`](../../engineering/phase-1-foundation/TASK-105-Setup-Global-Validation-Error-Handling.md).
-- Swagger generation → [`TASK-215`](../02-Phase-2-Revenue/TASK-215-Complete-Swagger-Documentation.md).
+- Custom validator implementation → [`engineering §14`](../../setup/CONVENTIONS.md).
+- Global error filter wiring → [`TASK-105`](../../setup/03-conventions/TASK-105-Setup-Global-Validation-Error-Handling.md).
+- Swagger generation → [`TASK-215`](../../setup/04-cross-cutting/TASK-215-Complete-Swagger-Documentation.md).

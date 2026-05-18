@@ -7,8 +7,8 @@
 - **Phụ thuộc**: TASK-106 (Schema Strategy)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
-> 🛠️ Base entity pattern: [`project-conventions.vi.md §11`](../../engineering/project-conventions.vi.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 🛠️ Base entity pattern: [`CONVENTIONS.md §11`](../../setup/CONVENTIONS.md)
 
 ---
 

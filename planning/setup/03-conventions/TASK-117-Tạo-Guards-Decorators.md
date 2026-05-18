@@ -2,8 +2,8 @@
 
 > 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** Auth middleware mechanism (Guards/Decorators).
-> **Single Source of Truth:** ../project-conventions.vi.md (§12)
-> **Charter business liên quan:** [../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md](../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md)
+> **Single Source of Truth:** ../CONVENTIONS.md (§12)
+> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

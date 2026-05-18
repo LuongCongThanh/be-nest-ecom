@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-108 (Category)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md) — section *Catalog Context*
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md) — section *Catalog Context*
 
 ---
 

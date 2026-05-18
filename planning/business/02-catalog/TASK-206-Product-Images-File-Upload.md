@@ -7,8 +7,8 @@
 - **Phụ thuộc**: TASK-203 (Products CRUD), TASK-223 engineering (File Upload Service)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
-> 🛠️ Storage adapter + image pipeline: [`engineering/phase-2-revenue/TASK-223`](../../engineering/phase-2-revenue/TASK-223-File-Upload-Service.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
+> 🛠️ Storage adapter + image pipeline: [`setup/04-cross-cutting/TASK-223`](../../setup/04-cross-cutting/TASK-223-File-Upload-Service.md)
 
 ---
 

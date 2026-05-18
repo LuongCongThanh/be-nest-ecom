@@ -7,7 +7,7 @@
 - **Phụ thuộc**: TASK-208 (Calculation), TASK-205 (Stock), TASK-111 (Order Entity)
 - **Trạng thái**: ⏳ Not started
 
-> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../CONTEXT.md`](../CONTEXT.md)
+> 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
 
 ---
 

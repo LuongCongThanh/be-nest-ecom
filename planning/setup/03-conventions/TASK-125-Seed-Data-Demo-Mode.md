@@ -4,7 +4,7 @@
 > **Intent:** Seed data & demo mode tooling.
 > **Single Source of Truth:** ../DATABASE_SETUP.md (Step 3) + ../COMMANDS.md (
 pm run seed)
-> **Charter business liên quan:** [../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md](../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md)
+> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

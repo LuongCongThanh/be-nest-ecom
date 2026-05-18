@@ -301,9 +301,9 @@ flowchart LR
 
 ### Phase 1: Foundation And Identity *(bounded context: Identity)*
 
-- Đặc tả schema chiến lược (snapshot, delete strategy, FK rules) — xem `01-Phase-1-Foundation/CHARTER.md`.
+- Đặc tả schema chiến lược (snapshot, delete strategy, FK rules) — xem `business/01-identity/CHARTER.md`.
 - Hoàn thiện auth, user lifecycle: register/login, refresh token rotation, change password, account verification & recovery.
-- _Engineering foundation (NestJS setup, config, DB, validation, migrations, conventions) được tách sang `planning/engineering/phase-1-foundation/`._
+- _Engineering foundation (NestJS setup, config, DB, validation, migrations, conventions) được tách sang `planning/setup/`._
 
 ### Phase 2: Revenue Operations *(bounded contexts: Catalog + Commerce)*
 

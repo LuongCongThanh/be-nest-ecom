@@ -3,7 +3,7 @@
 > 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** Lệnh tạo và chạy Prisma migration.
 > **Single Source of Truth:** ../COMMANDS.md (Database & Prisma Migrations)
-> **Charter business liên quan:** [../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md](../../ecommerce-api-doc/01-Phase-1-Foundation/CHARTER.md)
+> **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
 >
 > _File này giữ nguyên nội dung gốc để tham chiếu. Khi cập nhật, sửa **canonical doc** trước, file này có thể trở thành stub._
 

@@ -34,8 +34,8 @@ Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc
 
 | Nhóm cũ                                                                     | Đã chuyển đến                                    |
 | :-------------------------------------------------------------------------- | :----------------------------------------------- |
-| Setup project, env, DB, validation, migrations, base classes, seeds, README | `planning/engineering/phase-1-foundation/`       |
-| Entity Category, Product, Cart, Order                                       | `planning/ecommerce-api-doc/02-Phase-2-Revenue/` |
+| Setup project, env, DB, validation, migrations, base classes, seeds, README | `planning/setup/`       |
+| Entity Category, Product, Cart, Order                                       | `planning/business/` |
 
 ---
 
@@ -54,7 +54,7 @@ Phase 1 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đ�
 
 ## 🔗 Phụ thuộc Outbound
 
-Phase 1 phải hoàn tất các engineering foundation sau **trước khi** start (tham chiếu `planning/engineering/phase-1-foundation/`):
+Phase 1 phải hoàn tất các engineering foundation sau **trước khi** start (tham chiếu `planning/setup/`):
 
 - TASK-101 → 105: project setup, env, DB connect, global validation.
 - TASK-112, 113: migration tooling & strategy.
@@ -65,4 +65,4 @@ Phase 1 phải hoàn tất các engineering foundation sau **trước khi** star
 
 ## 🗣️ Ngôn ngữ thống nhất
 
-Glossary domain xem [`../CONTEXT.md`](../CONTEXT.md). Khi viết task mới, **bắt buộc** dùng đúng thuật ngữ đã định nghĩa ở đó.
+Glossary domain xem [`../../CONTEXT.md`](../../CONTEXT.md). Khi viết task mới, **bắt buộc** dùng đúng thuật ngữ đã định nghĩa ở đó.
