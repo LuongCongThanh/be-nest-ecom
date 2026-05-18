@@ -5,6 +5,133 @@
 
 ---
 
+## 🗺️ Roadmap Visual
+
+### 1. Dependency graph — 12 tuần
+
+```mermaid
+graph TD
+    W0([🛠️ Tuần 0<br/>Setup Tools<br/>Node + Docker + IDE]):::pre
+    W1[Tuần 1<br/>Hello NestJS + Postgres<br/>health check]:::found
+    W2[Tuần 2<br/>User Entity + Migration<br/>base classes]:::found
+    W3[Tuần 3<br/>Auth: Register / Login<br/>JWT + Guards]:::auth
+    W4[Tuần 4<br/>Refresh Token + Profile<br/>Change Password]:::auth
+    W5[Tuần 5<br/>Category + Product CRUD<br/>BigInt money + role guard]:::catalog
+    W6[Tuần 6<br/>Filter + Search FTS + Stock<br/>row-level lock]:::catalog
+    W7[Tuần 7<br/>Shopping Cart<br/>Guest cookie + snapshot]:::commerce
+    W8[🎯 Tuần 8<br/>Order CHECKOUT<br/>Eager stock + Idempotency<br/>State machine<br/>MVP DEMO-READY]:::mvp
+    W9[Tuần 9<br/>Payment VNPay<br/>HMAC webhook]:::commerce
+    W10[Tuần 10<br/>Errors + Swagger<br/>File upload + Logging]:::polish
+    W11[Tuần 11<br/>Email Verify + Reset<br/>Mailtrap → Resend]:::polish
+    W12[🚀 Tuần 12<br/>Unit + E2E Tests<br/>SHIP]:::ship
+
+    W0 --> W1 --> W2 --> W3 --> W4 --> W5 --> W6 --> W7 --> W8 --> W9 --> W10 --> W11 --> W12
+
+    classDef pre fill:#94a3b8,color:#fff,stroke:#475569,stroke-width:2px
+    classDef found fill:#3b82f6,color:#fff,stroke:#1e40af,stroke-width:2px
+    classDef auth fill:#8b5cf6,color:#fff,stroke:#6d28d9,stroke-width:2px
+    classDef catalog fill:#06b6d4,color:#fff,stroke:#0e7490,stroke-width:2px
+    classDef commerce fill:#f97316,color:#fff,stroke:#c2410c,stroke-width:2px
+    classDef mvp fill:#f59e0b,color:#fff,stroke:#b45309,stroke-width:4px
+    classDef polish fill:#ec4899,color:#fff,stroke:#be185d,stroke-width:2px
+    classDef ship fill:#10b981,color:#fff,stroke:#047857,stroke-width:4px
+```
+
+### 2. Gantt — timeline 12 tuần
+
+```mermaid
+gantt
+    title 12-Week Self-Learn Track to MVP
+    dateFormat YYYY-MM-DD
+    axisFormat %m-%d
+
+    section 🛠 Pre-flight
+    Tuần 0 Tools setup           :w0, 2026-05-19, 2d
+
+    section 🏗 Foundation
+    Tuần 1 NestJS + Postgres     :w1, after w0, 7d
+    Tuần 2 User + Migration      :w2, after w1, 7d
+
+    section 🔐 Auth
+    Tuần 3 Register/Login JWT    :w3, after w2, 7d
+    Tuần 4 Refresh + Profile     :w4, after w3, 7d
+
+    section 📦 Catalog
+    Tuần 5 Category + Product    :w5, after w4, 7d
+    Tuần 6 Search + Stock        :w6, after w5, 7d
+
+    section 🛒 Commerce
+    Tuần 7 Cart                  :w7, after w6, 7d
+    Tuần 8 🎯 Order CHECKOUT     :crit, w8, after w7, 7d
+    Tuần 9 Payment VNPay         :w9, after w8, 7d
+
+    section ✨ Polish
+    Tuần 10 Swagger + Upload     :w10, after w9, 7d
+    Tuần 11 Email + Recovery     :w11, after w10, 7d
+    Tuần 12 🚀 Tests + SHIP      :crit, w12, after w11, 7d
+```
+
+### 3. Concept learning curve
+
+Mỗi tuần học 1 group concept cốt lõi. Concept khó (đắt) dồn về cuối phase:
+
+```mermaid
+graph LR
+    subgraph "🏗 Foundation (W1-2)"
+        C1[Module/DI<br/>Controller→Service]
+        C2[Prisma + Migration<br/>UUID/Soft-delete]
+    end
+    subgraph "🔐 Auth (W3-4)"
+        C3[JWT + bcrypt<br/>Guards + Decorators]
+        C4[Refresh rotation<br/>Token family<br/>5s tolerance]
+    end
+    subgraph "📦 Catalog (W5-6)"
+        C5[Repository pattern<br/>Pagination DTO<br/>BigInt money]
+        C6[Postgres FTS<br/>Row-level lock<br/>Transaction]
+    end
+    subgraph "🛒 Commerce (W7-9)"
+        C7[Cart Guest+User<br/>Snapshot pattern]
+        C8[Atomic checkout<br/>Idempotency-Key<br/>State machine]
+        C9[Webhook HMAC<br/>Provider idempotent]
+    end
+    subgraph "✨ Polish (W10-12)"
+        C10[Filter+Interceptor<br/>Swagger+Upload]
+        C11[Email service<br/>Token one-time]
+        C12[Unit+E2E tests<br/>SHIP 🚀]
+    end
+
+    C1 --> C2 --> C3 --> C4 --> C5 --> C6 --> C7 --> C8 --> C9 --> C10 --> C11 --> C12
+```
+
+### 4. MVP scope vs Backlog
+
+```mermaid
+pie title 80 tasks chia thế nào
+    "MVP (W1-12)" : 35
+    "Backlog post-MVP" : 31
+    "Cut khỏi roadmap" : 14
+```
+
+### 5. ASCII timeline (offline view)
+
+```text
+              ┌─ MVP demo-able ─┐    ┌─ SHIP ─┐
+              ▼                 ▼    ▼        ▼
+W0 ─── W1 ─── W2 ─── W3 ─── W4 ─── W5 ─── W6 ─── W7 ─── W8 ─── W9 ─── W10 ─── W11 ─── W12
+ │      │      │      │      │      │      │      │      │      │       │       │       │
+ │      │      │      │      │      │      │      │      │      │       │       │       │
+Tool  Hello   User   Auth   Refresh Cat+   Search Cart  Order  Pay     Polish  Email   Test
+       Nest   Entity Login         Prod   Stock        🎯CORE  VNPay           Verify  SHIP🚀
+       +DB
+       
+Color: ⚪Pre  🔵Foundation  🟣Auth  🟦Catalog  🟧Commerce  🟡MVP  🌸Polish  🟢Ship
+```
+
+> 🎯 **Tuần 8** = MVP có thể demo (register → browse → cart → checkout có thanh toán mock).
+> 🚀 **Tuần 12** = ship-ready (có test, không bug critical).
+
+---
+
 ## 1. Vấn đề của planning hiện tại (Problem Statement)
 
 Đứng từ góc nhìn của một dev tự học BE, tài liệu hiện tại có 3 trở ngại:
