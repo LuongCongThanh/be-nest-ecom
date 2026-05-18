@@ -13,7 +13,7 @@ Thư mục này chứa **5 file spec/meta** của dự án. Mọi tài liệu nh
 | [`CONTEXT.md`](./CONTEXT.md) | **Glossary + Design Decisions** | Khi gặp thuật ngữ lạ (Money type, Snapshot, Refresh Family...) hoặc cần tra rule design đã lock. **File quan trọng nhất.** | Mỗi khi thêm/đổi 1 thuật ngữ domain hoặc lock 1 quyết định kiến trúc mới. |
 | [`REQUIREMENTS.md`](./REQUIREMENTS.md) | **BRD — Business Requirements** | Khi cần hiểu yêu cầu nghiệp vụ tổng thể (mục tiêu kinh doanh, user persona, value proposition). | Khi stakeholder đổi yêu cầu nghiệp vụ. Rất hiếm. |
 | [`ROADMAP.md`](./ROADMAP.md) | **Self-learn track 12 tuần** | Người mới bắt đầu — đây là **map đi từ Tuần 0 → MVP**. Có cả "What you learn" + step-by-step + checklist. | Khi chiến lược học/scope MVP đổi. |
-| [`STATUS.md`](./STATUS.md) | **Project Status** | Khi mở session code mới — xem task nào nên làm tiếp, dependency graph, week-by-week. | Sau mỗi task hoàn thành. **Cập nhật thường xuyên nhất.** |
+| [`STATUS.md`](./STATUS.md) | **Waterfall Tracking Dashboard** | Khi mở session code mới — xem Phase hiện tại, task tiếp, exit gate sắp đạt. Có audit log + sign-off template. | Sau mỗi task: cập nhật task status + append audit log entry. **File cập nhật thường xuyên nhất.** |
 | [`TASK_INDEX.md`](./TASK_INDEX.md) | **Master Task Index** | Khi cần tìm spec của 1 TASK ID cụ thể. | Khi thêm/xóa/move task file. |
 
 ---
