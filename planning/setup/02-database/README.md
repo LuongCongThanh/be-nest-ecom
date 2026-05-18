@@ -10,11 +10,11 @@ Kết nối NestJS ↔ PostgreSQL qua Prisma, thiết lập **chiến lược mi
 
 | ID       | Topic                          | File                                                            | Canonical |
 | :------- | :----------------------------- | :-------------------------------------------------------------- | :-------- |
-| TASK-103 | Setup PostgreSQL local         | [link](./TASK-103-Setup-Database-PostgreSQL.md)                 | `../DATABASE_SETUP.md` |
+| TASK-103 | Setup PostgreSQL local         | [link](./TASK-103-postgres-setup.md)                 | `../DATABASE_SETUP.md` |
 | TASK-104 | Connect NestJS to Postgres     | [link](./TASK-104-connect-postgres.md)                          | `../DATABASE_SETUP.md` |
 | TASK-106 | Database schema strategy       | [link](./TASK-106-schema-strategy.md)                           | `../DATABASE_SCHEMA.md` |
-| TASK-112 | Run migrations                 | [link](./TASK-112-Generate-Run-Migrations.md)                   | `../COMMANDS.md` |
-| TASK-113 | Migration best practices       | [link](./TASK-113-Migration-Best-Practices-Strategy.md)         | `../CONVENTIONS.md §13` |
+| TASK-112 | Run migrations                 | [link](./TASK-112-run-migrations.md)                   | `../COMMANDS.md` |
+| TASK-113 | Migration best practices       | [link](./TASK-113-migration-strategy.md)         | `../CONVENTIONS.md §13` |
 
 ## ⚖️ Bất biến
 

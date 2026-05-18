@@ -71,10 +71,10 @@ Phase 2 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đ�
 ## 🔗 Phụ thuộc Outbound
 
 Phase 2 require các engineering primitive sau hoàn tất trước:
-- [`TASK-212`](../setup/04-cross-cutting/TASK-212-Global-Error-Handling.md) — global error filter.
-- [`TASK-213`](../setup/04-cross-cutting/TASK-213-Request-Logging-Interceptor.md) — correlation ID cho debug.
-- [`TASK-214`](../setup/04-cross-cutting/TASK-214-Response-Transform-Interceptor.md) — response envelope.
-- [`TASK-223`](../setup/04-cross-cutting/TASK-223-File-Upload-Service.md) — trước TASK-206 (Product Images).
+- [`TASK-212`](../setup/04-cross-cutting/TASK-212-error-filter.md) — global error filter.
+- [`TASK-213`](../setup/04-cross-cutting/TASK-213-logging.md) — correlation ID cho debug.
+- [`TASK-214`](../setup/04-cross-cutting/TASK-214-response-transform.md) — response envelope.
+- [`TASK-223`](../setup/04-cross-cutting/TASK-223-file-upload.md) — trước TASK-206 (Product Images).
 
 Phase 1 dependency: Identity hoàn tất, User entity stable, Auth guards hoạt động.
 

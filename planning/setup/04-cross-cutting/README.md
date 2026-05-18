@@ -38,11 +38,11 @@ HTTP response
 
 | ID       | Topic                          | File                                                            |
 | :------- | :----------------------------- | :-------------------------------------------------------------- |
-| TASK-212 | Global Error Filter            | [link](./TASK-212-Global-Error-Handling.md)                     |
-| TASK-213 | Request Logging Interceptor    | [link](./TASK-213-Request-Logging-Interceptor.md)               |
-| TASK-214 | Response Transform Interceptor | [link](./TASK-214-Response-Transform-Interceptor.md)            |
-| TASK-215 | Swagger / OpenAPI              | [link](./TASK-215-Complete-Swagger-Documentation.md)            |
-| TASK-223 | File Upload Service            | [link](./TASK-223-File-Upload-Service.md)                       |
+| TASK-212 | Global Error Filter            | [link](./TASK-212-error-filter.md)                     |
+| TASK-213 | Request Logging Interceptor    | [link](./TASK-213-logging.md)               |
+| TASK-214 | Response Transform Interceptor | [link](./TASK-214-response-transform.md)            |
+| TASK-215 | Swagger / OpenAPI              | [link](./TASK-215-swagger.md)            |
+| TASK-223 | File Upload Service            | [link](./TASK-223-file-upload.md)                       |
 
 ## ⚖️ Bất biến
 

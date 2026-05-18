@@ -8,7 +8,7 @@
 - **Trạng thái**: ⏳ Not started
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../CONTEXT.md`](../../CONTEXT.md)
-> 🛠️ SMTP config: [`engineering §6`](../../setup/CONVENTIONS.md) ([`TASK-102`](../../setup/01-project/TASK-102-Setup-Environment-Configuration.md))
+> 🛠️ SMTP config: [`engineering §6`](../../setup/CONVENTIONS.md) ([`TASK-102`](../../setup/01-project/TASK-102-env-config.md))
 
 ---
 

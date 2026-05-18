@@ -54,10 +54,10 @@ Order **không bao giờ tham chiếu Cart hay Product mới nhất** — luôn 
 | ID       | Topic                          | File                                                   |
 | :------- | :----------------------------- | :----------------------------------------------------- |
 | TASK-111 | Order & OrderItem entities     | [link](./TASK-111-order-entities.md)                   |
-| TASK-209 | Order creation (checkout)      | [link](./TASK-209-Implement-Order-Creation.md)         |
-| TASK-210 | Order management               | [link](./TASK-210-Order-Management.md)                 |
-| TASK-211 | Order statistics               | [link](./TASK-211-Order-Statistics.md)                 |
-| TASK-222 | Order lifecycle events         | [link](./TASK-222-Order-Lifecycle-Event-Handling.md)   |
+| TASK-209 | Order creation (checkout)      | [link](./TASK-209-order-creation.md)         |
+| TASK-210 | Order management               | [link](./TASK-210-order-mgmt.md)                 |
+| TASK-211 | Order statistics               | [link](./TASK-211-order-stats.md)                 |
+| TASK-222 | Order lifecycle events         | [link](./TASK-222-order-events.md)   |
 
 ---
 

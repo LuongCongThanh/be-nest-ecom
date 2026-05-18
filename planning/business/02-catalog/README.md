@@ -56,10 +56,10 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 | :------- | :-------------------------- | :-------------------------------------------------------------- |
 | TASK-108 | Category entity             | [link](./TASK-108-category-entity.md)                           |
 | TASK-109 | Product entity              | [link](./TASK-109-product-entity.md)                            |
-| TASK-201 | Categories CRUD             | [link](./TASK-201-Implement-Categories-CRUD.md)                 |
-| TASK-202 | Category tree & filtering   | [link](./TASK-202-Category-Tree-Filtering.md)                   |
-| TASK-203 | Products CRUD               | [link](./TASK-203-Implement-Products-CRUD.md)                   |
-| TASK-204 | Product filter & search     | [link](./TASK-204-Product-Filtering-Search.md)                  |
-| TASK-205 | Stock management            | [link](./TASK-205-Product-Stock-Management.md)                  |
-| TASK-206 | Product images              | [link](./TASK-206-Product-Images-File-Upload.md)                |
-| TASK-218 | Product variants            | [link](./TASK-218-Product-Variants-Attributes.md)               |
+| TASK-201 | Categories CRUD             | [link](./TASK-201-categories-crud.md)                 |
+| TASK-202 | Category tree & filtering   | [link](./TASK-202-category-tree.md)                   |
+| TASK-203 | Products CRUD               | [link](./TASK-203-products-crud.md)                   |
+| TASK-204 | Product filter & search     | [link](./TASK-204-products-search.md)                  |
+| TASK-205 | Stock management            | [link](./TASK-205-stock-management.md)                  |
+| TASK-206 | Product images              | [link](./TASK-206-product-images.md)                |
+| TASK-218 | Product variants            | [link](./TASK-218-product-variants.md)               |

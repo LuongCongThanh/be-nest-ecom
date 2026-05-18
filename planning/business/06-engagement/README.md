@@ -38,12 +38,12 @@ Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Revi
 
 | ID       | Topic                       | File                                                |
 | :------- | :-------------------------- | :-------------------------------------------------- |
-| TASK-217 | Q&A System                  | [link](./TASK-217-Implement-QA-System.md)           |
-| TASK-219 | Reviews & Ratings           | [link](./TASK-219-Reviews-Ratings.md)               |
-| TASK-220 | Wishlist & Favorites        | [link](./TASK-220-Wishlist-Favorites.md)            |
-| TASK-224 | Discount & Coupon System    | [link](./TASK-224-Discount-Coupon-System.md)        |
-| TASK-225 | Multiple Shipping Methods   | [link](./TASK-225-Multiple-Shipping-Methods.md)     |
-| TASK-226 | Inventory Alerts            | [link](./TASK-226-Inventory-Alerts-Notifications.md) |
+| TASK-217 | Q&A System                  | [link](./TASK-217-qa.md)           |
+| TASK-219 | Reviews & Ratings           | [link](./TASK-219-reviews.md)               |
+| TASK-220 | Wishlist & Favorites        | [link](./TASK-220-wishlist.md)            |
+| TASK-224 | Discount & Coupon System    | [link](./TASK-224-coupons.md)        |
+| TASK-225 | Multiple Shipping Methods   | [link](./TASK-225-shipping.md)     |
+| TASK-226 | Inventory Alerts            | [link](./TASK-226-inventory-alerts.md) |
 | ~~TASK-216~~ | ⚠️ DEPRECATED — gộp vào TASK-219 | [link](./TASK-216-Rating-System.DEPRECATED.md) |
 
 ---

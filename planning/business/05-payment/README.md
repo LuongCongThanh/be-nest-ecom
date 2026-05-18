@@ -45,7 +45,7 @@ Tích hợp **provider thanh toán bên ngoài** (VNPay, Stripe, MoMo...) và đ
 
 | ID       | Topic                       | File                                                  |
 | :------- | :-------------------------- | :---------------------------------------------------- |
-| TASK-221 | Payment integration (VNPay) | [link](./TASK-221-Payment-Integration-Advanced.md)    |
+| TASK-221 | Payment integration (VNPay) | [link](./TASK-221-payment.md)    |
 
 ---
 

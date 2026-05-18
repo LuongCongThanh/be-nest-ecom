@@ -10,11 +10,11 @@
 
 | ID       | Topic                          | File                                                            | Canonical |
 | :------- | :----------------------------- | :-------------------------------------------------------------- | :-------- |
-| TASK-105 | Global Validation & Error      | [link](./TASK-105-Setup-Global-Validation-Error-Handling.md)    | `../CONVENTIONS.md §3, §14` |
+| TASK-105 | Global Validation & Error      | [link](./TASK-105-validation-error.md)    | `../CONVENTIONS.md §3, §14` |
 | TASK-117 | Guards & Decorators            | [link](./TASK-117-guards-decorators.md)                         | `../CONVENTIONS.md §12` |
-| TASK-121 | README convention              | [link](./TASK-121-Create-README-Documentation.md)               | — |
-| TASK-122 | Base classes & utilities       | [link](./TASK-122-Shared-Base-Classes-Utilities.md)             | `../CONVENTIONS.md §11` |
-| TASK-125 | Seed data & demo mode          | [link](./TASK-125-Seed-Data-Demo-Mode.md)                       | — |
+| TASK-121 | README convention              | [link](./TASK-121-readme-convention.md)               | — |
+| TASK-122 | Base classes & utilities       | [link](./TASK-122-base-classes.md)             | `../CONVENTIONS.md §11` |
+| TASK-125 | Seed data & demo mode          | [link](./TASK-125-seed-data.md)                       | — |
 
 ## ⚖️ Bất biến
 

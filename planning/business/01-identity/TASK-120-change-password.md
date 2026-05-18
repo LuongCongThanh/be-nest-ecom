@@ -19,7 +19,7 @@
 - **Đổi password = revoke mọi session** (kể cả session đang request) — buộc đăng nhập lại trên mọi thiết bị.
 - **Không log password** ở bất kỳ tầng nào (kể cả error log).
 
-> ⚠️ Phân biệt rõ với [`TASK-124 Password Recovery`](./TASK-124-Account-Verification-Password-Recovery.md): TASK-120 là **user đang login**; TASK-124 là **user quên mật khẩu**.
+> ⚠️ Phân biệt rõ với [`TASK-124 Password Recovery`](./TASK-124-account-recovery.md): TASK-120 là **user đang login**; TASK-124 là **user quên mật khẩu**.
 
 ---
 
