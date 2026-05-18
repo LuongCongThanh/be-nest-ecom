@@ -122,7 +122,7 @@ src/modules/[module-name]/
 
 ## 🧱 11. Base Classes & Shared Utilities
 
-> Hợp nhất từ [`phase-1-foundation/TASK-122`](./phase-1-foundation/TASK-122-Shared-Base-Classes-Utilities.md).
+> Hợp nhất từ [`TASK-122`](./03-conventions/TASK-122-Shared-Base-Classes-Utilities.md).
 
 ### BaseEntity (bắt buộc kế thừa cho mọi domain entity)
 
@@ -148,7 +148,7 @@ src/modules/[module-name]/
 
 ## 🛡️ 12. Auth Middleware Stack (Guards & Decorators)
 
-> Hợp nhất từ [`phase-1-foundation/TASK-117`](./phase-1-foundation/TASK-117-Tạo-Guards-Decorators.md).
+> Hợp nhất từ [`TASK-117`](./03-conventions/TASK-117-guards-decorators.md).
 
 ### Nguyên tắc Fail-by-Default
 
@@ -171,7 +171,7 @@ src/modules/[module-name]/
 
 ## 🔄 13. Migration Strategy & Best Practices
 
-> Hợp nhất từ [`phase-1-foundation/TASK-113`](./phase-1-foundation/TASK-113-Migration-Best-Practices-Strategy.md).
+> Hợp nhất từ [`TASK-113`](./02-database/TASK-113-Migration-Best-Practices-Strategy.md).
 
 ### Quy tắc bất di bất dịch
 
@@ -194,7 +194,7 @@ Mọi quyết định schema có dấu hiệu sau phải có ADR đi kèm (xem [
 
 ## 🚧 14. Global Validation & Error Handling Detail
 
-> Hợp nhất từ [`phase-1-foundation/TASK-105`](./phase-1-foundation/TASK-105-Setup-Global-Validation-Error-Handling.md). Bổ sung cho §3 và §5 ở trên.
+> Hợp nhất từ [`TASK-105`](./03-conventions/TASK-105-Setup-Global-Validation-Error-Handling.md). Bổ sung cho §3 và §5 ở trên.
 
 ### Validation Pipe global config
 
