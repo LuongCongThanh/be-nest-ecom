@@ -36,8 +36,8 @@ Refactor thành **roadmap 12 tuần** theo learning curve, mỗi tuần một **
 planning/
 ├── ROADMAP-SELF-LEARN.md           ← FILE NÀY (entry point mới cho self-learn)
 ├── QUICKSTART.md                   ← giữ nguyên (dành cho dev đã quen)
-├── ecommerce-api-doc/              ← giữ nguyên — task spec là source of truth
-└── engineering/                    ← giữ nguyên — convention là source of truth
+├── setup/                          ← hạ tầng, convention, tooling (HOW)
+└── business/                       ← domain, feature (WHAT)
 ```
 
 Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫn đường** trỏ vào TASK-xxx có sẵn.
@@ -55,7 +55,7 @@ Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫ
 **Làm**:
 
 1. Cài Node 20 LTS, pnpm, Docker Desktop, DBeaver/TablePlus, Postman/Insomnia.
-2. Đọc lướt (KHÔNG code): `engineering/project-conventions.vi.md` §1–3 + `ecommerce-api-doc/CONTEXT.md` (glossary).
+2. Đọc lướt (KHÔNG code): `setup/CONVENTIONS.md` §1–3 + `CONTEXT.md` (glossary).
 3. Tạo file `.env.example` rỗng, init `git init`, commit "chore: bootstrap".
 
 **Skip**: TASK-121 (README chi tiết) — viết README sau khi có code.
@@ -94,7 +94,7 @@ Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫ
 
 **Step-by-step**:
 
-1. Đọc `engineering/DATABASE_SCHEMA.md` phần User.
+1. Đọc `setup/DATABASE_SCHEMA.md` phần User.
 2. Viết model `User` trong `schema.prisma`, dùng `@id @default(uuid())`.
 3. `prisma migrate dev --name add_users` → mở DBeaver verify bảng.
 4. Tự thử: tạo migration sai → revert → tạo lại. **Học cảm giác migration là 1-chiều**.
@@ -269,7 +269,7 @@ Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫ
 
 **Step-by-step**:
 
-1. `GlobalExceptionFilter` format theo schema trong `project-conventions.vi.md` §14.
+1. `GlobalExceptionFilter` format theo schema trong `setup/CONVENTIONS.md` §14.
 2. `LoggingInterceptor` log `[method] path - status - duration` + correlation ID.
 3. `ResponseTransformInterceptor` bọc data `{ data, meta }`.
 4. Swagger: `@ApiTags`, `@ApiOperation`, `@ApiProperty` cho mọi DTO.
@@ -357,7 +357,7 @@ Không xóa file — chỉ dán nhãn "Out of scope for self-learn track" trong 
 
 ### Cấu trúc tài liệu
 
-- **Giữ nguyên** mọi file `TASK-xxx.md` + `CHARTER.md` + `CONTEXT.md` + `project-conventions.vi.md` + `DATABASE_SCHEMA.md`. Đây là **specification chi tiết** — refactor chỉ thêm lớp index/dẫn đường, không đụng nội dung gốc.
+- **Giữ nguyên nội dung** mọi file `TASK-xxx.md` + `CHARTER.md` + `CONTEXT.md` + `CONVENTIONS.md` + `DATABASE_SCHEMA.md`. Refactor chỉ **sắp xếp lại vị trí** (setup/ vs business/), không sửa nội dung spec.
 - **Thêm file mới**: `ROADMAP-SELF-LEARN.md` (file này) — entry point cho người tự học.
 - **Cập nhật**: `QUICKSTART.md` thêm 1 dòng "Tự học BE? → đọc `ROADMAP-SELF-LEARN.md`".
 
@@ -411,7 +411,7 @@ Xem `CONTEXT.md` đoạn "Order State Machine".
 
 ### Prior art
 
-Convention `engineering/project-conventions.vi.md` §9 đã định nghĩa AAA pattern + `@golevelup/ts-jest`. Self-learn track dùng đúng — chỉ giảm bớt strictness ở giai đoạn đầu.
+Convention `setup/CONVENTIONS.md` §9 đã định nghĩa AAA pattern + `@golevelup/ts-jest`. Self-learn track dùng đúng — chỉ giảm bớt strictness ở giai đoạn đầu.
 
 ### Coverage target self-learn
 
@@ -438,6 +438,6 @@ Convention `engineering/project-conventions.vi.md` §9 đã định nghĩa AAA p
 2. Bắt đầu **Tuần 0** ngay hôm nay (cài tools).
 3. Tuần 1 vào ngày mai, code line đầu tiên.
 4. Mỗi cuối tuần: cập nhật progress vào `PROJECT_STATUS.md` (chỉ tick task tương ứng).
-5. Khi vướng concept nào — tra `CONTEXT.md` (glossary) hoặc `project-conventions.vi.md` (rule).
+5. Khi vướng concept nào — tra `CONTEXT.md` (glossary) hoặc `setup/CONVENTIONS.md` (rule).
 
 **Triết lý cuối**: học BE không phải đọc 80 task. Là gõ phím, gặp lỗi, fix, hiểu. File này chỉ là bản đồ. Đi mới là điều quan trọng.
