@@ -123,7 +123,7 @@ W0 ─── W1 ─── W2 ─── W3 ─── W4 ─── W5 ─── W6
 Tool  Hello   User   Auth   Refresh Cat+   Search Cart  Order  Pay     Polish  Email   Test
        Nest   Entity Login         Prod   Stock        🎯CORE  VNPay           Verify  SHIP🚀
        +DB
-       
+
 Color: ⚪Pre  🔵Foundation  🟣Auth  🟦Catalog  🟧Commerce  🟡MVP  🌸Polish  🟢Ship
 ```
 
@@ -201,17 +201,23 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Task gốc**: TASK-101, 102, 103, 104
 
-**Mục tiêu**: `GET /health` trả `{ status: "ok", db: "connected" }`.
+**📐 ĐỌC TRƯỚC**: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md) — tạo đúng layout `src/{common, config, shared, modules, infrastructure, jobs}/` từ đầu, không refactor sau.
+
+**Mục tiêu**: `GET /health/live` + `GET /health/ready` (terminus) trả 200 với DB connected. App ở `/api/v1/*`, healthcheck ở root.
 
 **Step-by-step**:
 
 1. `nest new ecom-api --strict` → chạy `npm run start:dev` → mở `localhost:3000`.
-2. Cài `@nestjs/config class-validator class-transformer`, tạo `.env`, làm 1 `ConfigModule` validate qua class-validator `EnvSchema` (1 biến duy nhất: `DATABASE_URL`).
-3. Docker compose PostgreSQL 16 local (1 file `docker-compose.yml`, 15 dòng).
-4. Cài Prisma, `prisma init`, viết model `HealthCheck` (1 field), `prisma migrate dev --name init`.
-5. Tạo `HealthModule` → `HealthController` → `HealthService` query `SELECT 1`.
+2. Tạo cấu trúc folder theo `PROJECT_STRUCTURE.md`: `src/{common, config, shared, modules, infrastructure, jobs}/`.
+3. Setup path alias `@common/*`, `@modules/*`, ... trong `tsconfig.json` + `nest-cli.json`.
+4. Cài `@nestjs/config class-validator class-transformer`, tạo `.env`, làm 1 `ConfigModule` validate qua class-validator `EnvSchema` (biến: `DATABASE_URL`, `PORT`, `NODE_ENV`, `CORS_ORIGINS`, `LOG_FORMAT`).
+5. `main.ts`: `app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })`, enable CORS env-based whitelist (xem CONVENTIONS §12), setup Helmet.
+6. Docker compose PostgreSQL 16 local (1 file `docker-compose.yml`, 15 dòng).
+7. Cài Prisma, `prisma init`, viết model placeholder, `prisma migrate dev --name init`.
+8. Setup `PrismaService` ở `src/common/prisma/` (global module, `OnModuleInit/Destroy` connect/disconnect).
+9. Cài `@nestjs/terminus`, tạo `HealthModule` ở `src/modules/health/`. Endpoint `/health/live` (chỉ check Nest respond), `/health/ready` (check DB qua Prisma indicator).
 
-**Commit kết thúc**: `feat: health check connects to postgres`.
+**Commit kết thúc**: `feat: health check connects to postgres + terminus`.
 
 **Skip tuần này**: TASK-105 (global validation) — chưa có DTO thì chưa cần.
 
@@ -293,7 +299,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Step-by-step**:
 
-1. Model `Category` (id, name, slug, parentId?), `Product` (id, sku, slug, name, price Decimal(12,2), stock, categoryId, deletedAt).
+1. Model `Category` (id, name, slug, parentId?), `Product` (id, sku, slug, name, price BigInt (đồng VND), stock, categoryId, deletedAt).
 2. Migration, seed 5 category + 20 product.
 3. `RolesGuard` + `@Roles(Role.ADMIN)` cho endpoint POST/PATCH/DELETE.
 4. `GET /products` với pagination cursor hoặc offset (chọn 1, đừng cố làm cả hai).
@@ -454,20 +460,20 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 Khi đã có MVP chạy, mỗi cuối tuần học **1 chủ đề nâng cao** từ backlog dưới. Không cần theo thứ tự — chọn cái bạn tò mò nhất.
 
-| Topic                    | Task ID  | Lý do hoãn                                                          |
-| :----------------------- | :------- | :------------------------------------------------------------------ |
-| Rate limiting            | TASK-313 | Học khi gặp abuse thực tế.                                          |
-| RBAC nâng cao            | TASK-320 | Hiện đã có Roles enum, đủ MVP.                                      |
-| Caching Redis            | TASK-306, 311 | Đo trước rồi mới cache. Premature optimization.                 |
-| Logging/Tracing          | TASK-312 | Khi deploy production mới đáng.                                     |
-| API versioning           | TASK-314 | Khi có v2 mới cần.                                                  |
-| Reviews/Ratings          | TASK-219 | Feature, không phải kỹ năng BE cốt lõi.                             |
-| Wishlist                 | TASK-220 | Tương tự.                                                           |
-| Discount/Coupon          | TASK-224 | Business rule phức tạp — học sau khi quen domain.                   |
-| 2FA                      | TASK-319 | Khi cần security cao.                                               |
-| OAuth Social Login       | TASK-327 | Khi muốn frontend ngon.                                             |
-| CI/CD                    | TASK-308 | Khi push lên cloud lần đầu.                                         |
-| Docker production        | TASK-321 (phần Docker) | Khi deploy thật.                                      |
+| Topic              | Task ID                | Lý do hoãn                                        |
+| :----------------- | :--------------------- | :------------------------------------------------ |
+| Rate limiting      | TASK-313               | Học khi gặp abuse thực tế.                        |
+| RBAC nâng cao      | TASK-320               | Hiện đã có Roles enum, đủ MVP.                    |
+| Caching Redis      | TASK-306, 311          | Đo trước rồi mới cache. Premature optimization.   |
+| Logging/Tracing    | TASK-312               | Khi deploy production mới đáng.                   |
+| API versioning     | TASK-314               | Khi có v2 mới cần.                                |
+| Reviews/Ratings    | TASK-219               | Feature, không phải kỹ năng BE cốt lõi.           |
+| Wishlist           | TASK-220               | Tương tự.                                         |
+| Discount/Coupon    | TASK-224               | Business rule phức tạp — học sau khi quen domain. |
+| 2FA                | TASK-319               | Khi cần security cao.                             |
+| OAuth Social Login | TASK-327               | Khi muốn frontend ngon.                           |
+| CI/CD              | TASK-308               | Khi push lên cloud lần đầu.                       |
+| Docker production  | TASK-321 (phần Docker) | Khi deploy thật.                                  |
 
 ## 6. Cắt hẳn khỏi roadmap (nên bỏ luôn cho project học)
 
@@ -505,14 +511,14 @@ Mỗi tuần trong roadmap đã gắn:
 
 ### Quyết định scope
 
-| Quyết định                                  | Lý do                                                                 |
-| :------------------------------------------ | :-------------------------------------------------------------------- |
-| MVP = tuần 8 (cart + order)                 | Đủ demo, đủ học transaction + snapshot — 2 concept đắt giá nhất.      |
-| Cắt Phase 3 từ 29 → 4 task chính            | Phần còn lại là systems eng quy mô lớn, không phù hợp self-learn.     |
-| Email verify đẩy xuống tuần 11              | Cần external service (mail provider) → tăng friction cho người mới.   |
-| Test viết ở tuần 12 (cuối)                  | TDD strict không phù hợp người chưa quen — học test khi đã có code chạy. Sau đó luyện TDD ở project sau. |
-| Giữ Prisma làm ORM                          | TypeORM/MikroORM phức tạp hơn. Prisma docs tốt, migration tự sinh.    |
-| Bỏ TDD strict ở giai đoạn 1–8               | Convention nói TDD, nhưng self-learner cần "see it work" trước.        |
+| Quyết định                       | Lý do                                                                                                    |
+| :------------------------------- | :------------------------------------------------------------------------------------------------------- |
+| MVP = tuần 8 (cart + order)      | Đủ demo, đủ học transaction + snapshot — 2 concept đắt giá nhất.                                         |
+| Cắt Phase 3 từ 29 → 4 task chính | Phần còn lại là systems eng quy mô lớn, không phù hợp self-learn.                                        |
+| Email verify đẩy xuống tuần 11   | Cần external service (mail provider) → tăng friction cho người mới.                                      |
+| Test viết ở tuần 12 (cuối)       | TDD strict không phù hợp người chưa quen — học test khi đã có code chạy. Sau đó luyện TDD ở project sau. |
+| Giữ Prisma làm ORM               | TypeORM/MikroORM phức tạp hơn. Prisma docs tốt, migration tự sinh.                                       |
+| Bỏ TDD strict ở giai đoạn 1–8    | Convention nói TDD, nhưng self-learner cần "see it work" trước.                                          |
 
 ### State machine + Snapshot pattern
 

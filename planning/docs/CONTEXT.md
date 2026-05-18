@@ -1,7 +1,7 @@
 # 🗣️ CONTEXT.md — Ngôn ngữ Thống nhất (Ubiquitous Language)
 
 > Glossary domain cho dự án **E-commerce API**. Mọi tài liệu phase/task **phải** dùng đúng thuật ngữ tại đây.
-> File này **chỉ chứa định nghĩa thuật ngữ** — không chứa quyết định kỹ thuật (đặt ở `setup/`) và không chứa quy trình (đặt ở phase docs).
+> File chứa **glossary domain + 28 design decisions đã lock**. Quy ước code chi tiết: [`../setup/CONVENTIONS.md`](../setup/CONVENTIONS.md). Cấu trúc thư mục: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md).
 
 ---
 

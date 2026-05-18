@@ -34,10 +34,14 @@ Yêu cầu nghiệp vụ: ai dùng, mua gì, flow đặt hàng. Đọc lướt c
 - Đọc **kỹ** phần **Tuần 0** (pre-flight: cài tool) + **Tuần 1** (hello NestJS).
 - Đọc **lướt** Tuần 2–12 để biết mình sẽ đi đâu.
 
-### Bước 6 — Liếc quy ước code ⏱ 10 phút
+### Bước 6 — Đọc cấu trúc thư mục + quy ước ⏱ 15 phút
+→ Mở [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md) — **đọc kỹ trước khi code Tuần 1**
+
+Layout `src/{common, config, shared, modules, infrastructure, jobs}/` + module folder template + path aliases + file suffix table + naming rules. Tạo đúng từ đầu, KHÔNG refactor sau.
+
 → Mở [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md) §1–§3
 
-3 mục đầu là đủ cho Tuần 1: module structure, naming, type safety. §4–§15 đọc khi gặp.
+3 mục đầu là DI rules, naming, type safety. §4–§15 đọc khi gặp.
 
 ---
 
@@ -69,6 +73,7 @@ planning/
 │
 ├── setup/                        ← 🛠️  HOW (hạ tầng + quy ước)
 │   ├── README.md
+│   ├── PROJECT_STRUCTURE.md      ← cấu trúc src/ chuẩn (đọc bước 6)
 │   ├── CONVENTIONS.md            ← quy ước code (đọc bước 6)
 │   ├── COMMANDS.md               ← lệnh dev nhớ nhanh
 │   ├── DATABASE_SCHEMA.md        ← ER diagram
@@ -99,6 +104,7 @@ planning/
 | Tra thuật ngữ (Money, Snapshot, Idempotency, ...) | [`docs/CONTEXT.md`](./docs/CONTEXT.md)                           |
 | Biết tuần này code gì                              | [`docs/ROADMAP.md`](./docs/ROADMAP.md) + [`docs/STATUS.md`](./docs/STATUS.md) |
 | Tra task ID cụ thể                                  | [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)                     |
+| **Cấu trúc thư mục project** (src/, module layout, path aliases) | [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md) |
 | Quy ước code (naming, validation, pagination, ...) | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md)                 |
 | Lệnh `prisma migrate dev/deploy/...`                | [`setup/COMMANDS.md`](./setup/COMMANDS.md)                       |
 | Schema ER diagram                                   | [`setup/DATABASE_SCHEMA.md`](./setup/DATABASE_SCHEMA.md)         |

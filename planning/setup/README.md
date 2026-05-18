@@ -6,7 +6,8 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 
 | File                                     | Nội dung                                        |
 | :--------------------------------------- | :---------------------------------------------- |
-| [`CONVENTIONS.md`](./CONVENTIONS.md)     | Quy ước code: module, DI, naming, error, log, test, base classes, guards, migration, validation |
+| [`PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) | **Cấu trúc thư mục chuẩn** (src/, test/, module layout, path aliases, file suffix, naming). Đọc TRƯỚC khi code Tuần 1. |
+| [`CONVENTIONS.md`](./CONVENTIONS.md)     | Quy ước code: DI rules, error, log, test, base classes, guards, migration, validation, pagination, rate limit |
 | [`COMMANDS.md`](./COMMANDS.md)           | Lệnh dev / migration / seed thường dùng         |
 | [`DATABASE_SCHEMA.md`](./DATABASE_SCHEMA.md) | Sơ đồ ER + thiết kế bảng                     |
 | [`DATABASE_SETUP.md`](./DATABASE_SETUP.md)   | Cài PostgreSQL + Prisma local                |

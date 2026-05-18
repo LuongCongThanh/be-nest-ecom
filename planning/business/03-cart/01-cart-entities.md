@@ -42,7 +42,7 @@ Cart là **bằng chứng ý định mua** — không phải đơn hàng. Một 
 | `productId` | FK Product |
 | `variantId` | FK Variant, nullable (chỉ null khi Product không có variants) |
 | `quantity` | Integer, ≥ 1 |
-| `priceAtAdded` | Decimal(12,2), snapshot giá lúc add |
+| `priceAtAdded` | `BigInt` đơn vị đồng VND, snapshot giá lúc add |
 
 ### Quan hệ ràng buộc
 - Unique `(cartId, productId, variantId)`: thêm lần 2 cùng combo → **cộng dồn quantity**, không tạo row mới.

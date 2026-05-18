@@ -31,8 +31,8 @@ Product là **đơn vị tạo doanh thu**. Mọi quyết định kiến trúc P
 | `name` | Hiển thị | Required, ≤ 200 chars |
 | `slug` | URL | Unique, sinh tự động |
 | `description` | Long description | Optional, ≤ 5000 chars, Markdown |
-| `price` | Bán thực | Decimal(12,2) VND, > 0 |
-| `comparePrice` | Giá niêm yết | Decimal(12,2), optional, must `≥ price` |
+| `price` | Bán thực | `BigInt` đơn vị đồng VND, > 0 |
+| `comparePrice` | Giá niêm yết | `BigInt` optional, must `≥ price` |
 | `stockQuantity` | Tồn kho | Integer, default `0`, ≥ 0 (TASK-205 quản lý) |
 | `lowStockThreshold` | Cảnh báo | Integer, default `5`; trigger alert TASK-226 |
 | `isActive` | Visibility | Default `true` |

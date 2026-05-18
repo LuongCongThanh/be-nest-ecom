@@ -4,7 +4,9 @@
 
 ## 🎯 Mục đích
 
-Bootstrap dự án NestJS với cấu trúc thư mục chuẩn + biến môi trường có validate. Sau khi xong nhóm này, app phải `npm run start:dev` chạy được mà chưa cần DB.
+Bootstrap dự án NestJS với **cấu trúc thư mục chuẩn theo [`../PROJECT_STRUCTURE.md`](../PROJECT_STRUCTURE.md)** + biến môi trường có validate. Sau khi xong nhóm này, app phải `npm run start:dev` chạy được mà chưa cần DB.
+
+⚠️ **TRƯỚC khi code Tuần 1**: đọc [`../PROJECT_STRUCTURE.md`](../PROJECT_STRUCTURE.md) — biết tạo `src/{common, config, shared, modules, infrastructure, jobs}/` từ đầu, không refactor sau.
 
 ## 📋 Tasks
 

@@ -6,39 +6,39 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 
 ## 🏗️ 1. Kiến trúc Module & Dependency Injection (DI)
 
-### Bố cục Module Chuẩn
-
-Mọi tính năng phải được đóng gói tại `src/modules/[module-name]/`.
-
-```text
-src/modules/[module-name]/
-├── controllers/          # Xử lý request HTTP
-├── services/             # Logic nghiệp vụ (Business Logic)
-├── dto/                  # Validation (Class-Validator)
-├── interfaces/           # Type nội bộ
-├── guards/               # Access Control
-├── decorators/           # Custom Decorators
-├── [module-name].module.ts
-└── [module-name].service.spec.ts
-```
+> **Canonical project structure**: [`./PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) — toàn bộ layout `src/`, `test/`, module folder, path aliases, file suffix, import order. File CONVENTIONS.md này chỉ giữ DI rules.
 
 ### Quy tắc Dependency Injection
 
 1.  **Circular Dependency**: Hạn chế tối đa sử dụng `forwardRef()`. Nếu hai module phụ thuộc lẫn nhau, hãy tách logic dùng chung ra một `CommonModule` hoặc `SharedModule`.
-2.  **Explicit Exports**: Chỉ export các **Service** cần thiết, không bao giờ export toàn bộ Module trừ khi đó là Global Module.
-3.  **Scopes**: Mặc định sử dụng `DEFAULT` scope (Singleton). Chỉ dùng `REQUEST` scope khi thực sự cần thiết vì lý do hiệu năng.
+2.  **Explicit Exports**: Chỉ export các **Service** cần thiết. KHÔNG export Repository/Controller/DTO ra ngoài module (encapsulation).
+3.  **Scopes**: Mặc định `DEFAULT` scope (Singleton). Chỉ dùng `REQUEST` scope khi thực sự cần thiết vì lý do hiệu năng.
+4.  **Cross-module reference**: dùng path alias `@modules/<feature>` (xem PROJECT_STRUCTURE §Path aliases). CẤM `../../`.
+5.  **Common ↛ Modules**: code trong `src/common/` cấm import từ `src/modules/` (1-chiều, tránh circular).
+6.  **Infrastructure adapter pattern**: external service (email/storage/payment) phải qua interface ở `src/infrastructure/<service>/<service>.service.ts`. Service code phụ thuộc interface, không phụ thuộc provider impl.
+7.  **Jobs gọi service, không Prisma trực tiếp**: `src/jobs/*` inject service tương ứng.
 
 ---
 
 ## 📐 2. Quy ước Đặt tên & Cấu trúc Dữ liệu
 
+> **Canonical naming + file suffix table đầy đủ**: [`./PROJECT_STRUCTURE.md`](./PROJECT_STRUCTURE.md) §File suffix + §Naming. Bảng dưới chỉ tóm tắt.
+
 | Mục                   | Quy ước              | Ví dụ                                      |
 | :-------------------- | :------------------- | :----------------------------------------- |
-| **Classes**           | PascalCase           | `AuthService`, `UserController`            |
-| **Interfaces**        | PascalCase           | `JwtPayload`, `UserWithRelations`          |
-| **Files**             | kebab-case           | `auth.service.ts`, `get-user.decorator.ts` |
+| **Classes**           | PascalCase           | `AuthService`, `UsersController`           |
+| **Interfaces (contract)** | PascalCase, prefix `I` | `IEmailSender`, `IStorageAdapter`     |
+| **Type alias**        | PascalCase           | `JwtPayload`, `OrderState`                 |
+| **Enums**             | PascalCase, value SCREAMING_SNAKE | `Role.ADMIN`, `OrderStatus.PENDING` |
+| **Files**             | kebab-case + suffix  | `auth.service.ts`, `current-user.decorator.ts` |
+| **Folders**           | kebab-case, plural cho modules | `users/`, `order-items/`         |
 | **Variables/Methods** | camelCase            | `getUserById`, `updatedAt`                 |
-| **Constants**         | SCREAMING_SNAKE_CASE | `MAX_RETRY_ATTEMPTS`                       |
+| **Constants**         | SCREAMING_SNAKE_CASE | `MAX_RETRY_ATTEMPTS`, `JWT_EXPIRES_IN`     |
+| **DB table**          | snake_case plural    | `users`, `order_items`                     |
+| **DB column**         | snake_case (map qua Prisma `@map`) | `created_at`, `email_verified` |
+| **API endpoint**      | kebab-case plural    | `/users`, `/order-items`                   |
+| **JSON field (response)** | camelCase        | `{ "createdAt": "..." }`                   |
+| **Query param**       | camelCase            | `?page=1&limit=20`                         |
 
 ---
 
