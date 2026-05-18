@@ -31,7 +31,8 @@ Order **không bao giờ tham chiếu Cart hay Product mới nhất** — luôn 
 | `GET    /orders/me`                   | List Order của User hiện tại                  |
 | `GET    /orders/:id`                  | Detail (chỉ owner hoặc admin)                 |
 | `PATCH  /orders/:id/cancel`           | Hủy (owner, nếu state cho phép)               |
-| `PATCH  /orders/:id/status` (admin)   | Đổi state theo state machine                  |
+| `PATCH  /orders/:id/status` (admin/staff) | Đổi state theo state machine (validate transition) |
+| `PATCH  /orders/:id/force-status` (admin) | Force override state machine — bắt buộc `reason`, audit-logged |
 | `GET    /orders/stats` (admin)        | Thống kê (TASK-211)                           |
 
 ---
@@ -43,8 +44,8 @@ Order **không bao giờ tham chiếu Cart hay Product mới nhất** — luôn 
 3. **State transition tuân Order State Machine** (xem `CONTEXT.md`). Transition ngược (DELIVERED → SHIPPING) hoặc skip (PENDING → DELIVERED) → reject `400`.
 4. **`orderNumber` duy nhất, format `ORD-YYYY-NNNNNN`**. Dùng cho hiển thị + support. **Không expose `Order.id` (UUID)** ra UI.
 5. **Mỗi state transition emit 1 Order Lifecycle Event** (TASK-222): `order.paid`, `order.shipped`, `order.delivered`, `order.cancelled`, `order.refunded`.
-6. **Trừ kho khi state chuyển `PENDING → PAID`** (không phải khi tạo Order). Trước đó stock vẫn nguyên — tránh deadlock khi nhiều người checkout song song. ⚠️ *Quyết định này có thể đảo lại nếu phát hiện oversell — xem TASK-209.*
-7. **Cancel Order đã PAID** → set `REFUNDED` + hoàn stock + emit `order.refunded`. Không cho cancel khi đã `DELIVERED`.
+6. **Trừ kho EAGER tại `POST /orders` (PENDING)** trong cùng transaction checkout. Dùng row-level lock (`SELECT ... FOR UPDATE` hoặc Prisma `update where stockQty >= qty`) để chống oversell. Order PENDING quá 15 phút chưa PAID → cleanup job set CANCELLED + hoàn stock.
+7. **Cancel Order PAID**: user tự cancel chỉ trong **30 phút** sau checkout (`Self-Cancel Window`). Sau đó cần admin force. Set `REFUNDED` + hoàn stock + emit `order.refunded`. Refund VNPay = **manual** trong MVP (log note + admin xử lý portal). Không cho cancel khi `DELIVERED`. Refund scope = **full only** (partial → Phase 3).
 8. **User soft-deleted (`deletedAt`)** → Order vẫn tồn tại, dùng `customerEmailSnapshot` để liên hệ.
 
 ---

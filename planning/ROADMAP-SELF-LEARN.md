@@ -73,7 +73,7 @@ Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫ
 **Step-by-step**:
 
 1. `nest new ecom-api --strict` → chạy `npm run start:dev` → mở `localhost:3000`.
-2. Cài `@nestjs/config`, tạo `.env`, làm 1 `ConfigModule` với validation Zod (1 biến duy nhất: `DATABASE_URL`).
+2. Cài `@nestjs/config class-validator class-transformer`, tạo `.env`, làm 1 `ConfigModule` validate qua class-validator `EnvSchema` (1 biến duy nhất: `DATABASE_URL`).
 3. Docker compose PostgreSQL 16 local (1 file `docker-compose.yml`, 15 dòng).
 4. Cài Prisma, `prisma init`, viết model `HealthCheck` (1 field), `prisma migrate dev --name init`.
 5. Tạo `HealthModule` → `HealthController` → `HealthService` query `SELECT 1`.
@@ -183,7 +183,7 @@ Không xóa, không đổi tên file cũ. Roadmap mới **chỉ là 1 layer dẫ
 **Step-by-step**:
 
 1. Filter chain trong service (where dynamic).
-2. Search dùng `ILIKE %q%` cho gọn (FTS Postgres để Phase 3).
+2. Search dùng **Postgres FTS** (`tsvector` + GIN + `unaccent`) — diacritic-insensitive cho user VN. 1 migration tạo generated column + GIN index, query qua `plainto_tsquery`. Elasticsearch hoãn (chỉ cần khi >1M document).
 3. Category tree query: dùng recursive CTE hoặc materialized path. Chọn cách đơn giản: query parent + 1 cấp con.
 4. Endpoint admin `PATCH /products/:id/stock` dùng `prisma.$transaction` (read stock → update). **Học race condition**.
 

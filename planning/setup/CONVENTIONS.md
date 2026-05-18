@@ -77,19 +77,26 @@ src/modules/[module-name]/
 ## ⚙️ 6. Quản lý Môi trường (Environment Management)
 
 1.  **ConfigService**: Tuyệt đối không sử dụng `process.env` trực tiếp trong code. Luôn truy cập thông qua `ConfigService`.
-2.  **Environment Validation**: Mọi biến môi trường phải được xác thực (dùng Joi hoặc Zod) trong `ConfigModule` để đảm bảo ứng dụng không khởi động nếu thiếu cấu hình quan trọng.
+2.  **Environment Validation**: Mọi biến môi trường phải được xác thực qua **`class-validator` `EnvSchema` class** trong `ConfigModule` (callback `validate`) để đảm bảo ứng dụng không khởi động nếu thiếu cấu hình quan trọng. CẤM dùng Zod/Joi để tránh trộn 2 lib validation.
 3.  **`.env.example`**: Luôn cập nhật file này khi thêm biến môi trường mới.
 
 ---
 
 ## 📊 7. Logging & Giám sát (Observability)
 
-1.  **Correlation ID**: Mọi request phải đính kèm một `request-id` duy nhất trong log để dễ dàng truy vết (sử dụng middleware hoặc interceptor).
-2.  **Log Levels**:
-    - `Error`: Lỗi nghiêm trọng cần can thiệp ngay.
-    - `Warn`: Các tình huống bất thường nhưng ứng dụng vẫn chạy được.
-    - `Info`: Luồng xử lý chính của hệ thống.
-3.  **No `console.log`**: Chỉ sử dụng `Logger` từ `@nestjs/common`.
+1.  **Logger lib**: `nestjs-pino` (drop-in replace Nest Logger). Lý do: fast hơn Winston/built-in ~5x, structured JSON native, có HTTP middleware tự log request.
+2.  **Format dual-mode** qua env `LOG_FORMAT`:
+    - **`pretty`** (dev local): `pino-pretty` transport, colorized, single-line. Đẹp đọc.
+    - **`json`** (production/staging): raw JSON. Parse được bởi Datadog/Loki/CloudWatch.
+3.  **Correlation ID**: Mọi request có `requestId` (UUID) trong log + response header `x-request-id`. `nestjs-pino` `customProps` inject `req.id`. Service tự tạo Logger qua `Logger(context)` → log tự gắn requestId.
+4.  **Log Levels**:
+    - `error`: Lỗi nghiêm trọng cần can thiệp (DB down, payment fail, unhandled exception).
+    - `warn`: Bất thường nhưng app vẫn chạy (token expired, retry succeed, slow query).
+    - `info`: Luồng chính (request start/end, order created, payment success).
+    - `debug`: Chi tiết flow (chỉ bật `LOG_LEVEL=debug` khi đang debug).
+    - `trace`: Cực chi tiết, hiếm dùng.
+5.  **Redact secrets**: cấu hình `redact` pino strip `req.headers.authorization`, `password`, `*.password`, `creditCard`, `cvv`, `apiKey`. KHÔNG bao giờ log raw token/password dù dev.
+6.  **No `console.log`**: Cấm. Dùng `Logger` từ `@nestjs/common` (auto bind vào pino).
 
 ---
 
@@ -98,6 +105,10 @@ src/modules/[module-name]/
 1.  **Selective Fetching**: Luôn sử dụng `select` để lấy các trường cần thiết. Tránh lấy toàn bộ object nếu không dùng tới.
 2.  **Transactions**: Bắt buộc sử dụng Prisma Transactions (`$transaction`) cho các thao tác liên quan đến Order, Inventory hoặc các chuỗi thay đổi dữ liệu phụ thuộc lẫn nhau.
 3.  **Indexes**: Kiểm tra và đảm bảo các trường hay dùng để lọc (Filter/Sort) đã được đánh Index trong schema.
+4.  **Money type**: Mọi field tiền dùng `BigInt` đơn vị nhỏ nhất của currency (VND → đồng). CẤM `Decimal(N,2)` và `Float`. Lý do: integer math = không bao giờ sai precision. Convert string ở serialize boundary qua `formatCurrency()` (xem §11 utilities). Detail: [`../CONTEXT.md`](../CONTEXT.md) — *Money Type*.
+5.  **Row-level lock cho stock/inventory**: dùng `prisma.$queryRaw` `SELECT ... FOR UPDATE` hoặc atomic update `where: { stockQty: { gte: qty } }` trong cùng `$transaction`. Không bao giờ read-then-write rời rạc khi đụng tồn kho.
+6.  **Pagination — offset only (MVP)**: mọi list endpoint dùng `PaginationDto { page, limit }` ở `src/shared/dto/`. Response wrap `PaginatedResponse<T> { data, meta: { page, limit, total, totalPages } }`. `limit` default 20, max 100. CẤM endpoint tự cook params (`?p=`, `?per_page=`, ...). Migrate cursor sau khi dataset >50K record + có tracing đo thật.
+7.  **API Base Path & Versioning**: `app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })`. Mọi business endpoint dưới `/api/v1/*`. Healthcheck/metrics ở root (convention K8s/Prometheus probe). Khi cần v2 → thêm prefix mới, KHÔNG sửa v1 in-place. CẤM versioning qua header hoặc query param.
 
 ---
 
@@ -106,6 +117,8 @@ src/modules/[module-name]/
 - **Unit Tests**: Tập trung vào Service logic. Sử dụng `@golevelup/ts-jest` để mock dependencies.
 - **E2E Tests**: Tập trung vào các luồng nghiệp vụ quan trọng (Checkout, Auth flow).
 - **Mẫu**: Arrange-Act-Assert.
+- **E2E Test DB**: dùng Postgres test riêng (`docker-compose.test.yml` hoặc `TEST_DATABASE_URL`). Reset state qua **`TRUNCATE ... RESTART IDENTITY CASCADE`** trong `beforeEach`. KHÔNG dùng transaction rollback (Prisma 5 không support nested transaction).
+- **Test isolation**: mỗi test file dùng chung 1 DB nhưng truncate giữa các test → state hoàn toàn sạch. Parallel test files OK nếu Jest set `maxWorkers=1` cho e2e (tránh share DB conflict).
 
 ---
 
@@ -146,6 +159,30 @@ src/modules/[module-name]/
 
 ---
 
+## 🚦 11b. Rate Limiting (Cross-cutting)
+
+> Lib: `@nestjs/throttler` memory storage (MVP). Migrate Redis storage Phase 3 cho multi-instance.
+
+### Tier defaults (req/phút)
+
+| Tier | Áp dụng | Limit | Scope |
+|------|---------|-------|-------|
+| **strict** | `/auth/login`, `/auth/forgot`, `/auth/reset`, `/auth/refresh` | **5/phút** | IP |
+| **strict-user** | `POST /orders`, `POST /payments/checkout` | **3/phút** | userId |
+| **medium** | `GET /products?q=`, `GET /categories` | **60/phút** | IP |
+| **default** | Mọi endpoint authenticated khác | **120/phút** | userId |
+| **webhook** | `/payments/:provider/webhook` | **30/phút** | IP |
+| **public** | Mọi endpoint public không match trên | **30/phút** | IP |
+
+### Quy tắc
+
+- Decorator `@Throttle({ <tier>: { limit, ttl } })` ở controller method.
+- `NODE_ENV=test` → skip throttler (`skipIf` callback).
+- Response 429 dùng schema error chuẩn (xem §14), `code: "RATE_LIMIT_EXCEEDED"`, header `Retry-After: <seconds>`.
+- KHÔNG bypass cho admin role — admin cũng có limit (chống admin account leak làm attack vector).
+
+---
+
 ## 🛡️ 12. Auth Middleware Stack (Guards & Decorators)
 
 > Hợp nhất từ [`TASK-117`](./03-conventions/TASK-117-guards-decorators.md).
@@ -166,6 +203,18 @@ src/modules/[module-name]/
 ### Thứ tự thực thi middleware
 
 1. **Helmet** (security headers) → 2. **CORS** → 3. **Global ValidationPipe** → 4. **JwtAuthGuard** → 5. **RolesGuard** → 6. **Controller handler** → 7. **ResponseInterceptor** → 8. **GlobalExceptionFilter**.
+
+### CORS allow-list (từ env, không hard-code)
+
+- `CORS_ORIGINS` env = comma-separated list, ví dụ `https://shop.com,https://www.shop.com`.
+- Callback function check origin:
+  - Request không có `Origin` header (mobile native, curl) → **allow** (không bị CSRF).
+  - Origin trong list → allow.
+  - Khác → reject.
+- `credentials: true`, `maxAge: 86400` (preflight cache 24h).
+- Allowed headers: `Content-Type`, `Authorization`, `X-Request-Id`, `Idempotency-Key`.
+- Exposed headers: `X-Request-Id`.
+- CẤM `origin: '*'` — không tương thích `credentials: true` + insecure.
 
 ---
 
@@ -231,6 +280,37 @@ app.useGlobalPipes(new ValidationPipe({
 
 | Validator | Áp dụng | Quy tắc |
 | :--- | :--- | :--- |
-| `@IsStrongPassword` | password fields | ≥ 8 ký tự, có chữ hoa, số, ký tự đặc biệt |
-| `@IsVietnamesePhone` | phone fields | regex `^(?:\+84|0)[0-9]{9,10}$` |
+| `@IsStrongPassword` | password fields | ≥ 8 ký tự **+** không nằm trong top 100 common (VN list: `123456`, `password`, `matkhau`, `iloveyou`...) **+** HaveIBeenPwned breach check qua k-anonymity (gửi 5 ký tự đầu SHA1 hash). KHÔNG bắt buộc chữ hoa/số/đặc biệt (NIST 2024: length quan trọng hơn complexity). KHÔNG bắt đổi định kỳ. |
+| `@IsVietnamesePhone` | phone fields | Regex chính xác: `^(?:\+84|0)(3|5|7|8|9|2)[0-9]{8}$`. `(3\|5\|7\|8\|9)` đầu = mobile (03/05/07/08/09), `2` đầu = cố định (02x). Tổng 10 số (sau prefix `0`) hoặc 11 ký tự với `+84`. **Normalize trước validate** qua `@Transform`: strip space/dash. **Lưu DB E.164**: `+84901234567` (convert prefix `0` thành `+84`). Display UI là FE responsibility. |
 | `@IsTrimmedNotEmpty` | text input | reject `"   "` và empty string |
+
+---
+
+## 🏥 15. Healthcheck Endpoints
+
+> Lib: **`@nestjs/terminus`** (official). Endpoints **ngoài** prefix `/api/v1` (xem §11.7).
+
+### Hai endpoint K8s-style
+
+| Endpoint | Mục đích | Check gì |
+|----------|----------|----------|
+| `GET /health/live` | Liveness probe | App có chạy không. **KHÔNG check downstream.** Trả 200 nếu Nest respond được. |
+| `GET /health/ready` | Readiness probe | App ready phục vụ traffic. Check DB + (Phase 3: Redis, S3, email service). Trả 503 nếu downstream fail. |
+| `GET /health` | Alias cho `/health/ready` | Convention cũ — giữ để các tool legacy không break. |
+
+### Phân biệt liveness vs readiness
+
+- **Liveness fail** → K8s restart container.
+- **Readiness fail** → K8s rút khỏi load balancer pool (KHÔNG restart). App sẽ tự rejoin khi readiness pass lại.
+
+→ CẤM `/health/live` check DB — DB chết mà restart container không sửa được, chỉ gây cascade restart loop.
+
+### Response shape (chuẩn terminus)
+
+```json
+// 200 OK
+{ "status": "ok", "info": { "db": { "status": "up" } }, "error": {}, "details": {...} }
+
+// 503 Service Unavailable
+{ "status": "error", "info": {}, "error": { "db": { "status": "down", "message": "..." } }, "details": {...} }
+```

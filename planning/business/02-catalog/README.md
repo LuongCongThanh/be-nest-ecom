@@ -46,7 +46,7 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 4. `stockQuantity ≥ 0`. Trừ kho chỉ qua transaction (xem `04-order/`).
 5. Xóa Category đang chứa Product → set `categoryId = NULL` (SET NULL theo TASK-106).
 6. Xóa Product có OrderItem → **RESTRICT** (không cho phép xóa).
-7. Search `q` phải escape SQL injection — dùng Prisma parameter binding, không string concat.
+7. Search dùng **Postgres FTS** (`tsvector` generated column + GIN index + `unaccent` extension) — không ILIKE, không Elasticsearch. Query qua `plainto_tsquery('simple', unaccent(:q))` để diacritic-insensitive (`dien thoai` match `Điện Thoại`). SQL injection: parameter binding qua Prisma `$queryRaw`, không string concat.
 
 ---
 
