@@ -24,10 +24,10 @@ Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc
 | Nhóm                 | Task               | Mô tả ngắn                                                    |
 | :------------------- | :----------------- | :------------------------------------------------------------ |
 | **Data Foundation**  | TASK-106           | Chiến lược schema chung (snapshot, FK rules, delete strategy) |
-| **Identity Entity**  | TASK-107           | Đặc tả User entity                                            |
-| **Authentication**   | TASK-114, 115, 116 | JWT strategy, Auth DTOs, Register/Login                       |
-| **Account Mgmt**     | TASK-118, 119, 120 | Users CRUD, Profile, Change Password                          |
-| **Session**          | TASK-123           | Refresh Token & Session lifecycle                             |
+| **Identity Entity**  | TASK-107           | User entity + Address entity (N per User + `isDefault`)       |
+| **Authentication**   | TASK-114, 115, 116 | JWT strategy (15m access + 30d refresh rolling), Auth DTOs, Register/Login |
+| **Account Mgmt**     | TASK-118, 119, 120 | Users CRUD, Profile, Change Password (revoke all token families on change) |
+| **Session**          | TASK-123           | Refresh Token family + rotation + 5s tolerance window         |
 | **Account Recovery** | TASK-124           | Email verification, Password reset                            |
 
 ### ❌ NGOÀI SCOPE (đã chuyển đi)
@@ -45,10 +45,14 @@ Phase 1 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đ�
 
 1. ✅ User có thể đăng ký, đăng nhập, đổi mật khẩu, khôi phục mật khẩu, xác thực email.
 2. ✅ Mọi API non-public đều bị chặn nếu không có JWT hợp lệ.
-3. ✅ Refresh token rotation hoạt động; revoke session khi đổi mật khẩu.
-4. ✅ Role enum (`USER`/`STAFF`/`ADMIN`) đã đóng băng và có decorator phân quyền dùng được.
-5. ✅ Migration của các entity Identity đã chạy thành công trên staging.
-6. ✅ Audit: không có endpoint nào trả về `password` hash trong response.
+3. ✅ Token TTL: access **15 phút**, refresh **30 ngày rolling** (mỗi `/refresh` extend). Transport header `Authorization: Bearer`.
+4. ✅ Refresh token family rotation hoạt động. Triggers revoke: T1 reuse revoked (sau 5s tolerance), T2 change password (revoke all), T3 logout-all-devices, T6 logout đơn.
+5. ✅ Password rule (NIST 2024): ≥8 ký tự + không trong top 100 common + check HaveIBeenPwned breach (k-anonymity). KHÔNG bắt complexity (hoa/số/đặc biệt).
+6. ✅ Role enum (`USER`/`STAFF`/`ADMIN`) đã đóng băng và có decorator phân quyền dùng được.
+7. ✅ Address: User có N Address với `isDefault` (max 1). User soft-delete → Address CASCADE soft-delete.
+8. ✅ Soft-delete cascade theo Hybrid policy (xem [`../../CONTEXT.md`](../../CONTEXT.md) — Cross-context).
+9. ✅ Migration của các entity Identity đã chạy thành công trên staging.
+10. ✅ Audit: không có endpoint nào trả về `password` hash trong response. `class-transformer @Exclude()` enforce.
 
 ---
 

@@ -16,10 +16,23 @@ Order **không bao giờ tham chiếu Cart hay Product mới nhất** — luôn 
 
 | Entity      | Định nghĩa                                                                                          |
 | :---------- | :-------------------------------------------------------------------------------------------------- |
-| Order       | Header giao dịch: `orderNumber`, `userId`, `status`, `total`, `customerEmailSnapshot`, `shippingAddressSnapshot`. |
-| OrderItem   | Dòng đã chốt: `productSnapshot` (JSONB inline), `quantity`, `unitPrice`, `lineTotal`.               |
+| Order       | Header giao dịch: `orderNumber` (format `ORD-YYYY-{6digit}`, sinh từ Postgres sequence), `userId`, `status`, `subtotal`, `discountAmount`, `vatTotal`, `shippingFee`, `grandTotal` (tất cả `BigInt` đồng VND), `customerEmailSnapshot`, `shippingAddressSnapshot` (JSONB). |
+| OrderItem   | Dòng đã chốt: `productSnapshot` (JSONB inline), `quantity`, `unitPrice`, `vatRate` (Int 1/10000, MVP=0), `vatAmount` (BigInt, MVP=0), `lineTotal` (BigInt). |
 | Order State | Enum `PENDING / PAID / SHIPPING / DELIVERED / CANCELLED / REFUNDED`.                                |
 | Snapshot    | Bản sao "đông cứng" của Product/Address/Price/Email tại thời điểm checkout. **JSON inline, không FK.** |
+| OrderStateChangeLog | Audit log mọi state transition: `orderId`, `fromState`, `toState`, `changedBy`, `reason?`, `isForceOverride`, `createdAt`. |
+
+### Order Math Formula (bắt buộc theo thứ tự)
+
+```
+lineTotal[i]     = unitPrice[i] * quantity[i]
+subtotal         = sum(lineTotal)
+afterDiscount    = max(0, subtotal - discountAmount)            // discount cap = subtotal
+vatTotal         = (afterDiscount * vatRate) / (10000 + vatRate) // MVP: 0
+grandTotal       = afterDiscount + shippingFee
+```
+
+**Discount trừ TRƯỚC VAT** (đúng luật thuế VN).
 
 ---
 
@@ -47,6 +60,10 @@ Order **không bao giờ tham chiếu Cart hay Product mới nhất** — luôn 
 6. **Trừ kho EAGER tại `POST /orders` (PENDING)** trong cùng transaction checkout. Dùng row-level lock (`SELECT ... FOR UPDATE` hoặc Prisma `update where stockQty >= qty`) để chống oversell. Order PENDING quá 15 phút chưa PAID → cleanup job set CANCELLED + hoàn stock.
 7. **Cancel Order PAID**: user tự cancel chỉ trong **30 phút** sau checkout (`Self-Cancel Window`). Sau đó cần admin force. Set `REFUNDED` + hoàn stock + emit `order.refunded`. Refund VNPay = **manual** trong MVP (log note + admin xử lý portal). Không cho cancel khi `DELIVERED`. Refund scope = **full only** (partial → Phase 3).
 8. **User soft-deleted (`deletedAt`)** → Order vẫn tồn tại, dùng `customerEmailSnapshot` để liên hệ.
+9. **Idempotency**: `POST /orders` BẮT BUỘC header `Idempotency-Key` (UUID FE sinh khi mở trang checkout). Cùng key trong 24h → trả Order cũ. Body khác key cũ → `409 IDEMPOTENCY_KEY_REUSED`. Chống double-click + mobile retry.
+10. **Money type**: mọi field tiền `BigInt` đơn vị đồng VND. Không float, không Decimal.
+11. **Address Snapshot**: User chọn `Address` từ profile (xem [`../../CONTEXT.md`](../../CONTEXT.md) — Address Context). Server đọc Address → snapshot toàn bộ vào `shippingAddressSnapshot` JSONB. Sau đó sửa/xóa Address gốc KHÔNG ảnh hưởng Order.
+12. **VAT MVP = 0**: schema có `vatRate`, `vatAmount`, `vatTotal` nhưng MVP set `0`. Bật VAT sau qua flag, không cần migration historical.
 
 ---
 

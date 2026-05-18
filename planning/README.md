@@ -12,11 +12,11 @@ Tài liệu dự án chia **2 nhánh rõ ràng**:
 | Bạn muốn...                                       | Đọc file                                                                  |
 | :------------------------------------------------ | :------------------------------------------------------------------------ |
 | **Tự học BE từ 0 — lộ trình 12 tuần**             | [`ROADMAP-SELF-LEARN.md`](./ROADMAP-SELF-LEARN.md) 👈 **người mới đọc trước** |
-| Tra thuật ngữ domain (User, Cart, Order, Snapshot) | [`CONTEXT.md`](./CONTEXT.md)                                              |
+| Tra thuật ngữ domain (User, Cart, Order, Snapshot, Money type, VAT, Idempotency, Refresh family, Address...) | [`CONTEXT.md`](./CONTEXT.md) — đã lock 28 design decisions |
 | Hiểu yêu cầu nghiệp vụ tổng thể                   | [`BUSINESS_REQUIREMENTS.md`](./BUSINESS_REQUIREMENTS.md)                  |
 | Biết task nào nên làm tiếp                        | [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)                                |
 | Index toàn bộ task                                | [`TASK_INDEX.md`](./TASK_INDEX.md)                                        |
-| Quy ước code (naming, structure, testing)         | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md)                          |
+| Quy ước code (naming, validation, pagination, rate limit, logging, healthcheck, CORS, money, FTS) | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md) |
 | Lệnh dev / migration / seed                       | [`setup/COMMANDS.md`](./setup/COMMANDS.md)                                |
 | Schema database                                   | [`setup/DATABASE_SCHEMA.md`](./setup/DATABASE_SCHEMA.md)                  |
 | Cài PostgreSQL local                              | [`setup/DATABASE_SETUP.md`](./setup/DATABASE_SETUP.md)                    |

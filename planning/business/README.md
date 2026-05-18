@@ -9,20 +9,21 @@ Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 
 
 ## 📂 Bounded Contexts
 
-### 01-identity — Người dùng & xác thực
+### 01-identity — Người dùng + Auth + Address
 > 📜 Charter: [`./01-identity/CHARTER.md`](./01-identity/CHARTER.md)
+> Bao gồm 3 sub-domain: **User entity / Authentication (JWT + Refresh family) / Address profile (N per user)**.
 
 | Task | Mô tả |
 | :--- | :--- |
-| TASK-107 | Tạo User Entity |
-| TASK-114 | Setup JWT Authentication |
-| TASK-115 | Tạo Auth DTOs |
-| TASK-116 | Implement Register & Login |
-| TASK-118 | Implement Users CRUD |
-| TASK-119 | Implement User Profile |
-| TASK-120 | Implement Change Password |
-| TASK-123 | Refresh Token & Session Management |
-| TASK-124 | Account Verification & Password Recovery |
+| TASK-107 | User Entity (+ Address entity N per User, `isDefault`) |
+| TASK-114 | JWT Authentication (access 15m, refresh 30d rolling, Bearer header) |
+| TASK-115 | Auth DTOs (class-validator) |
+| TASK-116 | Register & Login |
+| TASK-118 | Users CRUD |
+| TASK-119 | User Profile |
+| TASK-120 | Change Password (revoke all token families) |
+| TASK-123 | Refresh Token Family (rotation + 5s tolerance + reuse detection) |
+| TASK-124 | Email Verification & Password Recovery |
 
 ### 02-catalog — Sản phẩm & danh mục
 | Task | Mô tả |
