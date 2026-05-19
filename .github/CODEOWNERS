@@ -1,0 +1,15 @@
+# CODEOWNERS — ai phải review PR khi file này thay đổi
+# Format: <pattern> <@github-username hoặc @org/team>
+
+# Default: tất cả files
+* @luongcongthanh0909
+
+# Auth & Security — cần review kỹ
+src/auth/           @luongcongthanh0909
+src/common/guards/  @luongcongthanh0909
+
+# Database migrations — bắt buộc review
+src/database/       @luongcongthanh0909
+
+# CI/CD config
+.github/            @luongcongthanh0909
