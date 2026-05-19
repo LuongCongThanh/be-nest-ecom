@@ -1,0 +1,11 @@
+# <type>(<scope>): <subject>  ← tối đa 72 ký tự, không dấu chấm cuối
+#
+# Types : feat | fix | refactor | perf | test | docs | style | chore | ci | revert
+# Scopes: auth | user | catalog | cart | order | payment | media | common | config | db
+#
+# --- Body (optional) --- giải thích WHY, cách gì, ảnh hưởng gì
+#
+#
+# --- Footer (optional) ---
+# Closes AUTH-01
+# BREAKING CHANGE: <description>

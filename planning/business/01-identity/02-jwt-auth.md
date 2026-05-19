@@ -26,13 +26,13 @@ Task này chốt **chính sách nghiệp vụ** cho cơ chế xác thực không
 
 ### 1. Issuance Policy
 
-| Mục | Quyết định | Ghi chú |
-| :--- | :--- | :--- |
-| Thuật toán ký | **HS256** | Phase 1 đơn dịch vụ. Nếu sau này tách microservices, migrate sang RS256 |
-| Access Token TTL | **30 phút** | |
-| Refresh Token TTL | **7 ngày** | Chi tiết rotation: TASK-123 |
-| Payload chuẩn | `{ sub, email, role, iat, exp }` | Cấm thêm bất kỳ field nào không nằm trong danh sách |
-| Secret storage | `JWT_SECRET` env var | Validate khi boot (TASK-102) |
+| Mục               | Quyết định                       | Ghi chú                                                                 |
+| :---------------- | :------------------------------- | :---------------------------------------------------------------------- |
+| Thuật toán ký     | **HS256**                        | Phase 1 đơn dịch vụ. Nếu sau này tách microservices, migrate sang RS256 |
+| Access Token TTL  | **30 phút**                      |                                                                         |
+| Refresh Token TTL | **7 ngày**                       | Chi tiết rotation: TASK-123                                             |
+| Payload chuẩn     | `{ sub, email, role, iat, exp }` | Cấm thêm bất kỳ field nào không nằm trong danh sách                     |
+| Secret storage    | `JWT_SECRET` env var             | Validate khi boot (TASK-102)                                            |
 
 ### 2. Validation Policy
 
@@ -45,21 +45,25 @@ Task này chốt **chính sách nghiệp vụ** cho cơ chế xác thực không
 ## ✅ Acceptance Criteria
 
 **AC-1: Expired token bị reject**
+
 - **Given** access token đã hết hạn (`exp < now - 30s`)
 - **When** request gọi endpoint bảo vệ
 - **Then** response `401 TOKEN_EXPIRED`, không lộ User info
 
 **AC-2: Tampered signature bị reject**
+
 - **Given** một access token hợp lệ
 - **When** client sửa 1 byte trong phần signature
 - **Then** response `401 INVALID_SIGNATURE`
 
 **AC-3: Suspended user không pass dù token còn hạn**
+
 - **Given** User đã login, token còn 20 phút TTL; sau đó Admin set `isActive = false`
 - **When** User gọi endpoint bảo vệ
 - **Then** response `401 ACCOUNT_INACTIVE`
 
 **AC-4: Payload không leak data nhạy cảm**
+
 - **Given** token vừa được cấp
 - **When** decode payload (không cần verify signature)
 - **Then** payload chỉ chứa `{ sub, email, role, iat, exp }` — không có `password`, `phone`, `firstName`, etc.

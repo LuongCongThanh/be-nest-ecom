@@ -1,6 +1,6 @@
 # 📦 Catalog — Sản phẩm & Danh mục
 
-> Bounded context **Catalog**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Catalog Context*.
+> Bounded context **Catalog**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section _Catalog Context_.
 
 ---
 
@@ -14,28 +14,28 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 
 ## 📦 Key Entities
 
-| Entity   | Định nghĩa                                                                                  |
-| :------- | :------------------------------------------------------------------------------------------ |
-| Category | Nhóm phân loại sản phẩm, hỗ trợ tree self-reference (`parentId`).                           |
-| Product  | Đơn vị bán được (SKU level). 1 Product = 1 SKU + 1 slug + `price` (`BigInt` đồng VND) + `comparePrice` (BigInt). |
-| Variant  | Biến thể của Product (size, màu). Mỗi variant có SKU riêng. (TASK-218, post-MVP.)           |
-| Stock    | Tồn kho thực. **Trừ EAGER tại `POST /orders` (PENDING)** trong cùng transaction — xem [`../04-order/`](../04-order/README.md). Order PENDING timeout 15 phút → hoàn stock. |
+| Entity   | Định nghĩa                                                                                                                                                                                                                       |
+| :------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Category | Nhóm phân loại sản phẩm, hỗ trợ tree self-reference (`parentId`).                                                                                                                                                                |
+| Product  | Đơn vị bán được (SKU level). 1 Product = 1 SKU + 1 slug + `price` (`BigInt` đồng VND) + `comparePrice` (BigInt).                                                                                                                 |
+| Variant  | Biến thể của Product (size, màu). Mỗi variant có SKU riêng. (TASK-218, post-MVP.)                                                                                                                                                |
+| Stock    | Tồn kho thực. **Trừ EAGER tại `POST /orders` (PENDING)** trong cùng transaction — xem [`../04-order/`](../04-order/README.md). Order PENDING timeout 15 phút → hoàn stock.                                                       |
 | Image    | Lưu qua `IStorageAdapter` (local disk dev, S3 prod). 3 size (`thumb 200px / medium 800px / original`), output `.webp`. Path `/products/{productId}/{uuid}_{size}.webp`. Xem [`CONTEXT.md`](../../docs/CONTEXT.md) — File Upload. |
 
 ---
 
 ## 🔌 Public API (high-level)
 
-| Endpoint                          | Vai trò                              |
-| :-------------------------------- | :----------------------------------- |
-| `GET    /categories`              | Tree danh mục (public)               |
-| `GET    /products`                | List + filter + search (public)      |
-| `GET    /products/:slug`          | Detail product theo slug (public)    |
-| `POST   /products` (admin)        | Tạo product                          |
-| `PATCH  /products/:id` (admin)    | Cập nhật                             |
-| `DELETE /products/:id` (admin)    | Soft-delete                          |
-| `PATCH  /products/:id/stock`      | Điều chỉnh tồn kho (admin)           |
-| `POST   /products/:id/images`     | Upload ảnh (admin, dùng TASK-223)    |
+| Endpoint                       | Vai trò                           |
+| :----------------------------- | :-------------------------------- |
+| `GET    /categories`           | Tree danh mục (public)            |
+| `GET    /products`             | List + filter + search (public)   |
+| `GET    /products/:slug`       | Detail product theo slug (public) |
+| `POST   /products` (admin)     | Tạo product                       |
+| `PATCH  /products/:id` (admin) | Cập nhật                          |
+| `DELETE /products/:id` (admin) | Soft-delete                       |
+| `PATCH  /products/:id/stock`   | Điều chỉnh tồn kho (admin)        |
+| `POST   /products/:id/images`  | Upload ảnh (admin, dùng TASK-223) |
 
 ---
 
@@ -55,14 +55,14 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 
 ## 📋 Tasks
 
-| ID       | Topic                       | File                                                            |
-| :------- | :-------------------------- | :-------------------------------------------------------------- |
-| TASK-108 | Category entity             | [link](./01-category-entity.md)                           |
-| TASK-109 | Product entity              | [link](./02-product-entity.md)                            |
-| TASK-201 | Categories CRUD             | [link](./03-categories-crud.md)                 |
-| TASK-202 | Category tree & filtering   | [link](./05-category-tree.md)                   |
-| TASK-203 | Products CRUD               | [link](./04-products-crud.md)                   |
-| TASK-204 | Product filter & search     | [link](./06-products-search.md)                  |
-| TASK-205 | Stock management            | [link](./07-stock-management.md)                  |
-| TASK-206 | Product images              | [link](./08-product-images.md)                |
-| TASK-218 | Product variants            | [link](./09-product-variants.md)               |
+| ID       | Topic                     | File                             |
+| :------- | :------------------------ | :------------------------------- |
+| TASK-108 | Category entity           | [link](./01-category-entity.md)  |
+| TASK-109 | Product entity            | [link](./02-product-entity.md)   |
+| TASK-201 | Categories CRUD           | [link](./03-categories-crud.md)  |
+| TASK-202 | Category tree & filtering | [link](./05-category-tree.md)    |
+| TASK-203 | Products CRUD             | [link](./04-products-crud.md)    |
+| TASK-204 | Product filter & search   | [link](./06-products-search.md)  |
+| TASK-205 | Stock management          | [link](./07-stock-management.md) |
+| TASK-206 | Product images            | [link](./08-product-images.md)   |
+| TASK-218 | Product variants          | [link](./09-product-variants.md) |

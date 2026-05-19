@@ -1,6 +1,6 @@
 # 🛒 Cart — Giỏ hàng
 
-> Bounded context **Commerce / Cart**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Commerce Context*.
+> Bounded context **Commerce / Cart**. Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section _Commerce Context_.
 
 ---
 
@@ -14,26 +14,26 @@ Cart **chưa phải giao dịch** — chưa trừ kho, chưa khóa giá. Snapsho
 
 ## 📦 Key Entities
 
-| Entity            | Định nghĩa                                                                                      |
-| :---------------- | :---------------------------------------------------------------------------------------------- |
-| Cart              | Trạng thái mua sắm của 1 User **HOẶC** 1 Guest. CHECK: `userId XOR guestSessionId`. 1 User active ↔ ≤ 1 Cart. 1 Guest (`guestSessionId`) ↔ ≤ 1 Cart. |
-| CartItem          | Dòng trong Cart: `productId + quantity + priceAtAdded`. `priceAtAdded` là `BigInt` đơn vị đồng VND. |
-| Guest Session ID  | UUID lưu cookie `gsid` (HttpOnly, SameSite=Lax, Max-Age=30 ngày). Server set khi non-auth client gọi `GET /cart` lần đầu. |
-| Price At Added    | Giá Product tại thời điểm thêm. So với `Product.price` hiện tại → flag `priceChanged: true` khi GET cart. |
-| Cart Lifecycle    | Guest cart: `expiresAt = createdAt + 30 ngày`. Cron daily hard-delete khi expired. User cart: soft-delete CASCADE theo User. |
+| Entity           | Định nghĩa                                                                                                                                           |
+| :--------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cart             | Trạng thái mua sắm của 1 User **HOẶC** 1 Guest. CHECK: `userId XOR guestSessionId`. 1 User active ↔ ≤ 1 Cart. 1 Guest (`guestSessionId`) ↔ ≤ 1 Cart. |
+| CartItem         | Dòng trong Cart: `productId + quantity + priceAtAdded`. `priceAtAdded` là `BigInt` đơn vị đồng VND.                                                  |
+| Guest Session ID | UUID lưu cookie `gsid` (HttpOnly, SameSite=Lax, Max-Age=30 ngày). Server set khi non-auth client gọi `GET /cart` lần đầu.                            |
+| Price At Added   | Giá Product tại thời điểm thêm. So với `Product.price` hiện tại → flag `priceChanged: true` khi GET cart.                                            |
+| Cart Lifecycle   | Guest cart: `expiresAt = createdAt + 30 ngày`. Cron daily hard-delete khi expired. User cart: soft-delete CASCADE theo User.                         |
 
 ---
 
 ## 🔌 Public API (high-level)
 
-| Endpoint                          | Vai trò                                          |
-| :-------------------------------- | :----------------------------------------------- |
-| `GET    /cart`                    | Lấy cart hiện tại — auth (User) hoặc cookie `gsid` (Guest). Tự tạo Cart + set cookie nếu chưa có. |
-| `POST   /cart/items`              | Thêm item — idempotent theo `productId` (cùng productId → cộng quantity) |
-| `PATCH  /cart/items/:id`          | Cập nhật quantity                                |
-| `DELETE /cart/items/:id`          | Xóa item                                         |
-| `DELETE /cart`                    | Xóa toàn bộ cart                                 |
-| `POST   /cart/merge` (internal)   | Gọi tự động sau login — gộp Guest cart vào User cart với `mergeWarnings[]` |
+| Endpoint                        | Vai trò                                                                                           |
+| :------------------------------ | :------------------------------------------------------------------------------------------------ |
+| `GET    /cart`                  | Lấy cart hiện tại — auth (User) hoặc cookie `gsid` (Guest). Tự tạo Cart + set cookie nếu chưa có. |
+| `POST   /cart/items`            | Thêm item — idempotent theo `productId` (cùng productId → cộng quantity)                          |
+| `PATCH  /cart/items/:id`        | Cập nhật quantity                                                                                 |
+| `DELETE /cart/items/:id`        | Xóa item                                                                                          |
+| `DELETE /cart`                  | Xóa toàn bộ cart                                                                                  |
+| `POST   /cart/merge` (internal) | Gọi tự động sau login — gộp Guest cart vào User cart với `mergeWarnings[]`                        |
 
 ---
 
@@ -57,11 +57,11 @@ Cart **chưa phải giao dịch** — chưa trừ kho, chưa khóa giá. Snapsho
 
 ## 📋 Tasks
 
-| ID       | Topic                | File                                          |
-| :------- | :------------------- | :-------------------------------------------- |
-| TASK-110 | Cart entities        | [link](./01-cart-entities.md)           |
-| TASK-207 | Shopping cart        | [link](./02-shopping-cart.md) |
-| TASK-208 | Cart calculations    | [link](./03-cart-calc.md)       |
+| ID       | Topic             | File                          |
+| :------- | :---------------- | :---------------------------- |
+| TASK-110 | Cart entities     | [link](./01-cart-entities.md) |
+| TASK-207 | Shopping cart     | [link](./02-shopping-cart.md) |
+| TASK-208 | Cart calculations | [link](./03-cart-calc.md)     |
 
 ---
 

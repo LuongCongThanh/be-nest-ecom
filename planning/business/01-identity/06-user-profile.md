@@ -23,10 +23,10 @@ End-user self-service: xem và cập nhật thông tin của **chính họ**. T�
 
 ## 📄 Endpoints
 
-| Endpoint | Method | Mô tả | Field cho phép |
-| :--- | :--- | :--- | :--- |
-| `/me` | GET | Profile của chính user (từ JWT context) | — |
-| `/me` | PATCH | Update profile | `firstName`, `lastName`, `phone` |
+| Endpoint | Method | Mô tả                                   | Field cho phép                   |
+| :------- | :----- | :-------------------------------------- | :------------------------------- |
+| `/me`    | GET    | Profile của chính user (từ JWT context) | —                                |
+| `/me`    | PATCH  | Update profile                          | `firstName`, `lastName`, `phone` |
 
 ### Field classification
 
@@ -39,21 +39,25 @@ End-user self-service: xem và cập nhật thông tin của **chính họ**. T�
 ## ✅ Acceptance Criteria
 
 **AC-1: GET /me trả về đúng user của token**
+
 - **Given** User A login, có access token T_A
 - **When** gọi `GET /me` với `Authorization: Bearer T_A`
 - **Then** response chứa profile của A (id, email, name, role, emailVerified); không có field `password`
 
 **AC-2: Không truy cập được profile user khác qua /me**
+
 - **Given** không tồn tại endpoint nào dạng `GET /me/:id`
 - **When** quét routes
 - **Then** chỉ có `GET /me` (không tham số), forced lấy user từ JWT
 
 **AC-3: Role escalation attempt bị ignore**
+
 - **Given** User role `USER`, gửi `PATCH /me` với body `{ firstName: "Bob", role: "ADMIN" }`
 - **When** response trả về
 - **Then** `firstName` được update thành "Bob", nhưng `role` vẫn là `USER` trong DB (forbidNonWhitelisted reject hoặc service whitelist filter)
 
 **AC-4: Email không thể đổi qua /me**
+
 - **Given** User gửi `PATCH /me` với `{ email: "new@x.com" }`
 - **When** xử lý
 - **Then** email trong DB không đổi; response `422 VALIDATION_FAILED` HOẶC field bị silently ignore (chọn 1 — đề xuất reject để rõ ràng)

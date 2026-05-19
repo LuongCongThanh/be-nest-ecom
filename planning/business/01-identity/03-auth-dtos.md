@@ -25,20 +25,20 @@
 
 ### 1. Register Contract — `POST /auth/register`
 
-| Field | Type | Rule | Mã lỗi `code` khi fail |
-| :--- | :--- | :--- | :--- |
-| `email` | string | Valid email, lowercase normalize, unique | `INVALID_EMAIL`, `EMAIL_ALREADY_EXISTS` |
-| `password` | string | ≥ 8 ký tự, có chữ hoa + số + ký tự đặc biệt | `WEAK_PASSWORD` |
-| `firstName` | string | Trim, 1-50 ký tự, không empty sau trim | `INVALID_NAME` |
-| `lastName` | string | Trim, 1-50 ký tự | `INVALID_NAME` |
-| `phone` | string? | Optional, regex `^(?:\+84|0)[0-9]{9,10}$` | `INVALID_PHONE` |
+| Field       | Type    | Rule                                        | Mã lỗi `code` khi fail                  |
+| :---------- | :------ | :------------------------------------------ | :-------------------------------------- | --------------- |
+| `email`     | string  | Valid email, lowercase normalize, unique    | `INVALID_EMAIL`, `EMAIL_ALREADY_EXISTS` |
+| `password`  | string  | ≥ 8 ký tự, có chữ hoa + số + ký tự đặc biệt | `WEAK_PASSWORD`                         |
+| `firstName` | string  | Trim, 1-50 ký tự, không empty sau trim      | `INVALID_NAME`                          |
+| `lastName`  | string  | Trim, 1-50 ký tự                            | `INVALID_NAME`                          |
+| `phone`     | string? | Optional, regex `^(?:\+84                   | 0)[0-9]{9,10}$`                         | `INVALID_PHONE` |
 
 ### 2. Login Contract — `POST /auth/login`
 
-| Field | Type | Rule | Mã lỗi |
-| :--- | :--- | :--- | :--- |
-| `email` | string | Valid email format | `INVALID_EMAIL` |
-| `password` | string | Non-empty | `MISSING_PASSWORD` |
+| Field      | Type   | Rule               | Mã lỗi             |
+| :--------- | :----- | :----------------- | :----------------- |
+| `email`    | string | Valid email format | `INVALID_EMAIL`    |
+| `password` | string | Non-empty          | `MISSING_PASSWORD` |
 
 > ⚠️ Login KHÔNG validate độ phức tạp password — tránh side-channel leak (xem TASK-116 AC-2).
 
@@ -65,21 +65,25 @@
 ## ✅ Acceptance Criteria
 
 **AC-1: Weak password bị reject**
+
 - **Given** payload register có `password = "12345678"` (8 chars nhưng chỉ số)
 - **When** POST /auth/register
 - **Then** response `422` với `errors: [{ field: "password", code: "WEAK_PASSWORD" }]`
 
 **AC-2: Mass-assignment bị chặn**
+
 - **Given** payload register có thêm field `role: "ADMIN"`
 - **When** POST /auth/register
 - **Then** response `422 VALIDATION_FAILED` (do `forbidNonWhitelisted`), user KHÔNG được tạo
 
 **AC-3: Email được normalize**
+
 - **Given** payload register có `email = "  Alice@Example.COM  "`
 - **When** POST /auth/register thành công
 - **Then** DB lưu `email = "alice@example.com"` (trimmed + lowercased)
 
 **AC-4: Response không leak password hash**
+
 - **Given** register/login thành công
 - **When** kiểm tra response body
 - **Then** không có field `password` ở bất kỳ độ sâu nào của JSON
