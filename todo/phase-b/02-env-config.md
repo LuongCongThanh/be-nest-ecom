@@ -37,19 +37,24 @@ Tạo `src/config/env.validation.ts`:
 ```typescript
 import Joi from 'joi';
 
+// Validated at app startup — missing or invalid values will crash the process immediately.
 export const envValidationSchema = Joi.object({
+  // App
   NODE_ENV: Joi.string()
     .valid('development', 'production', 'test')
     .default('development'),
   PORT: Joi.number().default(3000),
 
-  DATABASE_URL: Joi.string().required(),
+  // Database
+  DATABASE_URL: Joi.string().required(), // e.g. postgresql://user:pass@localhost:5432/ecom_db
 
+  // JWT — min 32 chars on secret to ensure signing strength
   JWT_SECRET: Joi.string().min(32).required(),
-  JWT_EXPIRES_IN: Joi.string().default('30m'),
-  REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),
+  JWT_EXPIRES_IN: Joi.string().default('30m'),           // access token lifetime
+  REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),  // refresh token lifetime
 
-  REDIS_URL: Joi.string().required(),
+  // Redis
+  REDIS_URL: Joi.string().required(), // e.g. redis://localhost:6379
 });
 ```
 
@@ -59,17 +64,17 @@ Mở `src/app.module.ts`:
 
 ```typescript
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { envValidationSchema } from './config/env.validation';
-import { HealthModule } from './health/health.module';
+import { ConfigModule } from '@nestjs/config'; // loads .env and exposes ConfigService app-wide
+import { envValidationSchema } from '@config/env.validation';
+import { HealthModule } from '@health/health.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,
-      validationSchema: envValidationSchema,
+      isGlobal: true,         // no need to re-import ConfigModule in child modules
+      validationSchema: envValidationSchema, // validate .env on startup; missing required vars crash the process
       validationOptions: {
-        abortEarly: true,
+        abortEarly: true,     // stop at first invalid var instead of collecting all errors
       },
     }),
     HealthModule,
@@ -77,6 +82,9 @@ import { HealthModule } from './health/health.module';
 })
 export class AppModule {}
 ```
+
+> **Tại sao dùng alias (`@config/`, `@health/`) thay vì relative import?**
+> Relative import (`'./config/env.validation'`) hoạt động nhưng dễ vỡ: khi move file sang thư mục khác, phải tìm và sửa tất cả nơi import nó. Alias được khai báo một lần trong `tsconfig.json` — rename thư mục không làm vỡ import nào. Alias cũng dễ đọc hơn trong file sâu nhiều tầng thư mục.
 
 ### 4. Tạo typed config service (optional nhưng nên có)
 
