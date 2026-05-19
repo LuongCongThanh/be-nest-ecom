@@ -23,40 +23,45 @@ Admin CRUD cho Product. Search/list public ở TASK-204; images ở TASK-206; st
 
 ## 📄 Endpoints
 
-| Endpoint | Method | Quyền | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/admin/products` | POST | ADMIN, STAFF | Tạo Product (draft mặc định `isActive=false`) |
-| `/admin/products/:id` | GET | ADMIN, STAFF | Detail (include inactive + soft-deleted) |
-| `/admin/products/:id` | PATCH | ADMIN, STAFF | Update |
-| `/admin/products/:id/publish` | POST | ADMIN, STAFF | Set `isActive=true` (sau khi pass guardrail) |
-| `/admin/products/:id/unpublish` | POST | ADMIN, STAFF | Set `isActive=false` |
-| `/admin/products/:id` | DELETE | ADMIN | Soft delete; reject nếu có Order |
+| Endpoint                        | Method | Quyền        | Mô tả                                         |
+| :------------------------------ | :----- | :----------- | :-------------------------------------------- |
+| `/admin/products`               | POST   | ADMIN, STAFF | Tạo Product (draft mặc định `isActive=false`) |
+| `/admin/products/:id`           | GET    | ADMIN, STAFF | Detail (include inactive + soft-deleted)      |
+| `/admin/products/:id`           | PATCH  | ADMIN, STAFF | Update                                        |
+| `/admin/products/:id/publish`   | POST   | ADMIN, STAFF | Set `isActive=true` (sau khi pass guardrail)  |
+| `/admin/products/:id/unpublish` | POST   | ADMIN, STAFF | Set `isActive=false`                          |
+| `/admin/products/:id`           | DELETE | ADMIN        | Soft delete; reject nếu có Order              |
 
 ---
 
 ## ✅ Acceptance Criteria
 
 **AC-1: Cannot publish without image**
+
 - **Given** Product `isActive=false`, không có image
 - **When** POST `/admin/products/:id/publish`
 - **Then** response `409 CANNOT_PUBLISH: missing image` (kèm checklist các điều kiện chưa pass)
 
 **AC-2: Slug giữ nguyên sau publish dù name đổi**
+
 - **Given** Product đã publish, `slug = "iphone-15"`, `name = "iPhone 15"`
 - **When** Admin PATCH `{ name: "iPhone 15 Pro Max" }` mà KHÔNG gửi slug
 - **Then** slug VẪN là `"iphone-15"`; response trả `slugLocked: true`, kèm gợi ý slug mới `"iphone-15-pro-max"` cho Admin override thủ công
 
 **AC-3: Price âm bị reject**
+
 - **Given** payload có `price = -10`
 - **When** POST/PATCH
 - **Then** `422 INVALID_PRICE`
 
 **AC-4: Delete reject khi có Order**
+
 - **Given** Product có 2 OrderItem
 - **When** DELETE
 - **Then** `409 PRODUCT_HAS_ORDER_HISTORY`; gợi ý dùng "Unpublish" thay vì delete
 
 **AC-5: Category orphan handling**
+
 - **Given** Product gán Category A; Admin xóa Category A (TASK-201 AC-5)
 - **When** GET Product detail
 - **Then** `categoryId = null`; response Admin UI có flag `isOrphaned: true`

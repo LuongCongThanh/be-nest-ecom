@@ -23,39 +23,44 @@ CRUD nội bộ cho `ADMIN`/`STAFF` để vận hành catalog. Public API list/d
 
 ## 📄 Endpoints
 
-| Endpoint | Method | Quyền | Mô tả |
-| :--- | :--- | :--- | :--- |
-| `/admin/categories` | POST | ADMIN | Tạo category |
-| `/admin/categories/:id` | GET | ADMIN, STAFF | Detail |
-| `/admin/categories/:id` | PATCH | ADMIN | Update (name, slug, parent, active) |
-| `/admin/categories/:id` | DELETE | ADMIN | Soft retire (`isActive=false`), Product được SET NULL `categoryId` |
-| `/admin/categories/:id/reorder` | POST | ADMIN | Đổi `sortOrder` |
+| Endpoint                        | Method | Quyền        | Mô tả                                                              |
+| :------------------------------ | :----- | :----------- | :----------------------------------------------------------------- |
+| `/admin/categories`             | POST   | ADMIN        | Tạo category                                                       |
+| `/admin/categories/:id`         | GET    | ADMIN, STAFF | Detail                                                             |
+| `/admin/categories/:id`         | PATCH  | ADMIN        | Update (name, slug, parent, active)                                |
+| `/admin/categories/:id`         | DELETE | ADMIN        | Soft retire (`isActive=false`), Product được SET NULL `categoryId` |
+| `/admin/categories/:id/reorder` | POST   | ADMIN        | Đổi `sortOrder`                                                    |
 
 ---
 
 ## ✅ Acceptance Criteria
 
 **AC-1: Non-admin không tạo/update được**
+
 - **Given** User role `USER`
 - **When** POST `/admin/categories`
 - **Then** response `403 FORBIDDEN`
 
 **AC-2: Slug regenerate khi name đổi**
+
 - **Given** Category `{ name: "Điện thoại", slug: "dien-thoai" }`
 - **When** PATCH với `{ name: "Điện thoại di động" }`, KHÔNG gửi slug
 - **Then** slug được auto-update thành `"dien-thoai-di-dong"`; response trả cờ `slugChanged: true` để FE cảnh báo
 
 **AC-3: Slug manual override hợp lệ**
+
 - **Given** Admin gửi `{ slug: "smartphone" }` (override thủ công)
 - **When** PATCH category
 - **Then** slug lưu `"smartphone"` (đã validate kebab-case)
 
 **AC-4: Re-parent ngăn cycle**
+
 - **Given** Cây A → B → C
 - **When** Admin update `A.parentId = C.id`
 - **Then** response `422 CIRCULAR_PARENT_REFERENCE`
 
 **AC-5: Soft retire không xóa Product**
+
 - **Given** Category có 5 Product
 - **When** DELETE category
 - **Then** Category có `isActive=false`; 5 Product có `categoryId = NULL`; vẫn search được trong "Uncategorized" filter

@@ -21,20 +21,20 @@ Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc
 
 ### ✅ TRONG SCOPE
 
-| Nhóm                 | Task               | Mô tả ngắn                                                    |
-| :------------------- | :----------------- | :------------------------------------------------------------ |
-| **Data Foundation**  | TASK-106           | Chiến lược schema chung (snapshot, FK rules, delete strategy) |
-| **Identity Entity**  | TASK-107           | User entity + Address entity (N per User + `isDefault`)       |
+| Nhóm                 | Task               | Mô tả ngắn                                                                 |
+| :------------------- | :----------------- | :------------------------------------------------------------------------- |
+| **Data Foundation**  | TASK-106           | Chiến lược schema chung (snapshot, FK rules, delete strategy)              |
+| **Identity Entity**  | TASK-107           | User entity + Address entity (N per User + `isDefault`)                    |
 | **Authentication**   | TASK-114, 115, 116 | JWT strategy (15m access + 30d refresh rolling), Auth DTOs, Register/Login |
 | **Account Mgmt**     | TASK-118, 119, 120 | Users CRUD, Profile, Change Password (revoke all token families on change) |
-| **Session**          | TASK-123           | Refresh Token family + rotation + 5s tolerance window         |
-| **Account Recovery** | TASK-124           | Email verification, Password reset                            |
+| **Session**          | TASK-123           | Refresh Token family + rotation + 5s tolerance window                      |
+| **Account Recovery** | TASK-124           | Email verification, Password reset                                         |
 
 ### ❌ NGOÀI SCOPE (đã chuyển đi)
 
-| Nhóm cũ                                                                     | Đã chuyển đến                                    |
-| :-------------------------------------------------------------------------- | :----------------------------------------------- |
-| Setup project, env, DB, validation, migrations, base classes, seeds, README | `planning/setup/`       |
+| Nhóm cũ                                                                     | Đã chuyển đến        |
+| :-------------------------------------------------------------------------- | :------------------- |
+| Setup project, env, DB, validation, migrations, base classes, seeds, README | `planning/setup/`    |
 | Entity Category, Product, Cart, Order                                       | `planning/business/` |
 
 ---
