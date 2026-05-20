@@ -59,7 +59,7 @@ Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 
 | :--- | :--- |
 | TASK-221 | Payment Integration Advanced (VNPay…) |
 
-### 06-engagement — Tương tác khách hàng
+### 06-engagement — Tương tác người dùng
 | Task | Mô tả |
 | :--- | :--- |
 | TASK-217 | Q&A System |
@@ -97,3 +97,5 @@ Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 
 2. Khi viết feature mới đụng thuật ngữ chưa có → cập nhật `CONTEXT.md` trước, code sau.
 3. Khi feature đụng schema → cập nhật `../setup/DATABASE_SCHEMA.md` trước, code migration sau.
 4. Khi feature đụng convention (validation rule mới, error code mới) → cập nhật `../setup/CONVENTIONS.md` trước.
+5. `business/` ưu tiên giữ **intent, workflow, invariant domain, acceptance behavior**. Tránh nhét quá nhiều mechanics thuần kỹ thuật nếu phần đó đã có canon ở `setup/`.
+6. Nếu một context cần rollout theo phase, hãy trỏ sang `../todo/` thay vì biến file business thành execution checklist thứ hai.

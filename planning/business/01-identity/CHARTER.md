@@ -1,15 +1,15 @@
-# 📜 Phase 1 Charter — Foundation & Identity
+# 📜 Identity Charter — Foundation & Identity
 
-> **Đây là tài liệu khung của Phase 1.** Mọi task trong phase đều phải gắn với mục tiêu, scope, và success criteria trong file này.
+> Đây là tài liệu khung của bounded context **Identity**. Mọi task trong context này đều phải gắn với mục tiêu, scope, và success criteria trong file này.
 
 ---
 
-## 🎯 Mục tiêu Phase
+## 🎯 Mục tiêu Context
 
 Xây dựng **bounded context Identity** hoàn chỉnh: User → Authentication → Authorization → Account lifecycle.
-Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc tả tại Phase 2 (Revenue) ngay trước khi triển khai feature tương ứng.
+Identity KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc tả ở các context commerce tương ứng và được triển khai theo execution path trong `../../todo/`.
 
-### Lý do tồn tại của Phase
+### Lý do tồn tại của Context
 
 1. **Identity là gốc của mọi quyền truy cập** — không thể triển khai Catalog/Order trước khi xác định ai là người dùng.
 2. **Schema-level decision lock-in** — các quyết định về User entity (UUID, role enum, soft-delete) ảnh hưởng đến mọi bảng FK sau này.
@@ -17,7 +17,7 @@ Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc
 
 ---
 
-## 📦 Scope của Phase 1
+## 📦 Scope của Identity
 
 ### ✅ TRONG SCOPE
 
@@ -39,9 +39,9 @@ Phase 1 KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặc
 
 ---
 
-## 🎯 Success Criteria (Phase Exit Gates)
+## 🎯 Success Criteria (Context Exit Gates)
 
-Phase 1 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đáp ứng:
+Identity chỉ được xem là đạt baseline khi **TẤT CẢ** điều kiện sau được đáp ứng:
 
 1. ✅ User có thể đăng ký, đăng nhập, đổi mật khẩu, khôi phục mật khẩu, xác thực email.
 2. ✅ Mọi API non-public đều bị chặn nếu không có JWT hợp lệ.
@@ -58,12 +58,12 @@ Phase 1 chỉ được đóng khi **TẤT CẢ** điều kiện sau được đ�
 
 ## 🔗 Phụ thuộc Outbound
 
-Phase 1 phải hoàn tất các engineering foundation sau **trước khi** start (tham chiếu `planning/setup/`):
+Identity cần các engineering foundation sau **trước khi** đi sâu vào feature (tham chiếu `planning/setup/`):
 
 - TASK-101 → 105: project setup, env, DB connect, global validation.
 - TASK-112, 113: migration tooling & strategy.
 - TASK-117: guards & decorators mechanism.
-- TASK-122: shared base classes (BaseEntity, BaseRepository).
+- TASK-122: shared utilities/base patterns ở mức vừa đủ, không bắt buộc generic `BaseRepository`.
 
 ---
 

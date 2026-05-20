@@ -16,7 +16,7 @@ Implement `POST /auth/register` và `POST /auth/login` — **2 luồng quan tr�
 - **Password = one-way hash**: plaintext password không bao giờ được lưu sau khi rời tay client. Bcrypt cost 12 = ~250ms hash time → chấp nhận được về UX nhưng làm brute force cực kỳ tốn kém.
 - **Login error message phải mơ hồ**: `INVALID_CREDENTIALS` cho cả trường hợp "email không tồn tại" lẫn "sai password" — không tiết lộ email có tồn tại hay không (chống enumeration attack).
 - **Timing attack prevention**: dù email không tồn tại, vẫn chạy `bcrypt.compare` với dummy hash — đảm bảo response time tương đương với trường hợp email tồn tại. Không làm điều này thì attacker đo thời gian response để biết email có tồn tại không.
-- **Atomic registration**: User được tạo + token được cấp trong cùng một flow — nếu token issue fail, User vẫn tạo được → orphan user không login được. Cần wrap trong transaction hoặc handle error và rollback.
+- **Registration cleanup on token-issue failure**: nếu user đã tạo mà token issue fail, phải rollback hoặc xóa user vừa tạo — không để orphan account.
 - **`emailVerified: false`**: user mới chưa verify email — cho phép login nhưng một số tính năng nhạy cảm sẽ bị limit (Phase D).
 
 ---
@@ -107,6 +107,8 @@ import { TokenService } from './token.service';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
 
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync('dummy-password-for-timing-attack-mitigation', 12);
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -130,7 +132,7 @@ export class AuthService {
     // Hash password — bcrypt cost 12
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
-    // Atomic create + issue tokens
+    // Create user first; if token issue fails, cleanup user vừa tạo
     const user = await this.prisma.user.create({
       data: {
         email: dto.email.toLowerCase(),
@@ -143,9 +145,13 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.tokenService.issueTokenPair(user.id, user.email, user.role);
-
-    return { user: this.sanitizeUser(user), ...tokens };
+    try {
+      const tokens = await this.tokenService.issueTokenPair(user.id, user.email, user.role);
+      return { user: this.sanitizeUser(user), ...tokens };
+    } catch (error) {
+      await this.prisma.user.delete({ where: { id: user.id } });
+      throw error;
+    }
   }
 
   async login(dto: LoginDto) {
@@ -157,7 +163,7 @@ export class AuthService {
     // Secure compare — same error regardless of email exists or not
     const passwordMatch = user
       ? await bcrypt.compare(dto.password, user.password)
-      : await bcrypt.compare(dto.password, '$2b$12$dummyhashtopreventtimingattack');
+      : await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
 
     if (!user || !passwordMatch) {
       throw new UnauthorizedException({

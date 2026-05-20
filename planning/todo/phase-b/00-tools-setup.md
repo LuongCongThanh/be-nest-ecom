@@ -35,6 +35,7 @@ wsl --install
 Khởi động lại máy khi được yêu cầu.
 
 Sau khi restart, mở PowerShell và verify:
+
 ```powershell
 wsl --version
 # Phải ra: WSL version 2.x.x
@@ -48,6 +49,7 @@ wsl --version
 
 - [ ] Tải và cài Node.js 20 LTS từ https://nodejs.org (chọn bản **LTS**, không chọn Current)
 - [ ] Verify trong PowerShell/Terminal:
+
 ```bash
 node -v   # phải ra v20.x.x
 npm -v    # phải ra 10.x.x
@@ -62,6 +64,7 @@ npm install -g @nestjs/cli
 ```
 
 Verify:
+
 ```bash
 nest --version   # ra version là OK
 ```
@@ -76,6 +79,7 @@ nest --version   # ra version là OK
 - [ ] Chờ Docker Desktop status chuyển sang **"Engine running"** (icon xanh ở taskbar)
 
 Verify trong terminal:
+
 ```bash
 docker --version          # Docker version 24.x.x
 docker compose version    # Docker Compose version v2.x.x
@@ -150,6 +154,7 @@ docker compose version  # Docker Compose version v2.x.x
 ```
 
 Và kiểm tra thêm:
+
 - [ ] Docker Desktop đang chạy (icon ở taskbar)
 - [ ] DBeaver mở được
 - [ ] Postman mở được

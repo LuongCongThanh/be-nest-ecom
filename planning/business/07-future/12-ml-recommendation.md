@@ -15,7 +15,7 @@
 
 Trong một cửa hàng có hàng ngàn sản phẩm, khách hàng rất dễ bị "ngợp" và không tìm thấy thứ họ thực sự muốn. Hệ thống gợi ý thông minh đóng vai trò như một "người tư vấn bán hàng" ảo, phân tích hành vi người dùng để đưa ra những sản phẩm phù hợp nhất. Điều này không chỉ cải thiện trải nghiệm mua sắm mà còn tăng mạnh giá trị đơn hàng trung bình (AOV) thông qua các kỹ thuật Up-selling và Cross-selling.
 
-- **Improved Customer Retention**: Giữ chân khách hàng lâu hơn trên ứng dụng bằng những nội dung hấp dẫn và cá nhân hóa.
+- **Improved User Retention**: Giữ chân người dùng lâu hơn trên ứng dụng bằng những nội dung hấp dẫn và cá nhân hóa.
 - **Optimized Discovery**: Giúp các sản phẩm mới hoặc các sản phẩm "ngách" dễ dàng tiếp cận đúng khách hàng mục tiêu.
 - **Data-Driven Revenue**: Chuyển đổi từ việc bán hàng bị động sang chủ động gợi ý nhu cầu cho khách hàng.
 

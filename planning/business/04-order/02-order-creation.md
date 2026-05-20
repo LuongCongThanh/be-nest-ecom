@@ -13,11 +13,11 @@
 
 ## 🎯 Business Intent
 
-Checkout là **transaction quan trọng nhất Phase 2**. Bất biến:
+Checkout là **transaction quan trọng nhất của commerce flow**. Bất biến:
 
 - **All-or-nothing**: 5 bước (calc → stock commit → snapshot create → cart clear → emit event) phải atomic. Lỗi ở bước nào → rollback toàn bộ.
 - **Idempotency-Key**: client phải gửi key duy nhất; duplicate POST trong window 10 phút → trả lại Order cũ, không tạo mới.
-- **Stock commit ngay**: Phase 2 không có reservation; commit luôn lúc tạo Order (status `PENDING`/`PAID` tuỳ provider). Nếu payment fail → release stock.
+- **Stock commit ngay**: MVP không có reservation; commit luôn lúc tạo Order. Nếu payment fail hoặc Order timeout/cancel → release stock theo rule của Order context.
 
 ---
 

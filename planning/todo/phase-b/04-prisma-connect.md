@@ -17,6 +17,7 @@ Thiết lập Prisma ORM và inject vào NestJS DI container qua `PrismaService`
 - **Lifecycle hooks** (`OnModuleInit`, `OnModuleDestroy`): connect khi app start, disconnect khi app stop — không leak connection khi app restart.
 - **`/health/ready` endpoint**: phân biệt "app alive" (`/health`) với "app ready to serve traffic" (`/health/ready`). Load balancer dùng `/health/ready` để biết lúc nào route traffic vào — nếu DB chưa connect, `/health/ready` trả lỗi.
 - **`postinstall: prisma generate`**: tự generate Prisma Client sau `npm install` — tránh lỗi "Cannot find module '@prisma/client'" trên môi trường mới.
+- **PrismaModule chỉ cung cấp client dùng chung**: business logic không `new PrismaClient()` ở bất kỳ đâu khác.
 
 ---
 

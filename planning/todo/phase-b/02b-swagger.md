@@ -32,6 +32,7 @@ npm install @nestjs/swagger
 
 ```typescript
 import { Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
@@ -50,13 +51,16 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const port = process.env['PORT'] ?? 3000;
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
   Logger.log(`Application running on port ${port}`, 'Bootstrap');
   Logger.log(`Swagger UI: http://localhost:${port}/docs`, 'Bootstrap');
 }
 bootstrap();
 ```
+
+> Task này kế thừa Task 02, nên từ đây trở đi không dùng `process.env` trực tiếp trong bootstrap nữa.
 
 ---
 

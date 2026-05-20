@@ -16,7 +16,7 @@
 - **UUID cho tất cả ID** (`@default(uuid())`): ID không thể enumerate — attacker không thể đoán `user/1`, `user/2`... để scan. Auto-increment int sẽ leak số lượng user.
 - **Soft delete cho User** (`deletedAt DateTime?`): User đã xóa nhưng có Order lịch sử — nếu hard delete thì mất `userId` trong Order. Soft delete giữ nguyên lịch sử và satisfy yêu cầu GDPR (anonymize thay vì xóa).
 - **`RefreshToken.familyId`**: group các token được sinh từ cùng một phiên login → khi phát hiện token cũ được dùng lại (replay attack), kill toàn bộ family, buộc re-login. Không có `familyId` thì không thể detect replay.
-- **`@@index` trên mọi FK và query field**: tránh full table scan khi lookup `WHERE userId = ?` hay `WHERE token = ?`.
+- **`@@index` trên mọi FK và query field**: tránh full table scan khi lookup `WHERE userId = ?` hay `WHERE tokenHash = ?`.
 
 ---
 
@@ -28,7 +28,7 @@
 | User có `deletedAt DateTime?` | Soft delete bảo tồn Order history, GDPR compliant |
 | Address và RefreshToken có `onDelete: Cascade` | Khi User bị delete, cleanup tự động |
 | Mọi FK và query field phải có `@@index` | Tránh full table scan |
-| `token String @unique` trên RefreshToken | Lookup `WHERE token = ?` phải O(1) |
+| `tokenHash String @unique` trên RefreshToken | Không lưu raw refresh token trong DB |
 
 ---
 
@@ -67,7 +67,6 @@ model User {
   addresses      Address[]
   refreshTokens  RefreshToken[]
 
-  @@index([email])
   @@index([deletedAt])
   @@map("users")
 }
@@ -105,7 +104,7 @@ model RefreshToken {
   id         String    @id @default(uuid())
   userId     String
   familyId   String
-  token      String    @unique
+  tokenHash  String    @unique
   usedAt     DateTime?
   revokedAt  DateTime?
   expiresAt  DateTime
@@ -115,10 +114,11 @@ model RefreshToken {
 
   @@index([userId])
   @@index([familyId])
-  @@index([token])
   @@map("refresh_tokens")
 }
 ```
+
+> Quy tắc business "mỗi user chỉ có 1 địa chỉ mặc định" sẽ được enforce ở service layer; Prisma/PostgreSQL không hỗ trợ partial unique đơn giản ở mức schema như `isDefault = true`.
 
 ### 5. Quy tắc quan trọng cần nhớ
 
@@ -149,11 +149,11 @@ model RefreshToken {
 - **When** kiểm tra schema
 - **Then** có cả 3 field: `familyId` (group session), `usedAt` (mark đã dùng), `revokedAt` (mark đã revoke) — thiếu 1 trong 3 thì replay detection ở Task 13 sẽ không hoạt động
 
-**AC-4: Mọi foreign key và query field đều có index**
+**AC-4: Mọi foreign key và query field quan trọng đều có index hoặc unique constraint**
 
 - **Given** schema đã viết
 - **When** review tất cả `@@index` declarations
-- **Then** `Address.userId`, `RefreshToken.userId`, `RefreshToken.familyId`, `RefreshToken.token` đều có index; `User.email` và `User.deletedAt` cũng có index
+- **Then** `Address.userId`, `RefreshToken.userId`, `RefreshToken.familyId` đều có index; `User.email` và `RefreshToken.tokenHash` được bảo vệ bằng unique constraint; `User.deletedAt` có index
 
 ---
 

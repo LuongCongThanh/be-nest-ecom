@@ -11,6 +11,8 @@
 
 Implement Order system: tạo order atomic (trừ stock + snapshot giá), state machine, cleanup job cho order pending quá 15 phút.
 
+> Order creation phải an toàn với concurrency. Không dùng `count() + 1` để sinh `orderNumber` vì có race condition khi 2 request tạo order cùng lúc.
+
 ---
 
 ## Các bước thực hiện
@@ -56,14 +58,16 @@ model OrderItem {
   id                   String  @id @default(uuid())
   orderId              String
   productId            String
+  variantId            String?
   productNameSnapshot  String
   productSkuSnapshot   String?
   priceSnapshot        Decimal @db.Decimal(12, 2)
   quantity             Int
   lineTotal            Decimal @db.Decimal(12, 2)
 
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
+  order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product         @relation(fields: [productId], references: [id])
+  variant ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
@@ -97,8 +101,8 @@ Tạo `src/modules/order/services/order.service.ts`:
 
 ```typescript
 import { Injectable, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service';
-import { generateOrderId } from '../../../shared/utils';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
   PENDING:    ['PAID', 'CANCELLED'],
@@ -126,7 +130,7 @@ export class OrderService {
     // Lấy cart của user
     const cart = await this.prisma.cart.findUnique({
       where: { userId },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true, variant: true } } },
     });
 
     if (!cart || cart.items.length === 0) {
@@ -147,24 +151,36 @@ export class OrderService {
       // Verify và trừ stock cho từng item
       for (const item of cart.items) {
         const product = await tx.product.findUnique({ where: { id: item.productId } });
-        if (!product || product.stock < item.quantity) {
+        const variant = item.variantId
+          ? await tx.productVariant.findUnique({ where: { id: item.variantId } })
+          : null;
+        const availableStock = variant ? variant.stock : product?.stock;
+
+        if (!product || availableStock == null || availableStock < item.quantity) {
           throw new BadRequestException({
             code: 'INSUFFICIENT_STOCK',
             message: `Product "${item.product.name}" has insufficient stock`,
           });
         }
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
+
+        if (variant) {
+          await tx.productVariant.update({
+            where: { id: item.variantId! },
+            data: { stock: { decrement: item.quantity } },
+          });
+        } else {
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
+        }
       }
 
-      // Tạo order number
-      const orderCount = await tx.order.count();
-      const orderNumber = generateOrderId(orderCount + 1);
+      // Tạo order number không phụ thuộc count() để tránh race condition
+      const orderNumber = `ORD-${new Date().getFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
 
       const subtotal = cart.items.reduce(
-        (sum, item) => sum + Number(item.product.basePrice) * item.quantity,
+        (sum, item) => sum + Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
         0
       );
 
@@ -187,10 +203,12 @@ export class OrderService {
           items: {
             create: cart.items.map(item => ({
               productId: item.productId,
+              variantId: item.variantId,
               productNameSnapshot: item.product.name,
-              priceSnapshot: item.product.basePrice,
+              productSkuSnapshot: item.variant?.sku ?? null,
+              priceSnapshot: item.variant?.price ?? item.product.basePrice,
               quantity: item.quantity,
-              lineTotal: Number(item.product.basePrice) * item.quantity,
+              lineTotal: Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
             })),
           },
           statusLogs: {
@@ -228,6 +246,14 @@ export class OrderService {
         data: { orderId, fromStatus: order.status, toStatus: toStatus as any, actorId, reason },
       }),
     ]);
+  }
+
+  async findMyOrders(userId: string) {
+    return this.prisma.order.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+      include: { items: true, payment: true },
+    });
   }
 
   async cancelExpiredPendingOrders() {
@@ -306,7 +332,7 @@ export class OrderController {
 
   @Get()
   findMyOrders(@CurrentUser('id') userId: string) {
-    return this.prisma.order.findMany({ where: { userId }, orderBy: { createdAt: 'desc' } });
+    return this.orderService.findMyOrders(userId);
   }
 
   @Roles(Role.ADMIN, Role.STAFF)

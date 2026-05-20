@@ -11,6 +11,8 @@
 
 Implement Shopping Cart với guest cart (cookie) và user cart (JWT). Khi guest login → merge cart.
 
+> Vì Phase B đang dùng default-deny global auth, các endpoint cart cần `@Public()` kết hợp với một cơ chế optional auth riêng nếu muốn vừa đọc được JWT user, vừa cho guest vào. Nếu chưa có `OptionalJwtAuthGuard`, hãy implement nó trước khi làm controller này.
+
 ---
 
 ## Các bước thực hiện
@@ -44,6 +46,7 @@ model CartItem {
 
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id])
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
 
   @@unique([cartId, productId, variantId])
   @@index([cartId])
@@ -70,7 +73,7 @@ model User {
 Tạo `src/modules/cart/services/cart.service.ts`:
 
 ```typescript
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../common/prisma/prisma.service';
 
 @Injectable()
@@ -83,7 +86,7 @@ export class CartService {
         where: { userId },
         create: { userId },
         update: {},
-        include: { items: { include: { product: true } } },
+        include: { items: { include: { product: true, variant: true } } },
       });
     }
 
@@ -92,20 +95,38 @@ export class CartService {
         where: { guestId },
         create: { guestId },
         update: {},
-        include: { items: { include: { product: true } } },
+        include: { items: { include: { product: true, variant: true } } },
       });
     }
 
-    throw new Error('userId or guestId required');
+    throw new BadRequestException({ code: 'CART_OWNER_REQUIRED', message: 'userId or guestId required' });
   }
 
   async addItem(cartId: string, productId: string, quantity: number, variantId?: string) {
+    if (quantity <= 0) {
+      throw new BadRequestException({ code: 'INVALID_QUANTITY', message: 'Quantity must be greater than 0' });
+    }
+
     const product = await this.prisma.product.findFirst({
       where: { id: productId, deletedAt: null, isActive: true },
     });
 
     if (!product) {
-      throw new Error('Product not found');
+      throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
+    }
+
+    if (variantId) {
+      const variant = await this.prisma.productVariant.findFirst({
+        where: { id: variantId, productId, isActive: true },
+      });
+      if (!variant) {
+        throw new NotFoundException({ code: 'PRODUCT_VARIANT_NOT_FOUND', message: 'Product variant not found' });
+      }
+      if (variant.stock < quantity) {
+        throw new BadRequestException({ code: 'INSUFFICIENT_STOCK', message: 'Variant has insufficient stock' });
+      }
+    } else if (product.stock < quantity) {
+      throw new BadRequestException({ code: 'INSUFFICIENT_STOCK', message: 'Product has insufficient stock' });
     }
 
     return this.prisma.cartItem.upsert({
@@ -122,31 +143,44 @@ export class CartService {
   }
 
   async updateItem(cartId: string, itemId: string, quantity: number) {
+    const existing = await this.prisma.cartItem.findFirst({
+      where: { id: itemId, cartId },
+    });
+    if (!existing) {
+      throw new NotFoundException({ code: 'CART_ITEM_NOT_FOUND', message: 'Cart item not found' });
+    }
+
     if (quantity <= 0) {
       return this.prisma.cartItem.delete({ where: { id: itemId } });
     }
     return this.prisma.cartItem.update({
-      where: { id: itemId, cartId },
+      where: { id: itemId },
       data: { quantity },
     });
   }
 
   async removeItem(cartId: string, itemId: string) {
-    return this.prisma.cartItem.delete({ where: { id: itemId, cartId } });
+    const existing = await this.prisma.cartItem.findFirst({
+      where: { id: itemId, cartId },
+    });
+    if (!existing) {
+      throw new NotFoundException({ code: 'CART_ITEM_NOT_FOUND', message: 'Cart item not found' });
+    }
+    return this.prisma.cartItem.delete({ where: { id: itemId } });
   }
 
   async calculate(cartId: string) {
     const cart = await this.prisma.cart.findUnique({
       where: { id: cartId },
-      include: { items: { include: { product: true } } },
+      include: { items: { include: { product: true, variant: true } } },
     });
 
     if (!cart) return { subtotal: 0, total: 0, items: [] };
 
     const items = cart.items.map(item => ({
       ...item,
-      unitPrice: Number(item.product.basePrice),
-      lineTotal: Number(item.product.basePrice) * item.quantity,
+      unitPrice: Number(item.variant?.price ?? item.product.basePrice),
+      lineTotal: Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
     }));
 
     const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
@@ -191,6 +225,7 @@ import { CartService } from '../services/cart.service';
 import { CurrentUser, Public } from '../../../common/decorators';
 import { randomUUID } from 'crypto';
 
+@Public()
 @Controller('cart')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
@@ -243,12 +278,19 @@ export class CartController {
     let guestId = req.cookies?.['gsid'];
     if (!guestId) {
       guestId = randomUUID();
-      res.cookie('gsid', guestId, { httpOnly: true, maxAge: 30 * 24 * 60 * 60 * 1000 });
+      res.cookie('gsid', guestId, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
     }
     return guestId;
   }
 }
 ```
+
+> Nếu muốn tránh `process.env` trong controller hoàn toàn, hãy bọc cookie options qua config service hoặc helper riêng.
 
 ### 5. Cài cookie-parser
 

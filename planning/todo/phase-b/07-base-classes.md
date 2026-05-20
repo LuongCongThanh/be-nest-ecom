@@ -1,4 +1,4 @@
-# Task 07 — Base Classes & Shared Utilities
+# Task 07 — Shared Contracts & Utilities
 
 **Phase**: B — Foundation
 **Ước lượng**: 2 giờ
@@ -11,10 +11,9 @@
 
 ## 🎯 Mục tiêu & Ý nghĩa
 
-Tạo `BaseRepository` abstract class và shared utilities. Mục tiêu là **không bao giờ gọi Prisma trực tiếp trong Service**.
+Tạo shared contracts và utilities có giá trị dùng lại ngay, nhưng **không ép generic `BaseRepository` quá sớm**.
 
-- **Repository pattern**: Service không nên biết về Prisma — nó chỉ biết về "lấy user", "tạo product". Khi cần swap ORM sau này, chỉ cần thay repository layer, không đụng service.
-- **Auto soft-delete filter**: `BaseRepository.findById()` và `findMany()` tự thêm `WHERE deletedAt IS NULL` — developer không cần nhớ thêm condition này mỗi lần query. Quên thêm là query lấy cả record đã xóa.
+- **Không over-abstract Prisma**: generic repository kiểu `modelName: string` + `as any` làm mất type-safety vốn là lợi thế lớn nhất của Prisma. Phase B nên giữ repositories mỏng, theo từng aggregate.
 - **`PaginatedResult<T>`**: mọi list endpoint trả cùng shape `{ data, total, page, limit }` — FE không cần handle format khác nhau cho mỗi endpoint.
 - **`slugify` với Vietnamese support**: NestJS không có built-in — URL-safe slug cho product/category name tiếng Việt. Không có util này thì mỗi developer viết lại mỗi kiểu.
 - **`generateOrderId`**: business format `ORD-2026-000001` — không phải UUID ngẫu nhiên, dễ support team tra cứu.
@@ -23,13 +22,11 @@ Tạo `BaseRepository` abstract class và shared utilities. Mục tiêu là **kh
 
 ## 🛠️ Các bước thực hiện
 
-### 1. Tạo BaseRepository
+### 1. Tạo shared pagination contracts
 
-Tạo `src/common/repositories/base.repository.ts`:
+Tạo `src/common/repositories/pagination.types.ts`:
 
 ```typescript
-import { PrismaService } from '../prisma/prisma.service';
-
 export interface PaginationOptions {
   page?: number;
   limit?: number;
@@ -41,58 +38,37 @@ export interface PaginatedResult<T> {
   page: number;
   limit: number;
 }
+```
 
-export abstract class BaseRepository<T> {
-  constructor(
-    protected readonly prisma: PrismaService,
-    protected readonly modelName: string,
-  ) {}
+### 2. Nếu cần repository, viết theo từng aggregate
 
-  async findById(id: string): Promise<T | null> {
-    const model = (this.prisma as any)[this.modelName];
-    return model.findFirst({
+Ví dụ `src/modules/identity/repositories/user.repository.ts`:
+
+```typescript
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '@common/prisma/prisma.service';
+
+@Injectable()
+export class UserRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  findActiveById(id: string) {
+    return this.prisma.user.findFirst({
       where: { id, deletedAt: null },
     });
   }
 
-  async findMany(
-    filter: Record<string, any> = {},
-    pagination: PaginationOptions = {},
-  ): Promise<PaginatedResult<T>> {
-    const { page = 1, limit = 20 } = pagination;
-    const skip = (page - 1) * limit;
-    const model = (this.prisma as any)[this.modelName];
-
-    const where = { ...filter, deletedAt: null };
-    const [data, total] = await Promise.all([
-      model.findMany({ where, skip, take: limit }),
-      model.count({ where }),
-    ]);
-
-    return { data, total, page, limit };
-  }
-
-  async create(data: any): Promise<T> {
-    const model = (this.prisma as any)[this.modelName];
-    return model.create({ data });
-  }
-
-  async update(id: string, data: any): Promise<T> {
-    const model = (this.prisma as any)[this.modelName];
-    return model.update({ where: { id }, data });
-  }
-
-  async softDelete(id: string): Promise<void> {
-    const model = (this.prisma as any)[this.modelName];
-    await model.update({
-      where: { id },
-      data: { deletedAt: new Date() },
+  findByEmail(email: string) {
+    return this.prisma.user.findFirst({
+      where: { email: email.toLowerCase(), deletedAt: null },
     });
   }
 }
 ```
 
-### 2. Tạo shared utilities
+> Mỗi repository chỉ bọc phần query logic có business rule thật sự, ví dụ soft-delete filter, eager loading, pagination. Không tạo một base class chung chỉ để che Prisma API.
+
+### 3. Tạo shared utilities
 
 Tạo `src/shared/utils/slugify.util.ts`:
 
@@ -156,11 +132,11 @@ export * from './id.util';
 - **When** gọi `slugify("Hello  World!!")`
 - **Then** trả `"hello-world"` — nhiều space → 1 gạch, ký tự đặc biệt bị loại
 
-**AC-3: `BaseRepository.findMany` tự filter soft-deleted records**
+**AC-3: Repository theo domain encapsulate được business query rules**
 
 - **Given** DB có 3 User: 2 active, 1 có `deletedAt != null`
-- **When** gọi `userRepository.findMany({})`
-- **Then** chỉ trả 2 User active — User đã soft-delete không xuất hiện trong kết quả
+- **When** gọi `userRepository.findActiveById(...)` hoặc `findByEmail(...)`
+- **Then** repository không trả record đã soft-delete — rule được giữ ở một chỗ
 
 **AC-4: Unit tests của `slugify` pass**
 
@@ -200,7 +176,7 @@ npm run test -- slugify
 
 - Caching trong Repository layer (Redis cache cho findById) → optimization sau khi có performance data
 - Event sourcing / Repository pattern nâng cao → ngoài scope Phase B
-- Generic type safety cho `BaseRepository` (tránh `as any`) → refactor sau khi có đủ models
+- Generic `BaseRepository` kiểu reflection/dynamic model lookup → cố ý không làm ở Phase B
 - `generateOrderId` với sequence từ DB (atomic) → Phase C khi implement Order feature
 - Thêm util cho định dạng ngày tháng, số điện thoại → thêm khi có nhu cầu cụ thể
 

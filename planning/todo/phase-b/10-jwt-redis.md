@@ -14,9 +14,10 @@
 Thiết lập JWT strategy và Redis module — **nền tảng bảo mật cho toàn bộ API**.
 
 - **Stateless access token (JWT)**: server không cần lưu session — horizontal scale không cần sticky session. Trade-off: không thể revoke trước TTL → giải quyết bằng access token TTL ngắn (30 phút) + refresh token.
-- **Stateful refresh token (DB + Redis)**: lưu trong DB để revoke được ngay lập tức (logout, change password, admin suspend). Nếu chỉ dùng JWT thì không thể force logout user.
+- **Stateful refresh token (DB)**: lưu metadata trong DB để revoke được ngay lập tức (logout, change password, admin suspend). Redis được setup từ sớm để dùng cho denylist, rate-limit, cache và các security flows ở phase sau.
 - **HS256 thuật toán ký**: đủ cho Phase B single service. Nếu sau này tách microservices cần RS256 (public key verify). Quyết định này đã cân nhắc.
 - **Payload tối thiểu `{ sub, email, role, iat, exp }`**: không nhét thêm thông tin. Data nhạy cảm không bao giờ vào JWT — token có thể decode client-side mà không cần secret.
+- **Không lưu raw refresh token trong DB**: chỉ lưu hash (`sha256`) của refresh token. Nếu DB bị lộ thì attacker không thể dùng trực tiếp refresh token đã phát hành.
 - **Identity re-check trong validate()**: sau khi decode JWT hợp lệ, vẫn phải check `isActive = true` và `deletedAt IS NULL`. Token còn TTL nhưng user bị suspend → reject ngay.
 
 ---
@@ -168,7 +169,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../../common/prisma/prisma.service';
-import { randomUUID } from 'crypto';
+import { createHash, randomUUID } from 'crypto';
 
 @Injectable()
 export class TokenService {
@@ -177,6 +178,10 @@ export class TokenService {
     private readonly config: ConfigService,
     private readonly prisma: PrismaService,
   ) {}
+
+  private hashRefreshToken(token: string): string {
+    return createHash('sha256').update(token).digest('hex');
+  }
 
   async issueTokenPair(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
@@ -187,13 +192,14 @@ export class TokenService {
 
     const familyId = randomUUID();
     const refreshTokenValue = randomUUID();
+    const refreshTokenHash = this.hashRefreshToken(refreshTokenValue);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
     await this.prisma.refreshToken.create({
       data: {
         userId,
         familyId,
-        token: refreshTokenValue,
+        tokenHash: refreshTokenHash,
         expiresAt,
       },
     });

@@ -4,7 +4,7 @@
 
 - **Task ID**: TASK-302
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (System Reliability)
-- **Phụ thuộc**: TASK-301 (Unit Tests), Phase 1 + Phase 2 Core Features
+- **Phụ thuộc**: TASK-301 (Unit Tests), core features MVP
 - **Trạng thái**: ⏳ Not started
 
 ---

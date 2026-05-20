@@ -17,7 +17,7 @@ Stock là tài sản. Sai 1 đơn vị = mất doanh thu HOẶC overselling (gi�
 
 - **Atomic & versioned**: dùng optimistic locking (`version` column) hoặc `SELECT ... FOR UPDATE` để chống race condition.
 - **Audit trail bắt buộc**: mỗi movement có `reason`, `referenceType`, `referenceId` (ví dụ `OrderItem`, `Inbound`, `Adjustment`).
-- **Phase 2 chỉ commit-on-PAID**: chưa có reservation/soft-lock (sẽ thêm khi launch high-traffic). Tức là Cart KHÔNG giữ stock; Stock chỉ trừ khi Order chuyển `PAID`.
+- **MVP dùng eager deduction tại checkout**: chưa có reservation/soft-lock. Cart KHÔNG giữ stock; Stock trừ ngay trong `POST /orders` cùng transaction tạo Order. Nếu Order timeout/cancel/refund → hoàn stock theo rule của Order context.
 
 ---
 
@@ -28,8 +28,8 @@ Stock là tài sản. Sai 1 đơn vị = mất doanh thu HOẶC overselling (gi�
 | Type         | `delta` | Trigger          | Reference            |
 | :----------- | :------ | :--------------- | :------------------- |
 | `INBOUND`    | `+N`    | Nhập kho từ NCC  | Manual / PO          |
-| `OUTBOUND`   | `-N`    | Order PAID       | OrderItem            |
-| `RETURN`     | `+N`    | Order REFUNDED   | OrderItem            |
+| `OUTBOUND`   | `-N`    | Order created / checkout commit | OrderItem |
+| `RETURN`     | `+N`    | Order cancelled / refunded      | OrderItem |
 | `ADJUSTMENT` | `±N`    | Kiểm kê / hư hao | Manual + reason text |
 
 ### Endpoint
@@ -41,7 +41,7 @@ Stock là tài sản. Sai 1 đơn vị = mất doanh thu HOẶC overselling (gi�
 
 ### Internal API (gọi từ Order service)
 
-- `reserveStock(productId, qty)` — Phase 2: alias của `commit` (không có reservation thực).
+- `reserveStock(productId, qty)` — chỉ là tên compatibility nếu cần; MVP không có reservation thực.
 - `commitStock(productId, qty, orderItemId)` — Atomic decrement với guard `stockQuantity >= qty`.
 - `releaseStock(productId, qty, orderItemId)` — Hoàn lại stock khi cancel/refund.
 
@@ -89,7 +89,7 @@ Stock là tài sản. Sai 1 đơn vị = mất doanh thu HOẶC overselling (gi�
 
 ## 🚫 Out of Scope
 
-- Reservation / soft-lock trong Cart → backlog (post-Phase 2).
+- Reservation / soft-lock trong Cart → backlog (post-MVP).
 - Multi-warehouse → backlog.
 - Inbound PO management → backlog (ERP territory).
 - Notification handling cho low-stock → TASK-226.

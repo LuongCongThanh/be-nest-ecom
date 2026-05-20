@@ -9,7 +9,7 @@
 
 ## Nhiệm vụ
 
-Nâng cấp GlobalExceptionFilter đầy đủ, thêm Request Logging Interceptor với correlation ID, và Response Transform Interceptor để wrap tất cả response về format chuẩn.
+Nâng cấp GlobalExceptionFilter đầy đủ, thêm Request Logging Interceptor với correlation ID, và Response Transform Interceptor để wrap các JSON success response về format chuẩn.
 
 ---
 
@@ -33,6 +33,8 @@ const errorResponse: ErrorResponse = {
 };
 ```
 
+> Không generate `requestId` mới ở đây nếu middleware đã set sẵn; filter chỉ nên đọc lại giá trị hiện có từ request/res header.
+
 ### 2. Tạo Correlation ID Middleware
 
 Tạo `src/common/middleware/correlation-id.middleware.ts`:
@@ -47,6 +49,7 @@ export class CorrelationIdMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     const requestId = (req.headers['x-request-id'] as string) ?? randomUUID();
     req.headers['x-request-id'] = requestId;
+    (req as Request & { requestId?: string }).requestId = requestId;
     res.setHeader('x-request-id', requestId);
     next();
   }
@@ -115,6 +118,9 @@ export class ResponseTransformInterceptor implements NestInterceptor {
         // Nếu data đã có success field (error response) thì không wrap
         if (data && typeof data === 'object' && 'success' in data) return data;
 
+        const response = context.switchToHttp().getResponse();
+        if (response.statusCode === 204) return data;
+
         return {
           success: true,
           data,
@@ -125,6 +131,8 @@ export class ResponseTransformInterceptor implements NestInterceptor {
   }
 }
 ```
+
+> Không dùng response wrapper cho file download, stream, redirect, hoặc `204 No Content`. Với các route đặc biệt này, controller/interceptor nên explicit opt-out.
 
 ### 5. Đăng ký interceptors trong main.ts
 
@@ -142,7 +150,7 @@ app.useGlobalInterceptors(
 
 ## Verify hoàn thành
 
-Gọi bất kỳ API thành công, response phải có format:
+Gọi bất kỳ API JSON thành công, response phải có format:
 ```json
 {
   "success": true,

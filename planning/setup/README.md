@@ -2,6 +2,14 @@
 
 Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước code, middleware xuyên suốt, hạ tầng scale.
 
+`setup/` là nơi giữ **engineering standards có tính enforce**. File ở đây nên trả lời:
+
+- project nên được tổ chức thế nào,
+- bootstrap/config/logging/validation nên theo rule nào,
+- và các cơ chế dùng chung nên được chuẩn hóa tới mức nào.
+
+`setup/` **không nên** trở thành execution checklist theo ngày; phần đó thuộc `../todo/`.
+
 ## 📑 Tài liệu canonical (source of truth)
 
 | File                                     | Nội dung                                        |
@@ -72,3 +80,4 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 - **Single source of truth**: nội dung trùng với `CONVENTIONS.md` / `DATABASE_*.md` → các file canonical là chuẩn. Task chỉ giữ **intent + acceptance criteria + link**.
 - **Task ID giữ nguyên** (101→321) để truy vết lịch sử lên kế hoạch ban đầu. KHÔNG renumber.
 - Với người tự học: bám `../docs/ROADMAP.md`, các task `05-scale-infra` chỉ làm sau khi xong MVP.
+- Khi một lựa chọn implementation còn đang mở, file canonical nên mô tả **default khuyến nghị + trade-off**, không khóa cứng một biến thể quá sớm nếu repo chưa thật sự cần.

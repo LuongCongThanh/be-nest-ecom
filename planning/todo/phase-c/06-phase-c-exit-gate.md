@@ -20,6 +20,7 @@ Test thủ công full flow end-to-end trước khi chuyển Phase D.
 - [ ] **Create order** → `POST /orders` với `Idempotency-Key` → order PENDING, stock bị trừ
 - [ ] **Pay** → `POST /payments/vnpay/create` → lấy URL → thanh toán sandbox → order PENDING → PAID
 - [ ] **View order** → `GET /orders` → thấy order với status PAID
+- [ ] **Guest cart** → thêm item khi chưa login, login xong cart được merge đúng
 
 ## Các edge cases cần test
 
@@ -27,6 +28,7 @@ Test thủ công full flow end-to-end trước khi chuyển Phase D.
 - [ ] Replay Idempotency-Key → trả cùng order, không tạo mới
 - [ ] Replay VNPay webhook → không xử lý 2 lần (idempotent)
 - [ ] Order pending > 15 phút → cron job tự cancel + hoàn stock
+- [ ] Product/category soft-deleted không còn xuất hiện trong public listing
 
 ## Code Quality
 - [ ] `npm run lint` — 0 errors

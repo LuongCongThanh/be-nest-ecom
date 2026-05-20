@@ -13,7 +13,7 @@
 
 ## 🎯 Business Intent
 
-Tích hợp ≥ 1 payment provider end-to-end (Phase 2 mục tiêu: **VNPay** cho thị trường VN; **COD** đơn giản; Stripe optional).
+Tích hợp ≥ 1 payment provider end-to-end (MVP khuyến nghị: **VNPay** cho thị trường VN; **COD** đơn giản; Stripe optional).
 
 - **PCI compliance**: server KHÔNG bao giờ nhận PAN/CVV. Mọi dữ liệu thẻ qua iframe/SDK của provider.
 - **Webhook signature verify**: tuyệt đối không trust webhook chưa verify signature.
@@ -76,7 +76,7 @@ interface PaymentProvider {
 - **Then** Order **không** đổi sang PAID; flag `PAYMENT_AMOUNT_MISMATCH` để Admin review; alert Slack/email
 
 **AC-5: COD flow đơn giản**
-- **Given** Customer chọn provider `cod`
+- **Given** User chọn provider `cod`
 - **When** POST `/orders` với `paymentProvider=cod`
 - **Then** Order tạo với `paymentStatus=UNPAID, status=PENDING`; không gọi external; Admin xác nhận thanh toán sau khi giao (TASK-210 `/admin/orders/:id/pay`)
 
@@ -96,5 +96,5 @@ interface PaymentProvider {
 
 - Saved payment methods (tokenization) → backlog (cần PCI level 1).
 - Recurring/subscription → backlog.
-- Multi-provider routing logic → Phase 3.
-- Currency conversion → Phase 3 TASK-326.
+- Multi-provider routing logic → giai đoạn scale sau.
+- Currency conversion → giai đoạn scale sau, TASK-326.

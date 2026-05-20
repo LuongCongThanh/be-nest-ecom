@@ -1,6 +1,6 @@
 # TASK-112: Quản trị Tiến hóa Cơ sở dữ liệu (Database Evolution Governance)
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
+> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
 > **Intent:** Lệnh tạo và chạy Prisma migration.
 > **Single Source of Truth:** ../COMMANDS.md (Database & Prisma Migrations)
 > **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)

@@ -147,7 +147,7 @@ Dùng khi: chưa có gì, muốn tạo roadmap, chia phases, định nghĩa mile
 /gsd-ship         → deploy hotfix
 ```
 
-**Scenario: Bắt đầu Phase 3 Scale**
+**Scenario: Bắt đầu giai đoạn Scale**
 
 ```
 /gsd-new-milestone      → tạo milestone mới

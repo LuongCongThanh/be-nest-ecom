@@ -42,7 +42,7 @@ Exit Gate này không phải formality — đây là kiểm tra toàn diện đ�
 - [ ] `POST /api/v1/auth/login` đúng credentials → `200` với tokens
 - [ ] `POST /api/v1/auth/login` sai password → `401 INVALID_CREDENTIALS`
 - [ ] `POST /api/v1/auth/login` email không tồn tại → `401 INVALID_CREDENTIALS` (cùng message với sai password)
-- [ ] `POST /api/v1/auth/refresh` với valid RT → cặp token mới, RT cũ có `usedAt != null` trong DB
+- [ ] `POST /api/v1/auth/refresh` với valid RT → cặp token mới, RT cũ có `usedAt != null` trong DB, DB chỉ lưu `tokenHash` chứ không lưu raw token
 - [ ] `POST /api/v1/auth/refresh` với RT đã used → `401 REFRESH_TOKEN_REPLAY_DETECTED`, toàn family bị revoke
 - [ ] `POST /api/v1/auth/logout` → `204`, refresh sau đó fail `401`
 - [ ] `POST /api/v1/auth/logout-all` → `204`, tất cả RT của user bị revoke
@@ -63,6 +63,7 @@ Exit Gate này không phải formality — đây là kiểm tra toàn diện đ�
 - [ ] Response 404 trả JSON, không phải HTML Express default
 - [ ] Response 500 không leak stack trace trong response body
 - [ ] JWT payload không chứa `password`, `phone`, hay PII ngoài `{ sub, email, role, iat, exp }`
+- [ ] Bảng `refresh_tokens` không chứa raw refresh token; chỉ chứa giá trị hash
 - [ ] Login error message giống nhau cho "email không tồn tại" và "sai password"
 
 ### 🧹 Code Quality

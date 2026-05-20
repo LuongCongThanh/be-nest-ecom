@@ -37,7 +37,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ecom_pass}
       POSTGRES_DB: ${POSTGRES_DB:-ecom_db}
     ports:
-      - '5432:5432'
+      - '${POSTGRES_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -51,7 +51,7 @@ services:
     container_name: ecom_redis
     restart: unless-stopped
     ports:
-      - '6379:6379'
+      - '${REDIS_PORT:-6379}:6379'
     volumes:
       - redisdata:/data
     healthcheck:
@@ -71,8 +71,10 @@ volumes:
 POSTGRES_USER=ecom_user
 POSTGRES_PASSWORD=ecom_pass
 POSTGRES_DB=ecom_db
-DATABASE_URL=postgresql://ecom_user:ecom_pass@localhost:5432/ecom_db
-REDIS_URL=redis://localhost:6379
+POSTGRES_PORT=5432
+REDIS_PORT=6379
+DATABASE_URL=postgresql://ecom_user:ecom_pass@localhost:${POSTGRES_PORT}/ecom_db
+REDIS_URL=redis://localhost:${REDIS_PORT}
 ```
 
 ### 3. Chạy containers

@@ -9,7 +9,7 @@
 
 ## Nhiệm vụ
 
-Integrate VNPay: tạo payment URL, xử lý webhook (verify HMAC, idempotent), chuyển order PENDING → PAID atomic.
+Integrate VNPay: tạo payment URL, xử lý IPN/return callback (verify HMAC, idempotent), chuyển order PENDING → PAID atomic.
 
 ---
 
@@ -37,8 +37,6 @@ model Payment {
   updatedAt      DateTime      @updatedAt
 
   order          Order         @relation(fields: [orderId], references: [id])
-
-  @@index([providerTxId])
   @@map("payments")
 }
 ```
@@ -50,7 +48,7 @@ npx prisma migrate dev --name add-payments
 ### 2. Cài packages VNPay
 
 ```bash
-npm install crypto-js qs
+npm install qs
 npm install --save-dev @types/qs
 ```
 
@@ -103,7 +101,7 @@ export class VNPayService {
 
     const date = new Date();
     const createDate = this.formatDate(date);
-    const txnRef = `${order.orderNumber}-${Date.now()}`;
+    const txnRef = order.id;
 
     const params: Record<string, string> = {
       vnp_Version: '2.1.0',
@@ -130,7 +128,7 @@ export class VNPayService {
     return `${this.vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`;
   }
 
-  async handleWebhook(query: Record<string, string>): Promise<{ code: string; message: string }> {
+  async handleIpn(query: Record<string, string>): Promise<{ code: string; message: string }> {
     const { vnp_SecureHash, vnp_TransactionNo, vnp_TxnRef, vnp_ResponseCode, ...rest } = query;
 
     // Verify HMAC
@@ -154,13 +152,15 @@ export class VNPayService {
     }
 
     // Lấy order từ txnRef
-    const orderNumber = vnp_TxnRef.split('-')[0];
     const order = await this.prisma.order.findFirst({
-      where: { orderNumber },
+      where: { id: vnp_TxnRef },
       include: { payment: true },
     });
 
     if (!order) return { code: '01', message: 'Order not found' };
+    if (order.status !== 'PENDING' && vnp_ResponseCode === '00') {
+      return { code: '00', message: 'Order already finalized' };
+    }
 
     if (vnp_ResponseCode === '00') {
       // Payment SUCCESS → PENDING → PAID atomic
@@ -185,6 +185,10 @@ export class VNPayService {
     }
 
     return { code: '00', message: 'Success' };
+  }
+
+  async handleReturn(query: Record<string, string>) {
+    return this.handleIpn(query);
   }
 
   private formatDate(date: Date): string {
@@ -219,16 +223,18 @@ export class PaymentController {
   @Public()
   @Get('vnpay/return')
   handleReturn(@Query() query: Record<string, string>) {
-    return this.vnpayService.handleWebhook(query);
+    return this.vnpayService.handleReturn(query);
   }
 
   @Public()
-  @Post('vnpay/webhook')
-  handleWebhook(@Query() query: Record<string, string>) {
-    return this.vnpayService.handleWebhook(query);
+  @Get('vnpay/ipn')
+  handleIpn(@Query() query: Record<string, string>) {
+    return this.vnpayService.handleIpn(query);
   }
 }
 ```
+
+> Nếu muốn giữ browser return và server-to-server IPN khác nhau, nên để `return` chỉ làm UX redirect/summary, còn `ipn` mới là nguồn chân lý để cập nhật payment state.
 
 ---
 

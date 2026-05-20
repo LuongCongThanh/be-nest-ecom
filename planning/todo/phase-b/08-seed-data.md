@@ -15,6 +15,7 @@ Tạo seed script để populate dữ liệu demo vào DB. Mỗi lần reset DB 
 
 - **Tốc độ phát triển**: Không có seed thì mỗi developer phải tự tạo account admin, tạo category, tạo product thủ công mỗi lần reset DB — mất 15-30 phút. Với seed thì 1 lệnh, 5 giây.
 - **Credentials cố định** (`admin@ecom.dev / Admin@123456`): mọi developer dùng cùng account để test — không bị "tôi không nhớ password tôi đã tạo".
+- **Chỉ dùng cho local dev**: credentials trong seed là dữ liệu tiện lợi cho môi trường local. Không bao giờ reuse cho shared/staging/production.
 - **Hash bcrypt trong seed**: seed tạo user với password đã hash — giống production, test case đúng hơn. Không bao giờ seed plaintext password.
 - **Xóa data cũ trước khi seed** (`deleteMany` theo thứ tự FK): seed có thể chạy nhiều lần mà không bị lỗi duplicate key. Thứ tự xóa quan trọng: phải xóa child table (RefreshToken, Address) trước parent (User).
 

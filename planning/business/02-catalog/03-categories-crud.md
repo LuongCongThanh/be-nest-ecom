@@ -71,4 +71,4 @@ CRUD nội bộ cho `ADMIN`/`STAFF` để vận hành catalog. Public API list/d
 
 - Public catalog list / tree → TASK-202.
 - Bulk import categories (CSV) → backlog.
-- Audit log admin actions → Phase 3 TASK-312.
+- Audit log admin actions → giai đoạn scale sau, TASK-312.

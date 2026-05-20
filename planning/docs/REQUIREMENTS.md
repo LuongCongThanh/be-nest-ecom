@@ -84,7 +84,7 @@ Lý do: đây là chỉ số phản ánh trực tiếp giá trị mà nền tả
 | Actor             | Vai trò                                                   |
 | ----------------- | --------------------------------------------------------- |
 | Guest             | Duyệt catalog, xem chi tiết sản phẩm                      |
-| Customer          | Đăng ký, đăng nhập, quản lý hồ sơ, giỏ hàng, đặt hàng     |
+| User              | Đăng ký, đăng nhập, quản lý hồ sơ, giỏ hàng, đặt hàng     |
 | Admin             | Quản lý users, categories, products, orders               |
 | Staff             | Vận hành đơn hàng, hỗ trợ khách hàng, cập nhật trạng thái |
 | External Services | Payment gateway, email service, file storage, analytics   |
@@ -131,7 +131,7 @@ Lý do: đây là chỉ số phản ánh trực tiếp giá trị mà nền tả
 | Cart Management       | Giữ trạng thái giỏ hàng theo người dùng       | Must Have   |
 | Order Management      | Tạo đơn, theo dõi vòng đời đơn hàng           | Must Have   |
 | Payment Recording     | Ghi nhận tình trạng thanh toán                | Must Have   |
-| Customer Profile      | Địa chỉ, hồ sơ, lịch sử tương tác cơ bản      | Should Have |
+| User Profile          | Địa chỉ, hồ sơ, lịch sử tương tác cơ bản      | Should Have |
 | Reporting & Analytics | Báo cáo đơn hàng, doanh thu, funnel           | Should Have |
 | Promotion Engine      | Coupon, discount, campaign                    | Could Have  |
 
@@ -139,7 +139,7 @@ Lý do: đây là chỉ số phản ánh trực tiếp giá trị mà nền tả
 
 ## 7. End-To-End Business Flows
 
-### 7.1 Customer Purchase Flow
+### 7.1 User Purchase Flow
 
 ```mermaid
 flowchart LR
@@ -204,15 +204,15 @@ flowchart LR
 | ID         | Requirement                                           | Priority  | Acceptance Criteria                              |
 | ---------- | ----------------------------------------------------- | --------- | ------------------------------------------------ |
 | FR-CART-01 | Mỗi customer có tối đa một giỏ hàng đang hoạt động    | Must Have | `userId` là duy nhất trên cart                   |
-| FR-CART-02 | Customer thêm sản phẩm vào giỏ                        | Must Have | Sản phẩm phải tồn tại, active và số lượng hợp lệ |
-| FR-CART-03 | Customer cập nhật số lượng hoặc xóa sản phẩm khỏi giỏ | Must Have | Giỏ hàng phản ánh đúng tổng item sau thao tác    |
+| FR-CART-02 | User thêm sản phẩm vào giỏ                            | Must Have | Sản phẩm phải tồn tại, active và số lượng hợp lệ |
+| FR-CART-03 | User cập nhật số lượng hoặc xóa sản phẩm khỏi giỏ     | Must Have | Giỏ hàng phản ánh đúng tổng item sau thao tác    |
 | FR-CART-04 | Hệ thống kiểm tra tồn kho trước khi tạo đơn           | Must Have | Không cho phép checkout nếu vượt stock khả dụng  |
 
 ### 8.6 Order Management
 
 | ID        | Requirement                                                    | Priority  | Acceptance Criteria                                     |
 | --------- | -------------------------------------------------------------- | --------- | ------------------------------------------------------- |
-| FR-ORD-01 | Customer tạo đơn hàng từ giỏ hàng                              | Must Have | Tạo order, order items và tổng tiền nhất quán           |
+| FR-ORD-01 | User tạo đơn hàng từ giỏ hàng                                  | Must Have | Tạo order, order items và tổng tiền nhất quán           |
 | FR-ORD-02 | Hệ thống lưu snapshot địa chỉ giao hàng tại thời điểm đặt hàng | Must Have | Thay đổi địa chỉ sau này không làm sai dữ liệu order cũ |
 | FR-ORD-03 | Hệ thống sinh `orderNumber` duy nhất                           | Must Have | Không trùng lặp giữa các đơn                            |
 | FR-ORD-04 | Admin hoặc staff cập nhật trạng thái đơn hàng                  | Must Have | Chỉ cho phép chuyển trạng thái hợp lệ                   |
@@ -299,19 +299,19 @@ flowchart LR
 
 ## 12. Release Roadmap By Business Value
 
-### Phase 1: Foundation And Identity *(bounded context: Identity)*
+### Foundation And Identity *(bounded context: Identity)*
 
 - Đặc tả schema chiến lược (snapshot, delete strategy, FK rules) — xem `business/01-identity/CHARTER.md`.
 - Hoàn thiện auth, user lifecycle: register/login, refresh token rotation, change password, account verification & recovery.
 - _Engineering foundation (NestJS setup, config, DB, validation, migrations, conventions) được tách sang `planning/setup/`._
 
-### Phase 2: Revenue Operations *(bounded contexts: Catalog + Commerce)*
+### Revenue Operations *(bounded contexts: Catalog + Commerce)*
 
 - Đặc tả entity Catalog/Commerce (Category, Product, Cart, Order) và triển khai feature ngay sau đó.
 - Hoàn thiện cart, order, payment recording.
 - Bổ sung search, filtering, upload, review, coupon.
 
-### Phase 3: Scale And Optimization
+### Scale And Optimization
 
 - Tăng cường testing, caching, observability, security.
 - Bổ sung analytics, loyalty, recommendation, CI/CD.

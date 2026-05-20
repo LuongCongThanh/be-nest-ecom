@@ -9,7 +9,7 @@
 
 ## Nhiệm vụ
 
-Setup Swagger UI tại `/api`. Mọi endpoint phải có documentation, DTO phải có examples.
+Hoàn thiện Swagger UI tại `/docs`. Mọi endpoint phải có documentation, DTO phải có examples, và phải khớp với response envelope thực tế của project.
 
 ---
 
@@ -18,7 +18,7 @@ Setup Swagger UI tại `/api`. Mọi endpoint phải có documentation, DTO ph�
 ### 1. Cài packages
 
 ```bash
-npm install @nestjs/swagger swagger-ui-express
+npm install @nestjs/swagger
 ```
 
 ### 2. Cấu hình Swagger trong main.ts
@@ -31,8 +31,10 @@ async function bootstrap() {
 
   // ... setup khác
 
+  const configService = app.get(ConfigService);
+
   // Swagger — chỉ enable khi không phải production
-  if (process.env.NODE_ENV !== 'production') {
+  if (configService.get<string>('app.nodeEnv') !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('E-Commerce API')
       .setDescription('NestJS E-Commerce Backend API Documentation')
@@ -48,14 +50,14 @@ async function bootstrap() {
       .build();
 
     const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api', app, document, {
+    SwaggerModule.setup('docs', app, document, {
       swaggerOptions: {
         persistAuthorization: true,
       },
     });
   }
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(configService.get<number>('app.port') ?? 3000);
 }
 ```
 
@@ -83,7 +85,7 @@ export class AuthController {
 }
 ```
 
-### 4. Thêm ApiProperty vào DTOs
+### 4. Thêm ApiProperty vào DTOs và response examples
 
 Ví dụ RegisterDto:
 
@@ -111,6 +113,8 @@ export class RegisterDto {
 
 Thêm tương tự vào **tất cả** DTO files.
 
+> Vì project đã có response envelope `{ success, data, timestamp }`, nên Swagger examples cũng nên phản ánh đúng shape này thay vì chỉ mô tả raw payload.
+
 ### 5. Thêm @ApiBearerAuth cho protected routes
 
 ```typescript
@@ -123,7 +127,7 @@ export class UsersController { ... }
 
 ## Verify hoàn thành
 
-Mở browser: `http://localhost:3000/api`
+Mở browser: `http://localhost:3000/docs`
 
 - [ ] Swagger UI hiển thị
 - [ ] Tất cả endpoints có documentation

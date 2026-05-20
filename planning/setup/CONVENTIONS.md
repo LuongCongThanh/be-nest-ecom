@@ -64,6 +64,7 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 
 - Tất cả endpoint phải có `@ApiTags`, `@ApiOperation`, và `@ApiResponse`.
 - DTO phải dùng `@ApiProperty` để mô tả ý nghĩa và ví dụ dữ liệu.
+- Swagger UI cho local/dev nên mount tại **`/docs`** để tách khỏi business API prefix.
 
 ---
 
@@ -77,7 +78,7 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 ## ⚙️ 6. Quản lý Môi trường (Environment Management)
 
 1.  **ConfigService**: Tuyệt đối không sử dụng `process.env` trực tiếp trong code. Luôn truy cập thông qua `ConfigService`.
-2.  **Environment Validation**: Mọi biến môi trường phải được xác thực qua **`class-validator` `EnvSchema` class** trong `ConfigModule` (callback `validate`) để đảm bảo ứng dụng không khởi động nếu thiếu cấu hình quan trọng. CẤM dùng Zod/Joi để tránh trộn 2 lib validation.
+2.  **Environment Validation**: Mọi biến môi trường phải được xác thực tập trung trong `src/config/**` để fail-fast khi boot. Có thể dùng **Joi** hoặc **schema/class-based validation**; điều quan trọng là chỉ có **một** cơ chế validation được chuẩn hóa trong repo tại một thời điểm, không trộn nhiều kiểu song song.
 3.  **`.env.example`**: Luôn cập nhật file này khi thêm biến môi trường mới.
 
 ---
@@ -109,6 +110,7 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 5.  **Row-level lock cho stock/inventory**: dùng `prisma.$queryRaw` `SELECT ... FOR UPDATE` hoặc atomic update `where: { stockQty: { gte: qty } }` trong cùng `$transaction`. Không bao giờ read-then-write rời rạc khi đụng tồn kho.
 6.  **Pagination — offset only (MVP)**: mọi list endpoint dùng `PaginationDto { page, limit }` ở `src/shared/dto/`. Response wrap `PaginatedResponse<T> { data, meta: { page, limit, total, totalPages } }`. `limit` default 20, max 100. CẤM endpoint tự cook params (`?p=`, `?per_page=`, ...). Migrate cursor sau khi dataset >50K record + có tracing đo thật.
 7.  **API Base Path & Versioning**: `app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })`. Mọi business endpoint dưới `/api/v1/*`. Healthcheck/metrics ở root (convention K8s/Prometheus probe). Khi cần v2 → thêm prefix mới, KHÔNG sửa v1 in-place. CẤM versioning qua header hoặc query param.
+8.  **Search strategy theo phase**: với MVP, ưu tiên query/filter/text search đơn giản nhưng đúng hành vi và dễ bảo trì. Postgres FTS/GiN/`unaccent` là hướng nâng cấp tốt khi đã có nhu cầu rõ ràng về relevance, tiếng Việt không dấu, hoặc performance; đừng khóa cứng FTS như điều kiện để catalog đầu tiên có thể ship.
 
 ---
 
@@ -146,10 +148,11 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 | `updatedAt` | DateTime | Tự động cập nhật khi save |
 | `deletedAt` | DateTime? | Soft-delete; query mặc định phải lọc `deletedAt IS NULL` |
 
-### BaseRepository pattern
+### Repository pattern
 
-- Mọi repository concrete kế thừa `BaseRepository<T>` với các method chuẩn: `findById`, `findMany`, `create`, `update`, `softDelete`.
-- Cấm dùng `prisma` trực tiếp trong service nếu có repository tương ứng — đảm bảo có thể mock cho unit test.
+- Ưu tiên **repository theo từng aggregate/bounded context** khi module có query logic đủ phức tạp để cần tách lớp data access.
+- Không bắt buộc mọi module phải kế thừa một `BaseRepository<T>` generic. Tránh abstraction dùng nhiều `any`, dynamic model lookup, hoặc ép tất cả model vào cùng một contract nếu điều đó làm giảm type-safety của Prisma.
+- Với module rất mỏng, service có thể dùng Prisma trực tiếp nếu vẫn giữ code rõ ràng, dễ test, và không lặp query logic. Khi query logic bắt đầu phình ra, tách repository concrete cho module đó.
 
 ### Shared utilities (đặt tại `src/shared/utils/`)
 
@@ -161,7 +164,7 @@ Tài liệu này định nghĩa các tiêu chuẩn lập trình, mẫu tài li�
 
 ## 🚦 11b. Rate Limiting (Cross-cutting)
 
-> Lib: `@nestjs/throttler` memory storage (MVP). Migrate Redis storage Phase 3 cho multi-instance.
+> Lib: `@nestjs/throttler` memory storage (MVP). Migrate Redis storage ở giai đoạn scale sau cho multi-instance.
 
 ### Tier defaults (req/phút)
 
@@ -275,6 +278,7 @@ app.useGlobalPipes(new ValidationPipe({
 
 - Mã `code` (UPPER_SNAKE) bắt buộc — frontend xử lý dựa trên `code`, không parse `message`.
 - `requestId` lấy từ correlation ID middleware (§7.1).
+- Validation error chuẩn dùng **`422 VALIDATION_FAILED`**. Route `204 No Content`, stream, file download, redirect không bị bọc vào success envelope JSON.
 
 ### Custom validators chuẩn
 
@@ -295,7 +299,7 @@ app.useGlobalPipes(new ValidationPipe({
 | Endpoint | Mục đích | Check gì |
 |----------|----------|----------|
 | `GET /health/live` | Liveness probe | App có chạy không. **KHÔNG check downstream.** Trả 200 nếu Nest respond được. |
-| `GET /health/ready` | Readiness probe | App ready phục vụ traffic. Check DB + (Phase 3: Redis, S3, email service). Trả 503 nếu downstream fail. |
+| `GET /health/ready` | Readiness probe | App ready phục vụ traffic. Check DB + (giai đoạn sau: Redis, S3, email service). Trả 503 nếu downstream fail. |
 | `GET /health` | Alias cho `/health/ready` | Convention cũ — giữ để các tool legacy không break. |
 
 ### Phân biệt liveness vs readiness

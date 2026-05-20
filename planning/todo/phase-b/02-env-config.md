@@ -15,7 +15,7 @@ Nguyên tắc: **app phải crash ngay khi khởi động nếu thiếu biến m
 
 - **Fail-fast at boot**: lỗi config xuất hiện ngay khi deploy, không phải 30 phút sau khi user gọi API đầu tiên.
 - **Joi validation schema**: đặt contract rõ ràng — developer mới biết chính xác cần set biến gì, không phải đọc toàn bộ codebase để tìm `process.env.X`.
-- **Không bao giờ dùng `process.env` trực tiếp trong code**: toàn bộ config truy cập qua `ConfigService` được inject — testable, mockable, type-safe.
+- **Không dùng `process.env` trực tiếp ngoài `src/config/**`**: toàn bộ runtime config truy cập qua `ConfigService` được inject — testable, mockable, type-safe.
 - **JWT_SECRET min 32 chars**: Joi enforce luôn — tránh deploy với secret yếu.
 
 > Pattern này ngăn class lỗi "missing env in production" — một trong những lý do outage phổ biến nhất khi deploy lần đầu.
@@ -86,7 +86,7 @@ export class AppModule {}
 > **Tại sao dùng alias (`@config/`, `@health/`) thay vì relative import?**
 > Relative import (`'./config/env.validation'`) hoạt động nhưng dễ vỡ: khi move file sang thư mục khác, phải tìm và sửa tất cả nơi import nó. Alias được khai báo một lần trong `tsconfig.json` — rename thư mục không làm vỡ import nào. Alias cũng dễ đọc hơn trong file sâu nhiều tầng thư mục.
 
-### 4. Tạo typed config service (optional nhưng nên có)
+### 4. Tạo typed config factories (nên có)
 
 Tạo `src/config/app.config.ts`:
 
@@ -103,6 +103,25 @@ export const jwtConfig = registerAs('jwt', () => ({
   expiresIn: process.env.JWT_EXPIRES_IN ?? '30m',
   refreshExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN ?? '7d',
 }));
+```
+
+> `process.env` chỉ được phép xuất hiện trong `src/config/**` như ở file này. Các nơi khác phải đọc qua `ConfigService`.
+
+### 5. Nạp config factories vào ConfigModule
+
+Mở `src/app.module.ts`:
+
+```typescript
+import { appConfig, jwtConfig } from '@config/app.config';
+
+ConfigModule.forRoot({
+  isGlobal: true,
+  load: [appConfig, jwtConfig],
+  validationSchema: envValidationSchema,
+  validationOptions: {
+    abortEarly: true,
+  },
+});
 ```
 
 ---
@@ -127,7 +146,7 @@ export const jwtConfig = registerAs('jwt', () => ({
 - **When** chạy `npm run start:dev`
 - **Then** app crash với message liên quan đến độ dài JWT_SECRET tối thiểu
 
-**AC-4: `process.env` không được dùng trực tiếp trong code**
+**AC-4: `process.env` không được dùng trực tiếp ngoài `src/config/`**
 
 - **Given** codebase sau Task 02
 - **When** grep toàn bộ `src/` tìm `process.env`

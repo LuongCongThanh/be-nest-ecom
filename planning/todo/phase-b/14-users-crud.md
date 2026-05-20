@@ -20,7 +20,7 @@ Các nguyên tắc quan trọng:
 - **`password` field không bao giờ được trả về response**: dùng `select` field hoặc destructure để exclude. Một developer quên điều này là lỗi security nghiêm trọng.
 - **Change password phải revoke tất cả refresh tokens**: sau khi đổi password, mọi phiên cũ đều invalid — attacker đang giữ token cũ bị log out. Không làm điều này thì old session vẫn active.
 - **Soft delete, không hard delete**: Admin xóa user vẫn giữ `deletedAt`, không xóa record — Order history của user đó vẫn truy vấn được.
-- **Admin không được tự thay đổi role của chính mình**: prevent privilege escalation.
+- **Admin không được tự xóa chính mình qua endpoint quản trị**: tránh tự khóa tài khoản admin cuối cùng của hệ thống.
 
 ---
 
@@ -189,6 +189,9 @@ export class UserService {
   }
 }
 ```
+
+> Nên bổ sung guard ở service/controller để chặn admin tự xóa chính mình:
+> `if (currentUserId === userId) throw new ForbiddenException(...)`
 
 ### 3. Tạo UsersController
 

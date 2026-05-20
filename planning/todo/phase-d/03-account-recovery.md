@@ -9,7 +9,7 @@
 
 ## Nhiệm vụ
 
-Implement email verification flow và forgot password flow với one-time token (1 giờ expiry).
+Implement email verification flow và forgot password flow với one-time token. `PASSWORD_RESET` hết hạn sau 1 giờ; `EMAIL_VERIFICATION` nên dài hơn, ví dụ 24 giờ.
 
 ---
 
@@ -33,15 +33,13 @@ enum TokenType {
 model EmailToken {
   id        String    @id @default(uuid())
   userId    String
-  token     String    @unique
+  tokenHash String    @unique
   type      TokenType
   usedAt    DateTime?
   expiresAt DateTime
   createdAt DateTime  @default(now())
 
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([token])
   @@index([userId])
   @@map("email_tokens")
 }
@@ -63,6 +61,8 @@ APP_URL=http://localhost:3000
 ```
 
 Dùng Mailtrap (https://mailtrap.io) để nhận email trong dev — miễn phí.
+
+> Giống refresh token ở Phase B, không lưu raw email token trong DB. Chỉ lưu hash của token; raw token chỉ đi qua email link gửi cho user.
 
 ### 4. Tạo MailService
 
@@ -123,6 +123,25 @@ export class MailService {
 ### 5. Thêm endpoints vào AuthController
 
 ```typescript
+// Verify email
+@Public()
+@Get('verify-email')
+async verifyEmail(@Query('token') token: string) {
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const record = await this.prisma.emailToken.findUnique({ where: { tokenHash } });
+
+  if (!record || record.usedAt || record.expiresAt < new Date() || record.type !== 'EMAIL_VERIFICATION') {
+    throw new BadRequestException({ code: 'INVALID_VERIFICATION_TOKEN', message: 'Invalid or expired token' });
+  }
+
+  await this.prisma.$transaction([
+    this.prisma.user.update({ where: { id: record.userId }, data: { emailVerified: true } }),
+    this.prisma.emailToken.update({ where: { id: record.id }, data: { usedAt: new Date() } }),
+  ]);
+
+  return { message: 'Email verified successfully' };
+}
+
 // Forgot password
 @Public()
 @Post('forgot-password')
@@ -134,10 +153,11 @@ async forgotPassword(@Body() body: { email: string }) {
   // Không leak email existence — luôn trả 200
   if (user) {
     const token = randomUUID();
+    const tokenHash = createHash('sha256').update(token).digest('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 giờ
 
     await this.prisma.emailToken.create({
-      data: { userId: user.id, token, type: 'PASSWORD_RESET', expiresAt }
+      data: { userId: user.id, tokenHash, type: 'PASSWORD_RESET', expiresAt }
     });
 
     // Fire-and-forget
@@ -151,7 +171,8 @@ async forgotPassword(@Body() body: { email: string }) {
 @Public()
 @Post('reset-password')
 async resetPassword(@Body() body: { token: string; newPassword: string }) {
-  const record = await this.prisma.emailToken.findUnique({ where: { token: body.token } });
+  const tokenHash = createHash('sha256').update(body.token).digest('hex');
+  const record = await this.prisma.emailToken.findUnique({ where: { tokenHash } });
 
   if (!record || record.usedAt || record.expiresAt < new Date() || record.type !== 'PASSWORD_RESET') {
     throw new BadRequestException({ code: 'INVALID_RESET_TOKEN', message: 'Invalid or expired token' });
@@ -169,14 +190,17 @@ async resetPassword(@Body() body: { token: string; newPassword: string }) {
 }
 ```
 
+> Register flow ở Phase B chưa gửi verification mail. Hãy bổ sung bước tạo `EMAIL_VERIFICATION` token sau khi register thành công, rồi gọi `mailService.sendVerificationEmail(...)`.
+
 ---
 
 ## Verify hoàn thành
 
 1. Đăng ký → check Mailtrap → nhận email verify
-2. Gọi `POST /auth/forgot-password` với email hợp lệ → Mailtrap nhận email reset
-3. Lấy token từ email → `POST /auth/reset-password` → đăng nhập với password mới thành công
-4. Dùng token đã used → `400 INVALID_RESET_TOKEN`
+2. Click link verify hoặc gọi `GET /auth/verify-email?token=...` → `emailVerified = true`
+3. Gọi `POST /auth/forgot-password` với email hợp lệ → Mailtrap nhận email reset
+4. Lấy token từ email → `POST /auth/reset-password` → đăng nhập với password mới thành công
+5. Dùng token đã used → `400 INVALID_RESET_TOKEN`
 
 ---
 

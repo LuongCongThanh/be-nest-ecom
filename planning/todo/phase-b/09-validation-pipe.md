@@ -66,7 +66,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
-import { ErrorResponse } from '../interfaces/error-response.interface';
+import { ErrorResponse, FieldError } from '../interfaces/error-response.interface';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -90,11 +90,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         code = exceptionResponse.code ?? this.statusToCode(statusCode);
         message = exceptionResponse.message ?? exception.message;
         if (Array.isArray(exceptionResponse.message)) {
-          // class-validator trả array message
-          errors = exceptionResponse.message.map((msg: string) => ({
-            field: msg.split(' ')[0],
-            message: msg,
-          }));
+          // class-validator hoặc exceptionFactory có thể trả array message/object
+          errors = exceptionResponse.message.map((item: string | FieldError) => {
+            if (typeof item === 'string') {
+              return {
+                field: item.split(' ')[0],
+                message: item,
+              };
+            }
+
+            return item;
+          });
           message = 'Validation failed';
           code = 'VALIDATION_FAILED';
         }
@@ -149,7 +155,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
 ```typescript
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpStatus, UnprocessableEntityException, ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 
@@ -163,17 +170,27 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,              // drop fields không có decorator
       forbidNonWhitelisted: true,   // reject request có field thừa
+      errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
       transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
+      exceptionFactory: (validationErrors) =>
+        new UnprocessableEntityException({
+          code: 'VALIDATION_FAILED',
+          message: validationErrors.map((error) => ({
+            field: error.property,
+            message: Object.values(error.constraints ?? {})[0] ?? 'Invalid value',
+          })),
+        }),
     }),
   );
 
   // Exception filter — format lỗi chuẩn
   app.useGlobalFilters(new GlobalExceptionFilter());
 
-  const port = process.env.PORT ?? 3000;
+  const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
 }
 bootstrap();
@@ -193,7 +210,7 @@ bootstrap();
 
 - **Given** DTO chỉ có `email` và `password`
 - **When** gửi body có thêm field `adminFlag: true`
-- **Then** response `400` hoặc field `adminFlag` bị drop hoàn toàn khỏi data — mass assignment prevented
+- **Then** response `422 VALIDATION_FAILED` — mass assignment prevented
 
 **AC-3: 404 trả JSON đúng format, không phải HTML**
 

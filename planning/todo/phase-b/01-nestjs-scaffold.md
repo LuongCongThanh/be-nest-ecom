@@ -34,12 +34,13 @@ nest new . --strict --skip-git --package-manager npm
 
 > NestJS CLI sẽ hỏi tên package — nhập `be-nest-ecom`.
 
-### 2. Tạo cấu trúc thư mục domain-driven
+### 2. Tạo cấu trúc thư mục nền
 
 ```powershell
-mkdir src/common, src/config, src/modules, src/shared, src/migrations
+mkdir src/common, src/config, src/modules, src/shared
 mkdir src/common/filters, src/common/guards, src/common/decorators
 mkdir src/common/interceptors, src/common/pipes, src/common/repositories
+mkdir src/health
 ```
 
 Cấu trúc cuối cùng:
@@ -48,8 +49,8 @@ src/
   common/           ← filters, guards, decorators, interceptors, pipes, repositories
   config/           ← ConfigModule, validation schema (Task 02)
   modules/          ← domain modules: identity/, catalog/, cart/, order/, payment/
-  migrations/       ← Prisma migration files (Task 06)
   shared/           ← utils, constants, types dùng chung
+  health/           ← health endpoints tách riêng để giữ bootstrap gọn
   app.module.ts
   main.ts
 ```
@@ -87,7 +88,8 @@ Thêm vào `tsconfig.json` (phần `compilerOptions`):
       "@common/*": ["src/common/*"],
       "@modules/*": ["src/modules/*"],
       "@shared/*": ["src/shared/*"],
-      "@config/*": ["src/config/*"]
+      "@config/*": ["src/config/*"],
+      "@health/*": ["src/health/*"]
     }
   }
 }
@@ -107,10 +109,8 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1', { exclude: ['health'] });
 
-  // CORS sẽ được cấu hình đúng ở Task 02 sau khi có ConfigService.
-  // CONVENTIONS §6.1 cấm dùng process.env trực tiếp trong code.
-
-  const port = process.env.PORT ?? 3000;
+  // Task 02 sẽ thay bootstrap port bằng ConfigService.
+  const port = 3000;
   await app.listen(port);
   Logger.log(`Application running on port ${port}`, 'Bootstrap');
 }

@@ -88,12 +88,12 @@ Cân bằng UX (không bắt user re-login mỗi 30 phút) và bảo mật (acce
 - **When** gọi API bảo vệ bằng AT đó
 - **Then** request vẫn pass (chấp nhận trade-off vì AT stateless). Sau khi AT hết hạn, không refresh được → user phải re-login.
 
-> Ghi chú AC-5: nếu muốn revoke AT tức thì → cần introspection endpoint hoặc token blacklist Redis (Phase 3 — TASK-307).
+> Ghi chú AC-5: nếu muốn revoke AT tức thì → cần introspection endpoint hoặc token blacklist Redis (giai đoạn scale sau — TASK-307).
 
 ---
 
 ## 🚫 Out of Scope
 
-- Access token revocation tức thì (blacklist) → Phase 3.
+- Access token revocation tức thì (blacklist) → giai đoạn scale sau.
 - Device fingerprinting / device list UI → backlog.
 - Session sharing across multiple browser tabs (SSO) → ngoài phạm vi.

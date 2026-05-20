@@ -108,6 +108,6 @@ totalAmount   = subtotal - discountValue + shippingFee + tax
 
 ## 🚫 Out of Scope
 
-- Multi-currency → Phase 3 TASK-326.
+- Multi-currency → giai đoạn scale sau, TASK-326.
 - Per-region tax rules → backlog (BRD §14 open).
-- Loyalty points redemption → Phase 3 TASK-303.
+- Loyalty points redemption → giai đoạn scale sau, TASK-303.

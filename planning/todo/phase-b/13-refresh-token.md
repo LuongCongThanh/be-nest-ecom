@@ -16,6 +16,7 @@ Implement refresh token rotation với replay detection. Cân bằng giữa UX (
 - **Rotation**: mỗi lần `POST /auth/refresh` → sinh cặp token mới, token cũ bị mark `usedAt`. Không reuse token cũ — giảm window nếu token bị intercepted.
 - **Replay detection**: nếu token đã có `usedAt != null` được dùng lại → **kill toàn bộ token family** và buộc re-login. Logic: nếu token cũ được dùng lại, attacker đã chiếm token và cả user lẫn attacker đang dùng — kill hết để force re-auth an toàn.
 - **`familyId` group**: tất cả refresh token sinh ra từ cùng một phiên login (chain rotate) có cùng `familyId`. Kill family = đăng xuất phiên đó khỏi mọi thiết bị đang rotate trong chain đó.
+- **Hash-based storage**: DB chỉ lưu `tokenHash`, còn raw refresh token chỉ tồn tại ở client. Lookup được thực hiện bằng cách hash token nhận vào rồi query theo hash đó.
 - **Revocation triggers**: logout (chỉ token hiện tại), logout-all (toàn bộ token của user), change-password (toàn bộ), admin suspend (toàn bộ).
 - **Access token vẫn hợp lệ đến hết TTL**: khi RT bị revoke, AT còn TTL vẫn pass — đây là trade-off chấp nhận được. Revoke AT tức thì cần blacklist Redis (Phase D).
 
@@ -27,7 +28,7 @@ Implement refresh token rotation với replay detection. Cân bằng giữa UX (
 
 | # | Bước | Hành động | Lỗi có thể trả về |
 | :- | :--- | :--- | :--- |
-| 1 | Lookup | Tìm RT trong DB theo `token` value | `401 INVALID_REFRESH_TOKEN` |
+| 1 | Lookup | Hash RT nhận vào rồi tìm trong DB theo `tokenHash` | `401 INVALID_REFRESH_TOKEN` |
 | 2 | Replay check | `usedAt != null`? → kill toàn family | `401 REFRESH_TOKEN_REPLAY_DETECTED` |
 | 3 | Revoke check | `revokedAt != null`? | `401 REFRESH_TOKEN_REVOKED` |
 | 4 | Expiry check | `expiresAt < now`? | `401 REFRESH_TOKEN_EXPIRED` |
@@ -68,78 +69,78 @@ Mở `src/modules/identity/services/token.service.ts`, thêm:
 
 ```typescript
 async refresh(refreshTokenValue: string) {
-  // Tìm token trong DB
-  const tokenRecord = await this.prisma.refreshToken.findUnique({
-    where: { token: refreshTokenValue },
-    include: { user: true },
+  const tokenHash = this.hashRefreshToken(refreshTokenValue);
+
+  return this.prisma.$transaction(async (tx) => {
+    const tokenRecord = await tx.refreshToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (!tokenRecord) {
+      throw new UnauthorizedException({
+        code: 'INVALID_REFRESH_TOKEN',
+        message: 'Refresh token not found',
+      });
+    }
+
+    if (tokenRecord.usedAt !== null) {
+      await tx.refreshToken.updateMany({
+        where: { familyId: tokenRecord.familyId },
+        data: { revokedAt: new Date() },
+      });
+      throw new UnauthorizedException({
+        code: 'REFRESH_TOKEN_REPLAY_DETECTED',
+        message: 'Token reuse detected. All sessions revoked.',
+      });
+    }
+
+    if (tokenRecord.revokedAt !== null) {
+      throw new UnauthorizedException({
+        code: 'REFRESH_TOKEN_REVOKED',
+        message: 'Refresh token has been revoked',
+      });
+    }
+
+    if (tokenRecord.expiresAt < new Date()) {
+      throw new UnauthorizedException({
+        code: 'REFRESH_TOKEN_EXPIRED',
+        message: 'Refresh token has expired',
+      });
+    }
+
+    await tx.refreshToken.update({
+      where: { id: tokenRecord.id },
+      data: { usedAt: new Date() },
+    });
+
+    const { user } = tokenRecord;
+    const newRefreshTokenValue = randomUUID();
+    const newRefreshTokenHash = this.hashRefreshToken(newRefreshTokenValue);
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    await tx.refreshToken.create({
+      data: {
+        userId: user.id,
+        familyId: tokenRecord.familyId,
+        tokenHash: newRefreshTokenHash,
+        expiresAt,
+      },
+    });
+
+    const accessToken = this.jwt.sign(
+      { sub: user.id, email: user.email, role: user.role },
+      { expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m' },
+    );
+
+    return { accessToken, refreshToken: newRefreshTokenValue };
   });
-
-  if (!tokenRecord) {
-    throw new UnauthorizedException({
-      code: 'INVALID_REFRESH_TOKEN',
-      message: 'Refresh token not found',
-    });
-  }
-
-  // Token đã dùng rồi → replay attack → kill toàn family
-  if (tokenRecord.usedAt !== null) {
-    await this.prisma.refreshToken.updateMany({
-      where: { familyId: tokenRecord.familyId },
-      data: { revokedAt: new Date() },
-    });
-    throw new UnauthorizedException({
-      code: 'REFRESH_TOKEN_REPLAY_DETECTED',
-      message: 'Token reuse detected. All sessions revoked.',
-    });
-  }
-
-  // Token đã bị revoke
-  if (tokenRecord.revokedAt !== null) {
-    throw new UnauthorizedException({
-      code: 'REFRESH_TOKEN_REVOKED',
-      message: 'Refresh token has been revoked',
-    });
-  }
-
-  // Token hết hạn
-  if (tokenRecord.expiresAt < new Date()) {
-    throw new UnauthorizedException({
-      code: 'REFRESH_TOKEN_EXPIRED',
-      message: 'Refresh token has expired',
-    });
-  }
-
-  // Mark token cũ là used
-  await this.prisma.refreshToken.update({
-    where: { id: tokenRecord.id },
-    data: { usedAt: new Date() },
-  });
-
-  // Tạo cặp token mới với cùng familyId
-  const { user } = tokenRecord;
-  const newRefreshTokenValue = randomUUID();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-  await this.prisma.refreshToken.create({
-    data: {
-      userId: user.id,
-      familyId: tokenRecord.familyId,  // cùng family
-      token: newRefreshTokenValue,
-      expiresAt,
-    },
-  });
-
-  const accessToken = this.jwt.sign(
-    { sub: user.id, email: user.email, role: user.role },
-    { expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m' },
-  );
-
-  return { accessToken, refreshToken: newRefreshTokenValue };
 }
 
-async logout(refreshTokenValue: string): Promise<void> {
+async logout(userId: string, refreshTokenValue: string): Promise<void> {
+  const tokenHash = this.hashRefreshToken(refreshTokenValue);
   await this.prisma.refreshToken.updateMany({
-    where: { token: refreshTokenValue },
+    where: { tokenHash, userId },
     data: { revokedAt: new Date() },
   });
 }
@@ -169,8 +170,8 @@ async refresh(@Body() dto: RefreshDto) {
 
 @Post('logout')
 @HttpCode(HttpStatus.NO_CONTENT)
-async logout(@Body() dto: RefreshDto) {
-  await this.tokenService.logout(dto.refreshToken);
+async logout(@CurrentUser('id') userId: string, @Body() dto: RefreshDto) {
+  await this.tokenService.logout(userId, dto.refreshToken);
 }
 
 @Post('logout-all')
@@ -196,7 +197,7 @@ async logoutAll(@CurrentUser('id') userId: string) {
 - **When** attacker thử dùng lại RT_1
 - **Then** response `401 REFRESH_TOKEN_REPLAY_DETECTED`; cả RT_1, RT_2 và mọi token cùng family đều có `revokedAt != null`; user buộc re-login
 
-**AC-3: Logout revoke token, refresh sau fail**
+**AC-3: Logout chỉ revoke token thuộc phiên hiện tại của chính user đó**
 
 - **Given** user có token hợp lệ
 - **When** gọi `POST /auth/logout` với refresh token

@@ -9,7 +9,9 @@
 
 ## Nhiệm vụ
 
-Thêm `Category`, `Product`, `ProductVariant` models vào `prisma/schema.prisma`. Sau đó generate migration.
+Thêm `Category`, `Product`, `ProductVariant`, `ProductImage` models vào `prisma/schema.prisma`. Sau đó generate migration.
+
+> Quy ước Phase C: catalog read là public, write là admin/staff; soft delete được dùng cho `Category` và `Product`. Inventory có thể nằm ở `Product.stock` hoặc `ProductVariant.stock`, nhưng các task sau phải dùng cùng một rule thống nhất.
 
 ---
 
@@ -36,7 +38,6 @@ model Category {
   products    Product[]
 
   @@index([parentId])
-  @@index([slug])
   @@map("categories")
 }
 ```
@@ -62,7 +63,6 @@ model Product {
   images      ProductImage[]
 
   @@index([categoryId])
-  @@index([slug])
   @@index([deletedAt])
   @@map("products")
 }
@@ -115,6 +115,8 @@ model ProductImage {
 npx prisma migrate dev --name add-catalog
 npx prisma generate
 ```
+
+> `slug` và `sku` đã là unique constraint, nên không cần thêm `@@index` lặp lại cho chính các field này.
 
 ---
 

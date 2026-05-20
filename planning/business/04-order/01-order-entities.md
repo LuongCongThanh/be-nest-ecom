@@ -29,7 +29,7 @@ Order là **tài liệu pháp lý** ràng buộc khách hàng và nhà bán. B�
 | :--- | :--- |
 | `id` | UUID v4 |
 | `orderNumber` | String unique, format `ORD-\d{8}-[A-Z0-9]{5}` |
-| `userId` | FK User (nullable nếu guest checkout — Phase 3) |
+| `userId` | FK User (nullable nếu guest checkout — giai đoạn scale sau) |
 | `customerEmailSnapshot` | Snapshot — bảo toàn khi User đổi email |
 | `status` | Enum: `PENDING`, `PAID`, `SHIPPING`, `DELIVERED`, `CANCELLED`, `REFUNDED` |
 | `subtotal` | Decimal — tổng `unitPrice * qty` của OrderItem |

@@ -55,6 +55,11 @@ Bây giờ bạn:
    - Tuần 2 → [`setup/02-database/README.md`](./setup/02-database/README.md) + [`business/01-identity/CHARTER.md`](./business/01-identity/CHARTER.md)
    - Tuần 3+ → tiếp tục theo ROADMAP
 
+Nếu bạn muốn **đi theo execution plan đã phase hóa sẵn**, mở [`../todo/README.md`](../todo/README.md) ngay từ đây.
+
+- `planning/` = canon về glossary, invariant, rule, source material
+- `todo/` = canon về thứ tự thực thi
+
 ---
 
 ## 🗂️ Cấu trúc repo
@@ -102,7 +107,7 @@ planning/
 | "Tôi muốn..."                                       | Mở file                                                          |
 |-----------------------------------------------------|------------------------------------------------------------------|
 | Tra thuật ngữ (Money, Snapshot, Idempotency, ...) | [`docs/CONTEXT.md`](./docs/CONTEXT.md)                           |
-| Biết tuần này code gì                              | [`docs/ROADMAP.md`](./docs/ROADMAP.md) + [`docs/STATUS.md`](./docs/STATUS.md) |
+| Biết nên làm phase/checkpoint nào tiếp theo       | [`../todo/README.md`](../todo/README.md) + [`docs/STATUS.md`](./docs/STATUS.md) |
 | Tra task ID cụ thể                                  | [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)                     |
 | **Cấu trúc thư mục project** (src/, module layout, path aliases) | [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md) |
 | Quy ước code (naming, validation, pagination, ...) | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md)                 |
@@ -120,15 +125,16 @@ planning/
    - `setup/` = **làm thế nào** (infra, convention)
    - `business/` = **làm cái gì** (domain feature)
 2. **Bounded context**: `business/<context>/` mỗi thư mục là 1 domain độc lập.
-3. **Source of truth**: rule chính ở `docs/CONTEXT.md` + `setup/CONVENTIONS.md` + `setup/DATABASE_*.md`. Task file chỉ giữ intent + acceptance + link canonical.
+3. **Source of truth**: rule chính ở `docs/CONTEXT.md` + `setup/CONVENTIONS.md` + `setup/DATABASE_*.md`. Task/spec file chỉ giữ intent + acceptance + link canonical.
 4. **Glossary first**: thuật ngữ mới → cập nhật `docs/CONTEXT.md` TRƯỚC, code sau.
+5. **Execution second**: khi cần bắt tay làm theo phase, dùng `todo/`; nếu `todo/` lệch canonical rule thì sửa `planning/` trước hoặc sửa cả hai cùng lúc.
 
 ---
 
 ## 🛠️ Cách dùng task file (mỗi lần code)
 
-1. Vào [`docs/STATUS.md`](./docs/STATUS.md) → chọn task tiếp theo.
-2. Mở task file (đường dẫn ở [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)).
+1. Vào [`../todo/README.md`](../todo/README.md) hoặc phase tương ứng → chọn checkpoint tiếp theo.
+2. Nếu cần spec gốc, mở task file qua [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md).
 3. Đọc README của subdir chứa task đó (vd `business/04-order/README.md`) để hiểu context + invariants.
 4. Implement theo acceptance criteria.
 5. Update [`docs/STATUS.md`](./docs/STATUS.md) sau khi xong.

@@ -17,6 +17,7 @@ Tạo migration đầu tiên từ schema và áp dụng lên PostgreSQL.
 - **`prisma migrate dev` vs `prisma migrate deploy`**: `dev` dùng khi phát triển (tạo migration mới từ schema changes), `deploy` dùng trong CI/CD production (chỉ apply migration đã có, không tạo mới). Không bao giờ dùng `dev` trên production.
 - **Rollback bằng cách tạo migration mới**: Prisma không có built-in rollback. Cách đúng là viết migration mới để undo thay đổi. Task này dạy pattern đó qua `migrate reset` → `migrate dev`.
 - **`prisma generate` sau mỗi schema change**: sync Prisma Client TypeScript types với schema mới — không generate thì TypeScript không biết model mới tồn tại.
+- **`prisma migrate reset` chỉ dùng cho local development**: lệnh này xóa toàn bộ data. Không bao giờ chạy trên shared DB hay production.
 
 ---
 

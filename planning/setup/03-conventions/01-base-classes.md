@@ -6,7 +6,7 @@
 
 ## 🎯 Intent
 
-Chuẩn hóa **BaseEntity** + **BaseRepository** + utilities chung. Mọi entity domain kế thừa BaseEntity → không bao giờ thiếu `createdAt/updatedAt/deletedAt`. Mọi repository kế thừa BaseRepository → có sẵn 5 method chuẩn, service mock được cho unit test.
+Chuẩn hóa **base fields** + **shared utilities** + định hướng tách lớp data access khi cần. Mọi entity domain cần thống nhất `createdAt/updatedAt/deletedAt`; repository chỉ nên được trừu tượng hóa tới mức còn giữ được type-safety và readability.
 
 ---
 
@@ -20,16 +20,11 @@ Chuẩn hóa **BaseEntity** + **BaseRepository** + utilities chung. Mọi entity
       - `updatedAt DateTime @updatedAt`.
       - `deletedAt DateTime?` — soft-delete; default query lọc `deletedAt IS NULL`.
 
-### BaseRepository<T>
+### Repository boundary
 
-- [ ] Abstract class ở `src/common/repositories/base.repository.ts`.
-- [ ] Method chuẩn (mọi repo concrete kế thừa):
-      - `findById(id: string): Promise<T | null>` — auto-filter soft-deleted.
-      - `findMany(filter, pagination): Promise<{ data, total }>`.
-      - `create(data): Promise<T>`.
-      - `update(id, data): Promise<T>`.
-      - `softDelete(id): Promise<void>` — set `deletedAt = now()`.
-- [ ] Cấm dùng `prisma` trực tiếp trong service nếu có repository tương ứng. Lint rule hoặc code-review enforce.
+- [ ] Nếu module có query logic phức tạp, tạo repository concrete riêng cho module đó (`users.repository.ts`, `orders.repository.ts`, ...).
+- [ ] Không bắt buộc `BaseRepository<T>` generic. Nếu có shared contract/helper thì nó phải giữ được type-safety, không dùng dynamic model lookup mù mờ.
+- [ ] Với module rất mỏng, service có thể dùng Prisma trực tiếp nếu code vẫn rõ ràng và dễ test.
 
 ### Shared utilities (ở `src/shared/utils/`)
 
@@ -41,7 +36,7 @@ Chuẩn hóa **BaseEntity** + **BaseRepository** + utilities chung. Mọi entity
 
 - [ ] Soft-delete user → `findById` trả `null`, raw `SELECT *` thấy `deletedAt` set.
 - [ ] `slugify("Điện Thoại 15 Pro")` → `"dien-thoai-15-pro"`.
-- [ ] BaseRepository mock được bằng `jest.fn()` cho unit test service.
+- [ ] Repository concrete hoặc Prisma dependency mock được rõ ràng cho unit test service.
 
 ---
 

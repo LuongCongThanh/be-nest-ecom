@@ -9,7 +9,9 @@
 
 ## Nhiệm vụ
 
-Implement đầy đủ CRUD cho Categories và Products, bao gồm: category tree, FTS search, stock management, product variants.
+Implement đầy đủ CRUD cho Categories và Products, bao gồm: category tree, text search, stock management, product variants.
+
+> Phase C dùng text search `contains + insensitive` qua Prisma. Nếu sau này cần full-text search thật sự của PostgreSQL, đó là một task Phase D/E riêng.
 
 ---
 
@@ -71,6 +73,15 @@ export class CategoriesService {
       throw new ConflictException({ code: 'CATEGORY_SLUG_EXISTS', message: 'Category slug already exists' });
     }
 
+    if (dto.parentId) {
+      const parent = await this.prisma.category.findFirst({
+        where: { id: dto.parentId, deletedAt: null, isActive: true },
+      });
+      if (!parent) {
+        throw new NotFoundException({ code: 'CATEGORY_PARENT_NOT_FOUND', message: 'Parent category not found' });
+      }
+    }
+
     return this.prisma.category.create({
       data: { ...dto, slug },
     });
@@ -109,12 +120,33 @@ export class CategoriesService {
     if (!category) throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
 
     const data: any = { ...dto };
-    if (dto.name) data.slug = slugify(dto.name);
+    if (dto.parentId === id) {
+      throw new ConflictException({ code: 'CATEGORY_PARENT_INVALID', message: 'Category cannot be its own parent' });
+    }
+    if (dto.name) {
+      data.slug = slugify(dto.name);
+      const slugExists = await this.prisma.category.findFirst({
+        where: { slug: data.slug, id: { not: id } },
+      });
+      if (slugExists) {
+        throw new ConflictException({ code: 'CATEGORY_SLUG_EXISTS', message: 'Category slug already exists' });
+      }
+    }
 
     return this.prisma.category.update({ where: { id }, data });
   }
 
   async softDelete(id: string) {
+    const hasChildren = await this.prisma.category.count({
+      where: { parentId: id, deletedAt: null },
+    });
+    if (hasChildren > 0) {
+      throw new ConflictException({
+        code: 'CATEGORY_HAS_CHILDREN',
+        message: 'Cannot delete category with active child categories',
+      });
+    }
+
     await this.prisma.category.update({
       where: { id },
       data: { deletedAt: new Date() },
@@ -204,6 +236,15 @@ export class ProductsService {
     const exists = await this.prisma.product.findUnique({ where: { slug } });
     if (exists) throw new ConflictException({ code: 'PRODUCT_SLUG_EXISTS', message: 'Product slug already exists' });
 
+    if (dto.categoryId) {
+      const category = await this.prisma.category.findFirst({
+        where: { id: dto.categoryId, deletedAt: null, isActive: true },
+      });
+      if (!category) {
+        throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
+      }
+    }
+
     return this.prisma.product.create({ data: { ...dto, slug } });
   }
 
@@ -246,7 +287,23 @@ export class ProductsService {
   async update(id: string, dto: Partial<CreateProductDto>) {
     await this.findOne(id);
     const data: any = { ...dto };
-    if (dto.name) data.slug = slugify(dto.name);
+    if (dto.name) {
+      data.slug = slugify(dto.name);
+      const slugExists = await this.prisma.product.findFirst({
+        where: { slug: data.slug, id: { not: id } },
+      });
+      if (slugExists) {
+        throw new ConflictException({ code: 'PRODUCT_SLUG_EXISTS', message: 'Product slug already exists' });
+      }
+    }
+    if (dto.categoryId) {
+      const category = await this.prisma.category.findFirst({
+        where: { id: dto.categoryId, deletedAt: null, isActive: true },
+      });
+      if (!category) {
+        throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
+      }
+    }
     return this.prisma.product.update({ where: { id }, data });
   }
 
@@ -279,7 +336,7 @@ export class ProductsService {
 
 ### 6. Controllers
 
-Tạo `src/modules/catalog/controllers/categories.controller.ts` và `products.controller.ts` với đầy đủ CRUD endpoints. Admin required cho write operations, public cho read.
+Tạo `src/modules/catalog/controllers/categories.controller.ts` và `products.controller.ts` với đầy đủ CRUD endpoints. Admin/staff required cho write operations, public cho read.
 
 Ví dụ categories controller:
 
@@ -296,17 +353,17 @@ export class CategoriesController {
   @Get('tree')
   findTree() { return this.service.findTree(); }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STAFF)
   @Post()
   create(@Body() dto: CreateCategoryDto) { return this.service.create(dto); }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STAFF)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: CreateCategoryDto) {
     return this.service.update(id, dto);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.STAFF)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) { return this.service.softDelete(id); }
