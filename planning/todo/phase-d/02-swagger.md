@@ -3,7 +3,7 @@
 **Phase**: D — Polish  
 **Ước lượng**: 2 giờ  
 **Phụ thuộc**: Task D-01  
-**Spec gốc**: [planning/setup/04-cross-cutting/04-swagger.md](../../planning/setup/04-cross-cutting/04-swagger.md)
+**Spec gốc**: [04-swagger.md](../../setup/04-cross-cutting/04-swagger.md)
 
 ---
 

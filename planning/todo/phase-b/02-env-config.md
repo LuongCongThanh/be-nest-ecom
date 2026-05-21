@@ -4,8 +4,10 @@
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 01
 **Ưu tiên**: 🔴 CAO (Fail-fast safety — thiếu là crash ngay khi boot)
-**Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/01-project/02-env-config.md](../../planning/setup/01-project/02-env-config.md)
+**Trạng thái**: ✅ Done
+**Spec gốc**: [02-env-config.md](../../setup/01-project/02-env-config.md)
+
+> **Repo snapshot 2026-05-21:** `ConfigModule`, Joi validation schema, typed config factories, `.env`/`.env.example` đã có. `main.ts` đã chuyển sang lấy port qua `ConfigService`; `process.env` hiện được giữ trong `src/config/**`.
 
 ---
 

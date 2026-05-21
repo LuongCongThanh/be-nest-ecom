@@ -3,7 +3,7 @@
 **Phase**: C — Core MVP  
 **Ước lượng**: 4 giờ  
 **Phụ thuộc**: Task C-02  
-**Spec gốc**: [planning/business/03-cart/02-shopping-cart.md](../../planning/business/03-cart/02-shopping-cart.md)
+**Spec gốc**: [02-shopping-cart.md](../../business/03-cart/02-shopping-cart.md)
 
 ---
 

@@ -3,7 +3,7 @@
 **Phase**: C — Core MVP  
 **Ước lượng**: 5 giờ  
 **Phụ thuộc**: Task C-01  
-**Spec gốc**: [planning/business/02-catalog/03-categories-crud.md](../../planning/business/02-catalog/03-categories-crud.md)
+**Spec gốc**: [03-categories-crud.md](../../business/02-catalog/03-categories-crud.md)
 
 ---
 

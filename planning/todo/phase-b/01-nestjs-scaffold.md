@@ -4,8 +4,10 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 00 (tools)
 **Ưu tiên**: 🔴 CAO (Foundation — sai ở đây phải refactor toàn bộ)
-**Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/01-project/01-bootstrap-nestjs.md](../../planning/setup/01-project/01-bootstrap-nestjs.md)
+**Trạng thái**: 🔵 In progress
+**Spec gốc**: [01-bootstrap-nestjs.md](../../setup/01-project/01-bootstrap-nestjs.md)
+
+> **Repo snapshot 2026-05-21:** scaffold nền, strict mode, path aliases, `.env.example`, prefix `/api/v1`, `HealthModule` cơ bản đã có. Chưa hội tụ đủ target structure trong `PROJECT_STRUCTURE.md`.
 
 ---
 

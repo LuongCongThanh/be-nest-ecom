@@ -3,7 +3,7 @@
 **Phase**: E — Verification  
 **Ước lượng**: 10 giờ  
 **Phụ thuộc**: Phase D hoàn thành  
-**Spec gốc**: [planning/setup/05-scale-infra/01-unit-tests.md](../../planning/setup/05-scale-infra/01-unit-tests.md)
+**Spec gốc**: [01-unit-tests.md](../../setup/05-scale-infra/01-unit-tests.md)
 
 ---
 

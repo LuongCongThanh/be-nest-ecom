@@ -351,7 +351,7 @@ Tài liệu được xem là đạt chuẩn khi:
 - Có thể dùng để briefing cho Business Owner, PM, BA, Engineering và QA mà không cần giải thích lại phạm vi lõi.
 - Mọi epic chính đều có mục tiêu kinh doanh, actor và acceptance criteria ở mức đủ để tách thành task kỹ thuật.
 - KPI và roadmap phản ánh đúng thứ tự ưu tiên phát triển.
-- Nội dung thống nhất với codebase hiện tại: NestJS, Prisma, PostgreSQL, JWT và module-based architecture.
+- Nội dung thống nhất với **kiến trúc mục tiêu** của codebase: NestJS, Prisma, PostgreSQL, JWT và module-based architecture. Khi repo chưa implement đủ, coi đây là target architecture thay vì trạng thái hoàn thành hiện tại.
 
 ---
 

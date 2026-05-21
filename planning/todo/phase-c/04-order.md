@@ -3,7 +3,7 @@
 **Phase**: C — Core MVP  
 **Ước lượng**: 7 giờ  
 **Phụ thuộc**: Task C-03  
-**Spec gốc**: [planning/business/04-order/02-order-creation.md](../../planning/business/04-order/02-order-creation.md)
+**Spec gốc**: [02-order-creation.md](../../business/04-order/02-order-creation.md)
 
 ---
 

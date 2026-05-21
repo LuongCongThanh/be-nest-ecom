@@ -3,7 +3,7 @@
 **Phase**: D — Polish  
 **Ước lượng**: 5 giờ  
 **Phụ thuộc**: Task D-02  
-**Spec gốc**: [planning/business/01-identity/09-account-recovery.md](../../planning/business/01-identity/09-account-recovery.md)
+**Spec gốc**: [09-account-recovery.md](../../business/01-identity/09-account-recovery.md)
 
 ---
 

@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 10
 **Ưu tiên**: 🔴 CAO (Security — default-deny, mọi endpoint sau đây cần guards này)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/03-conventions/04-guards-decorators.md](../../planning/setup/03-conventions/04-guards-decorators.md)
+**Spec gốc**: [04-guards-decorators.md](../../setup/03-conventions/04-guards-decorators.md)
 
 ---
 

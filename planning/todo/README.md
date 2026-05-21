@@ -2,6 +2,9 @@
 
 Folder này là **lớp thực thi** của repo.
 
+> Nếu bạn muốn **tự code, tự học, dùng AI như người hướng dẫn thay vì người code hộ**, mở file này trước:
+> [`00-self-learning-guide.md`](./00-self-learning-guide.md)
+
 - `planning/` = knowledge base / spec gốc / glossary / conventions
 - `todo/` = thứ tự làm việc thực tế theo phase
 

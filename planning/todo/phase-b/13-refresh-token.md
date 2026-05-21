@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 12
 **Ưu tiên**: 🔴 CAO (Security — UX không thể dùng nếu thiếu, và thiếu thì có lỗ hổng bảo mật)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/business/01-identity/08-refresh-token.md](../../planning/business/01-identity/08-refresh-token.md)
+**Spec gốc**: [08-refresh-token.md](../../business/01-identity/08-refresh-token.md)
 
 ---
 

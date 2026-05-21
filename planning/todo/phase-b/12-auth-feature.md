@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 11
 **Ưu tiên**: 🔴 CAO (Core Business — tất cả feature sau đều cần user đã login)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/business/01-identity/04-register-login.md](../../planning/business/01-identity/04-register-login.md)
+**Spec gốc**: [04-register-login.md](../../business/01-identity/04-register-login.md)
 
 ---
 

@@ -3,7 +3,7 @@
 **Phase**: C — Core MVP  
 **Ước lượng**: 2 giờ  
 **Phụ thuộc**: Phase B hoàn thành  
-**Spec gốc**: [planning/business/02-catalog/README.md](../../planning/business/02-catalog/README.md)
+**Spec gốc**: [README.md](../../business/02-catalog/README.md)
 
 ---
 

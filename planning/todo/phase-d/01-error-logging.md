@@ -3,7 +3,7 @@
 **Phase**: D — Polish  
 **Ước lượng**: 5 giờ  
 **Phụ thuộc**: Phase C hoàn thành  
-**Spec gốc**: [planning/setup/04-cross-cutting/](../../planning/setup/04-cross-cutting/)
+**Spec gốc**: [01-error-filter.md](../../setup/04-cross-cutting/01-error-filter.md) · [02-logging.md](../../setup/04-cross-cutting/02-logging.md) · [03-response-transform.md](../../setup/04-cross-cutting/03-response-transform.md)
 
 ---
 

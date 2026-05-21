@@ -3,7 +3,7 @@
 > **Mục đích**: Refactor 80 task của `planning/` thành lộ trình **tự cài đặt, tự code tay** theo **đường cong học BE**.
 > **Nguyên tắc**: mỗi bước nhỏ, chạy được, hiểu khái niệm trước khi gõ phím. Khi xong 1 milestone thì commit.
 >
-> `ROADMAP.md` là **learning map**, không phải execution checklist sống hằng ngày. Khi bắt tay làm thật, dùng `../../todo/README.md` và các `todo/phase-*` để biết bước tiếp theo.
+> `ROADMAP.md` là **learning map**, không phải execution checklist sống hằng ngày. Khi bắt tay làm thật, dùng `../todo/README.md` và các `todo/phase-*` để biết bước tiếp theo.
 
 ---
 
@@ -203,9 +203,9 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Task gốc**: TASK-101, 102, 103, 104
 
-**📐 ĐỌC TRƯỚC**: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md) — tạo đúng layout `src/{common, config, shared, modules, infrastructure, jobs}/` từ đầu, không refactor sau.
+**📐 ĐỌC TRƯỚC**: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md) — đây là **target structure** cho repo. Nếu code hiện tại đang ở trạng thái chuyển tiếp, dùng file này như đích cần hội tụ về, không mặc định coi repo đã bám 100%.
 
-**Mục tiêu**: `GET /health/live` + `GET /health/ready` (terminus) trả 200 với DB connected. App ở `/api/v1/*`, healthcheck ở root.
+**Mục tiêu**: `GET /health/live` trả 200 khi app còn sống, `GET /health/ready` trả 200 khi DB connected. App ở `/api/v1/*`, healthcheck ở root.
 
 **Step-by-step**:
 

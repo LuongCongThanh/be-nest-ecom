@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 05
 **Ưu tiên**: 🟡 TRUNG BÌNH (Structural — cần để có DB tables, nhưng dễ redo)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/02-database/04-run-migrations.md](../../planning/setup/02-database/04-run-migrations.md)
+**Spec gốc**: [04-run-migrations.md](../../setup/02-database/04-run-migrations.md)
 
 ---
 

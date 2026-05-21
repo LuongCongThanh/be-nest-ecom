@@ -35,13 +35,13 @@ graph LR
 
 ```text
 Phase A — Requirements & Design        [████████████████████] 100%  ✅ Đóng
-Phase B — Foundation Impl  (W1-4)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏳ Sắp mở
+Phase B — Foundation Impl  (W1-4)      [███░░░░░░░░░░░░░░░░░]  18%  🔵 Đang làm
 Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa (chờ B)
 Phase D — Polish Impl     (W10-11)    [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase E — Verification    (W12)       [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase F — Maintenance     (post-MVP)  [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Backlog
 ─────────────────────────────────────────────────────────────────────────
-TỔNG (Phase B-E, MVP)                  [░░░░░░░░░░░░░░░░░░░░]   0%  (0/35 task)
+TỔNG (Phase B-E, execution files)      [██░░░░░░░░░░░░░░░░░░]   7%  (2/29 done, 1 in progress)
 ```
 
 ---
@@ -86,13 +86,13 @@ TỔNG (Phase B-E, MVP)                  [░░░░░░░░░░░░�
 ### Entry Gate (đã mở 🟢)
 
 - [x] Phase A đóng
-- [ ] **Tools setup (Tuần 0) DONE** ← chưa
-- [ ] Repo init + first commit ← chưa
+- [x] **Tools setup (Tuần 0) DONE** — repo đã có `package.json`, `node_modules/`, lint/test/build scripts
+- [x] Repo init + first commit — git repo đã tồn tại và đang được dùng
 
 ### Exit Gate (đóng phase khi ✅ tất cả)
 
 - [ ] `npm run start:dev` chạy, log `Nest application successfully started`
-- [ ] `GET /health/live` + `GET /health/ready` (terminus) trả 200 với DB connected
+- [ ] `GET /health/live` trả 200 khi app sống; `GET /health/ready` (terminus) trả 200 khi DB connected
 - [ ] `POST /api/v1/auth/register` + `POST /api/v1/auth/login` chạy thật, trả access+refresh token
 - [ ] `GET /api/v1/me` với Bearer token trả user info, không có `password`
 - [ ] `POST /api/v1/auth/refresh` rotate token, **detect reuse → kill family**
@@ -108,15 +108,18 @@ TỔNG (Phase B-E, MVP)                  [░░░░░░░░░░░░�
 
 | Task file | Status | Note |
 |------|:------:|------|
-| `todo/phase-b/00-tools-setup.md` | ⏳ | pre-flight |
-| `todo/phase-b/01-nestjs-scaffold.md` | ⏳ | bootstrap |
-| `todo/phase-b/02-env-config.md` | ⏳ | config validation |
-| `todo/phase-b/02b-swagger.md` | ⏳ | DX bootstrap |
+| `todo/phase-b/00-tools-setup.md` | ⏳ | toolchain máy local không thể xác nhận chỉ từ repo; cần verify thủ công |
+| `todo/phase-b/01-nestjs-scaffold.md` | 🔵 | app scaffold + `/health` cơ bản + prefix + aliases đã có; structure target chưa hội tụ đủ |
+| `todo/phase-b/02-env-config.md` | ✅ | `ConfigModule` + schema validation + config factory đã khớp task |
+| `todo/phase-b/02b-swagger.md` | ✅ | Swagger bootstrap + `addBearerAuth()` + port qua `ConfigService` đã khớp task |
 | `todo/phase-b/03-docker-postgres.md` → `15-phase-b-exit-gate.md` | ⏳ | canonical execution chain |
 
 **Tổng ước**: ~32 giờ ≈ 4 tuần × 8h.
 
 **Status legend**: ⏳ Not started · 🔵 In progress · ⏸ Blocked · ✅ Done · ❌ Cancelled
+
+> Ghi chú: từ bản cập nhật này, progress ở đây phản ánh **execution files trong `planning/todo/`**, không dùng mẫu số `35 task` cũ của roadmap/spec tổng hợp.
+> Verify snapshot 2026-05-21: `npx tsc --noEmit` pass; `npm run build` đang fail vì Windows lock/permission trên file trong `dist/`, nên chưa thể coi code quality gate là pass.
 
 ---
 
@@ -245,6 +248,9 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 ```
 [2026-05-19 18:00] [Phase A] [meta]              [DONE] Phase A đóng. 79 task spec + glossary + decisions locked.
 [2026-05-19 18:00] [Phase B] [meta]              [OPEN] Phase B mở. Bắt đầu Tuần 0 setup tools.
+[2026-05-21 00:00] [Phase B] [doc-audit]         [UPDATE] Đồng bộ lại tracker với repo thật: scaffold/env-config/Swagger bootstrap đang in progress; Docker/Prisma/Auth chưa bắt đầu.
+[2026-05-21 00:10] [Phase B] [verify]            [UPDATE] `npx tsc --noEmit` pass. `npm run build` fail do `EPERM` khi ghi/xóa file trong `dist/`, chưa kết luận là lỗi code.
+[2026-05-21 00:20] [Phase B] [task-02/02b]       [UPDATE] `ConfigModule` đã load typed config factories; `main.ts` dùng `ConfigService` cho port. Nâng Task 02 và 02b lên DONE.
 ```
 
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->

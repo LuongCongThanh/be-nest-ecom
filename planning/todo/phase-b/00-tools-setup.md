@@ -4,7 +4,7 @@
 **Ước lượng**: 1-2 giờ
 **Phụ thuộc**: không có
 **Ưu tiên**: 🟢 THẤP (Prerequisites)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **OS**: Windows 11
 
 ---

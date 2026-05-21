@@ -6,6 +6,8 @@
 **Ưu tiên**: 🔴 CAO (Developer experience — cần ngay khi setup project để test API trong suốt quá trình build)
 **Trạng thái**: ✅ Done
 
+> **Repo snapshot 2026-05-21:** Swagger đã được bootstrap ở `/docs` với `addBearerAuth()`. Bootstrap hiện đã lấy port qua `ConfigService`, khớp với hướng dẫn task.
+
 ---
 
 ## 🎯 Mục tiêu & Ý nghĩa

@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 06
 **Ưu tiên**: 🟡 TRUNG BÌNH (Architecture — tạo nền abstraction, nhưng có thể add sau)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/03-conventions/01-base-classes.md](../../planning/setup/03-conventions/01-base-classes.md)
+**Spec gốc**: [01-base-classes.md](../../setup/03-conventions/01-base-classes.md)
 
 ---
 

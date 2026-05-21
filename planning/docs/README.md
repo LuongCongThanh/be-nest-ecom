@@ -78,7 +78,7 @@ Thư mục này chứa **5 file spec/meta** của dự án. Mọi tài liệu nh
 | "Soft-delete user thì Cart/Order/Review thế nào?" | `CONTEXT.md` — Cross-context cascade  |
 | "Pagination kiểu gì?"                             | `../setup/CONVENTIONS.md §8.6`        |
 | "Rate limit endpoint nào?"                        | `../setup/CONVENTIONS.md §11b`        |
-| "Nên làm phase nào tiếp theo?"                    | `../../todo/README.md` + `STATUS.md`  |
+| "Nên làm phase nào tiếp theo?"                    | `../todo/README.md` + `STATUS.md`     |
 
 ---
 

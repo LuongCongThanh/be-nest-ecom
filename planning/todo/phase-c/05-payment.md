@@ -3,7 +3,7 @@
 **Phase**: C — Core MVP  
 **Ước lượng**: 5 giờ  
 **Phụ thuộc**: Task C-04  
-**Spec gốc**: [planning/business/05-payment/01-payment.md](../../planning/business/05-payment/01-payment.md)
+**Spec gốc**: [01-payment.md](../../business/05-payment/01-payment.md)
 
 ---
 

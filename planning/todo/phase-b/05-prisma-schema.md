@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 04
 **Ưu tiên**: 🔴 CAO (Data model — sai ở đây phải migration phá cấu trúc sau)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/business/01-identity/01-user-entity.md](../../planning/business/01-identity/01-user-entity.md)
+**Spec gốc**: [01-user-entity.md](../../business/01-identity/01-user-entity.md)
 
 ---
 

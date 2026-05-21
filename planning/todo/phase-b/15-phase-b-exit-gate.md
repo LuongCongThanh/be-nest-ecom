@@ -146,7 +146,7 @@ Authorization: Bearer ADMIN_TOKEN
 
 ## Ghi vào STATUS.md sau khi xong
 
-Mở [planning/docs/STATUS.md](../../planning/docs/STATUS.md) → cuộn xuống `Daily Audit Log` → thêm entry:
+Mở [STATUS.md](../../docs/STATUS.md) → cuộn xuống `Daily Audit Log` → thêm entry:
 
 ```
 [2026-XX-XX HH:MM] [Phase B] [EXIT GATE PASSED]

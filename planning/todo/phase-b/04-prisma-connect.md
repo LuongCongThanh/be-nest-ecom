@@ -5,7 +5,9 @@
 **Phụ thuộc**: Task 03
 **Ưu tiên**: 🔴 CAO (Data layer — mọi task sau đều cần)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/02-database/02-connect-postgres.md](../../planning/setup/02-database/02-connect-postgres.md)
+**Spec gốc**: [02-connect-postgres.md](../../setup/02-database/02-connect-postgres.md)
+
+> **Repo snapshot 2026-05-21:** repo chưa có thư mục `prisma/`, chưa có `@prisma/client`, `prisma` package, `PrismaModule`, `PrismaService`, hay `/health/ready`.
 
 ---
 
@@ -15,7 +17,7 @@ Thiết lập Prisma ORM và inject vào NestJS DI container qua `PrismaService`
 
 - **Single PrismaClient instance**: `@Global()` + `PrismaModule` đảm bảo chỉ có 1 client duy nhất — tránh connection pool exhaustion khi nhiều module cùng khởi tạo `new PrismaClient()`.
 - **Lifecycle hooks** (`OnModuleInit`, `OnModuleDestroy`): connect khi app start, disconnect khi app stop — không leak connection khi app restart.
-- **`/health/ready` endpoint**: phân biệt "app alive" (`/health`) với "app ready to serve traffic" (`/health/ready`). Load balancer dùng `/health/ready` để biết lúc nào route traffic vào — nếu DB chưa connect, `/health/ready` trả lỗi.
+- **Health contract rõ ràng**: phân biệt "app alive" (`/health/live`) với "app ready to serve traffic" (`/health/ready`). Giữ `GET /health` như alias của readiness để các tool cũ không gãy. Load balancer nên dùng `/health/ready`.
 - **`postinstall: prisma generate`**: tự generate Prisma Client sau `npm install` — tránh lỗi "Cannot find module '@prisma/client'" trên môi trường mới.
 - **PrismaModule chỉ cung cấp client dùng chung**: business logic không `new PrismaClient()` ở bất kỳ đâu khác.
 
@@ -119,8 +121,8 @@ import { PrismaService } from '../common/prisma/prisma.service';
 export class HealthController {
   constructor(private readonly prisma: PrismaService) {}
 
-  @Get()
-  async check() {
+  @Get('live')
+  live() {
     return { status: 'ok', timestamp: new Date().toISOString() };
   }
 
@@ -128,6 +130,11 @@ export class HealthController {
   async ready() {
     await this.prisma.$queryRaw`SELECT 1`;
     return { status: 'ok', db: 'connected' };
+  }
+
+  @Get()
+  async health() {
+    return this.ready();
   }
 }
 ```
@@ -152,19 +159,25 @@ export class HealthController {
 - **When** chạy `npm run start:dev`
 - **Then** log `[PrismaService] Prisma connected` xuất hiện trong console
 
-**AC-2: `/health/ready` phản biệt DB state**
+**AC-2: `/health/live` và `/health/ready` tách đúng trách nhiệm**
+
+- **Given** app đang chạy
+- **When** gọi `GET http://localhost:3000/health/live`
+- **Then** response `200` dù downstream chưa được check
+
+**AC-3: `/health/ready` phản biệt DB state**
 
 - **Given** app đang chạy, DB connected
 - **When** gọi `GET http://localhost:3000/health/ready`
 - **Then** response `200 { "status": "ok", "db": "connected" }`
 
-**AC-3: `/health/ready` fail khi DB down**
+**AC-4: `/health/ready` fail khi DB down**
 
 - **Given** postgres container bị stop (`docker compose stop postgres`)
 - **When** gọi `GET http://localhost:3000/health/ready`
 - **Then** response không phải `200` — app báo hiệu chưa ready (status 500 hoặc 503)
 
-**AC-4: Không có multiple PrismaClient instances**
+**AC-5: Không có multiple PrismaClient instances**
 
 - **Given** nhiều module import PrismaService
 - **When** chạy app và kiểm tra connection pool

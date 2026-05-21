@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 08
 **Ưu tiên**: 🔴 CAO (API contract — tất cả endpoint sau cần validation và error format nhất quán)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/03-conventions/03-validation-error.md](../../planning/setup/03-conventions/03-validation-error.md)
+**Spec gốc**: [03-validation-error.md](../../setup/03-conventions/03-validation-error.md)
 
 ---
 

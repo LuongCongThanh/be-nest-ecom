@@ -5,7 +5,7 @@
 **Phụ thuộc**: Task 07
 **Ưu tiên**: 🟡 TRUNG BÌNH (Developer experience — không block build, nhưng verify rất khó nếu thiếu)
 **Trạng thái**: ⏳ Not started
-**Spec gốc**: [planning/setup/03-conventions/02-seed-data.md](../../planning/setup/03-conventions/02-seed-data.md)
+**Spec gốc**: [02-seed-data.md](../../setup/03-conventions/02-seed-data.md)
 
 ---
 
