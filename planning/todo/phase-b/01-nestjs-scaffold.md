@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 00 (tools)
 **Ưu tiên**: 🔴 CAO (Foundation — sai ở đây phải refactor toàn bộ)
-**Trạng thái**: 🔵 In progress
+**Trạng thái**: ✅ Done
 **Spec gốc**: [01-bootstrap-nestjs.md](../../setup/01-project/01-bootstrap-nestjs.md)
 
 > **Repo snapshot 2026-05-21:** scaffold nền, strict mode, path aliases, `.env.example`, prefix `/api/v1`, `HealthModule` cơ bản đã có. Chưa hội tụ đủ target structure trong `PROJECT_STRUCTURE.md`.
@@ -46,6 +46,7 @@ mkdir src/health
 ```
 
 Cấu trúc cuối cùng:
+
 ```
 src/
   common/           ← filters, guards, decorators, interceptors, pipes, repositories
@@ -60,6 +61,7 @@ src/
 ### 3. Cấu hình tsconfig.json — strict mode
 
 Mở `tsconfig.json`, đảm bảo có:
+
 ```json
 {
   "compilerOptions": {
@@ -82,6 +84,7 @@ npm install --save-dev tsconfig-paths
 ```
 
 Thêm vào `tsconfig.json` (phần `compilerOptions`):
+
 ```json
 {
   "compilerOptions": {
@@ -127,6 +130,7 @@ nest generate controller health --no-spec
 ```
 
 Trong `health.controller.ts`:
+
 ```typescript
 import { Controller, Get } from '@nestjs/common';
 
@@ -145,6 +149,7 @@ export class HealthController {
 ### 7. Tạo .env.example
 
 Tạo file `.env.example` ở root:
+
 ```
 NODE_ENV=development
 PORT=3000
@@ -158,6 +163,7 @@ LOG_LEVEL=debug
 ```
 
 Tạo `.env` từ example (PowerShell):
+
 ```powershell
 Copy-Item .env.example .env
 ```
@@ -199,17 +205,20 @@ npm run start:dev
 ```
 
 Phải thấy log:
+
 ```
 [Nest] LOG [NestApplication] Nest application successfully started
 [Bootstrap] Application running on port 3000
 ```
 
 Mở browser hoặc REST Client, gọi:
+
 ```
 GET http://localhost:3000/health
 ```
 
 Phải trả:
+
 ```json
 { "status": "ok", "timestamp": "..." }
 ```
