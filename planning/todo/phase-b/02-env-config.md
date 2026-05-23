@@ -52,8 +52,8 @@ export const envValidationSchema = Joi.object({
 
   // JWT — min 32 chars on secret to ensure signing strength
   JWT_SECRET: Joi.string().min(32).required(),
-  JWT_EXPIRES_IN: Joi.string().default('30m'),           // access token lifetime
-  REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'),  // refresh token lifetime
+  JWT_EXPIRES_IN: Joi.string().default('30m'), // access token lifetime
+  REFRESH_TOKEN_EXPIRES_IN: Joi.string().default('7d'), // refresh token lifetime
 
   // Redis
   REDIS_URL: Joi.string().required(), // e.g. redis://localhost:6379
@@ -73,10 +73,10 @@ import { HealthModule } from '@health/health.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,         // no need to re-import ConfigModule in child modules
+      isGlobal: true, // no need to re-import ConfigModule in child modules
       validationSchema: envValidationSchema, // validate .env on startup; missing required vars crash the process
       validationOptions: {
-        abortEarly: true,     // stop at first invalid var instead of collecting all errors
+        abortEarly: true, // stop at first invalid var instead of collecting all errors
       },
     }),
     HealthModule,
@@ -159,17 +159,21 @@ ConfigModule.forRoot({
 ## Verify hoàn thành
 
 ### Test 1 — App chạy bình thường với .env đầy đủ
+
 ```bash
 npm run start:dev
 # Phải log: Nest application successfully started
 ```
 
 ### Test 2 — App crash nếu thiếu biến bắt buộc
+
 Xóa tạm `JWT_SECRET` khỏi `.env`, rồi chạy:
+
 ```bash
 npm run start:dev
 # Phải crash với error: "JWT_SECRET" is required
 ```
+
 Nhớ thêm lại `JWT_SECRET` vào `.env` sau khi test.
 
 ---
