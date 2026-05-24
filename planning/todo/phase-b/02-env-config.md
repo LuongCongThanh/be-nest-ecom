@@ -11,6 +11,61 @@
 
 ---
 
+## 📚 Bạn Sẽ Học Được Gì?
+
+> **Sau task này, bạn sẽ có thể:** Thiết lập hệ thống config an toàn cho NestJS app — app crash ngay khi boot nếu thiếu env, thay vì crash lúc có traffic thật.
+
+### 🧠 1. Tư Duy "Fail-Fast"
+
+**Vấn đề thực tế:** App deploy xong, chạy được 30 phút, user gọi API đầu tiên → crash vì thiếu `JWT_SECRET`. Downtime, mất data, xấu hổ.
+
+**Giải pháp:** Validate toàn bộ config **ngay khi boot** — nếu thiếu bất kỳ biến nào thì crash ngay, không cho app chạy. Đây là pattern chống một class lỗi phổ biến nhất khi deploy production.
+
+### 🛠️ 2. Kỹ Năng Cụ Thể
+
+| Bạn Học                      | Bạn Làm Được                                                         |
+| ---------------------------- | -------------------------------------------------------------------- |
+| **Joi validation schema**    | Khai báo contract rõ ràng: biến nào bắt buộc, kiểu gì, default là gì |
+| **`ConfigModule.forRoot()`** | Đăng ký config global — không cần import lại ở từng module con       |
+| **`registerAs()` factory**   | Nhóm config theo domain (`app`, `jwt`) thay vì flat object           |
+| **Path alias** (`@config/`)  | Import sạch, không bị vỡ khi move file                               |
+| **`process.env` isolation**  | Quy tắc kiến trúc: chỉ được dùng trong `src/config/**`               |
+
+### 🔐 3. Security Mindset
+
+- `JWT_SECRET` phải **tối thiểu 32 ký tự** — Joi enforce tự động, không cần nhớ
+- Developer mới vào team chỉ cần đọc schema là biết cần set biến gì — không phải grep cả codebase
+
+### 🏗️ 4. Pattern Kiến Trúc
+
+```
+.env file
+   ↓ (đọc khi boot)
+Joi validation schema  ← crash ngay nếu sai/thiếu
+   ↓ (pass)
+ConfigModule (global)
+   ↓ (inject)
+ConfigService → dùng trong bất kỳ service nào
+```
+
+> **Quy tắc:** Không bao giờ dùng `process.env.X` trực tiếp trong business logic — luôn inject `ConfigService`.
+
+### ✅ 5. Cách Verify Bạn Đã Hiểu
+
+Task này có **3 test case thực tế** để tự kiểm tra:
+
+1. App chạy bình thường khi `.env` đầy đủ
+2. App crash với message rõ ràng khi thiếu `JWT_SECRET`
+3. App từ chối `JWT_SECRET` ngắn hơn 32 ký tự
+
+### 🔭 6. Ngoài Phạm Vi Task Này
+
+- Secret rotation (Vault, AWS Secrets Manager) → Phase E
+- Config theo từng environment (`.env.staging`) → DevOps
+- CORS config → Task 11
+
+---
+
 ## 🎯 Mục tiêu & Ý nghĩa
 
 Nguyên tắc: **app phải crash ngay khi khởi động nếu thiếu biến môi trường bắt buộc**, không để app chạy với config thiếu rồi crash lúc runtime (sau khi đã có traffic).

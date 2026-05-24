@@ -22,13 +22,13 @@
 
 ## 📋 Quy tắc data model
 
-| Quy tắc | Lý do |
-| :--- | :--- |
-| Mọi `id` dùng `@default(uuid())` | Không thể enumerate, không leak business metrics |
-| User có `deletedAt DateTime?` | Soft delete bảo tồn Order history, GDPR compliant |
-| Address và RefreshToken có `onDelete: Cascade` | Khi User bị delete, cleanup tự động |
-| Mọi FK và query field phải có `@@index` | Tránh full table scan |
-| `tokenHash String @unique` trên RefreshToken | Không lưu raw refresh token trong DB |
+| Quy tắc                                        | Lý do                                             |
+| :--------------------------------------------- | :------------------------------------------------ |
+| Mọi `id` dùng `@default(uuid())`               | Không thể enumerate, không leak business metrics  |
+| User có `deletedAt DateTime?`                  | Soft delete bảo tồn Order history, GDPR compliant |
+| Address và RefreshToken có `onDelete: Cascade` | Khi User bị delete, cleanup tự động               |
+| Mọi FK và query field phải có `@@index`        | Tránh full table scan                             |
+| `tokenHash String @unique` trên RefreshToken   | Không lưu raw refresh token trong DB              |
 
 ---
 
@@ -160,6 +160,7 @@ model RefreshToken {
 ## Verify hoàn thành
 
 Chạy:
+
 ```bash
 npx prisma validate
 # Phải output: The schema at prisma/schema.prisma is valid
