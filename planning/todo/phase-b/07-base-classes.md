@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 06
 **Ưu tiên**: 🟡 TRUNG BÌNH (Architecture — tạo nền abstraction, nhưng có thể add sau)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [01-base-classes.md](../../setup/03-conventions/01-base-classes.md)
 
 ---

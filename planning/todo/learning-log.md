@@ -98,3 +98,32 @@
 - **Prisma 7 breaking change**: `url = env("DATABASE_URL")` trong `datasource` block của `schema.prisma` không còn được hỗ trợ ở Prisma 7. Phải xóa dòng `url` khỏi `schema.prisma` — URL đã được config trong `prisma.config.ts` với `datasource: { url: env("DATABASE_URL") }`.
 
 ---
+
+## Task 07 — Shared Contracts & Utilities
+
+**Date:** 2026-05-26
+**Phase:** B — Foundation
+
+### Task 07 — Kết quả verify
+
+- `PrismaService` extends generated `PrismaClient` với lifecycle hooks ✅
+- `PrismaModule` global — inject được ở mọi module không cần import lại ✅
+- `PaginatedResult<T>` và `PaginationOptions` shared contracts ✅
+- `slugify`, `formatCurrency`, `generateOrderId` utils ✅
+- `UserRepository` filter soft-delete tự động qua `deletedAt: null` ✅
+- `@generated/*` alias thêm vào `tsconfig.json` ✅
+
+### Task 07 — Điều đã học
+
+- **Repository Pattern**: tách business query logic khỏi Service — rule `deletedAt: null` viết một lần trong repository, mọi nơi gọi đều tự động có, không sợ developer quên filter.
+- **`@Global()` PrismaModule**: import 1 lần ở `AppModule`, các module con inject `PrismaService` trực tiếp mà không cần import `PrismaModule` lại — tránh tạo nhiều `PrismaClient` instance gây connection pool exhaustion.
+- **Import alias vs relative path**: alias (`@common/*`, `@generated/*`) dễ đọc và không bị ảnh hưởng khi move file — relative path (`../../../`) dễ sai khi refactor.
+
+### Task 07 — Lỗi gặp phải
+
+- **Prettier indent conflict**: `.prettierrc` không khai báo `tabWidth` tường minh → VSCode editor dùng 4 spaces, Prettier dùng 2 spaces mặc định → conflict khi Format on Save. Fix: thêm `"tabWidth": 2` vào `.prettierrc` và tạo `.editorconfig` với `indent_size = 2`.
+- **`prefer-string-replace-all` ESLint rule**: `String#replace()` với global regex bị flag — phải đổi sang `replaceAll()`. Với ký tự đơn như `đ` dùng `replaceAll('đ', 'd')` thay vì regex.
+- **Prisma generated `PrismaClient` là `const` không phải class**: ESLint `@typescript-eslint/no-unsafe-call`, `no-unsafe-member-access`, `no-unsafe-return` báo lỗi khi gọi `this.$connect()`, `this.prisma.user.findFirst()` — fix bằng cách thêm override trong `eslint.config.mjs` để tắt 3 rules này cho `src/**/*.ts`.
+- **Prettier `{ }` với space**: constructor body rỗng phải là `{}` không phải `{ }`.
+
+---
