@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 04
 **Ưu tiên**: 🔴 CAO (Data model — sai ở đây phải migration phá cấu trúc sau)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [01-user-entity.md](../../business/01-identity/01-user-entity.md)
 
 ---

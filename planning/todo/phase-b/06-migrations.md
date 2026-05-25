@@ -4,7 +4,7 @@
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 05
 **Ưu tiên**: 🟡 TRUNG BÌNH (Structural — cần để có DB tables, nhưng dễ redo)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [04-run-migrations.md](../../setup/02-database/04-run-migrations.md)
 
 ---
@@ -87,25 +87,25 @@ npx prisma migrate dev
 
 ## ✅ Tiêu chí nghiệm thu
 
-**AC-1: Migration được apply thành công**
+### AC-1: Migration được apply thành công
 
 - **Given** Docker postgres healthy, schema đã viết ở Task 05
 - **When** chạy `npx prisma migrate dev --name init`
 - **Then** output không có error; file migration tồn tại trong `prisma/migrations/`; lệnh `npx prisma migrate status` trả `All migrations have been applied`
 
-**AC-2: Tất cả bảng tồn tại với đúng cấu trúc**
+### AC-2: Tất cả bảng tồn tại với đúng cấu trúc
 
 - **Given** migration đã apply
 - **When** mở DBeaver hoặc Prisma Studio
 - **Then** tồn tại 3 bảng: `users`, `addresses`, `refresh_tokens` với đủ columns theo schema Task 05
 
-**AC-3: Idempotent — migrate lại không tạo bảng trùng**
+### AC-3: Idempotent — migrate lại không tạo bảng trùng
 
 - **Given** migration đã apply lần đầu
 - **When** chạy `npx prisma migrate dev` lần nữa (không có schema changes)
 - **Then** output `Already in sync, no schema changes found` — không tạo migration file mới
 
-**AC-4: Reset + re-apply hoạt động**
+### AC-4: Reset + re-apply hoạt động
 
 - **Given** migration đã apply
 - **When** chạy `npx prisma migrate reset` → confirm Y → `npx prisma migrate dev`
