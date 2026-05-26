@@ -1,28 +1,84 @@
-# NestJS Mentor - Reference
+# NestJS Mentor — Reference
 
-Detailed helper formats referenced by `SKILL.md`.
+Detailed formats and examples referenced from SKILL.md.
+
+---
+
+## Docs URL table
+
+### npm packages (read `package.json` first)
+
+| Package pattern                        | Official docs URL                              |
+| -------------------------------------- | ---------------------------------------------- |
+| `@nestjs/*`                            | `https://docs.nestjs.com`                      |
+| `prisma`, `@prisma/*`                  | `https://www.prisma.io/docs`                   |
+| `jest`, `@types/jest`, `ts-jest`       | `https://jestjs.io/docs/getting-started`       |
+| `joi`                                  | `https://joi.dev/api`                          |
+| `typescript`, `typescript-eslint`      | `https://www.typescriptlang.org/docs`          |
+| `prettier`                             | `https://prettier.io/docs/en/index.html`       |
+| `eslint`, `eslint-*`                   | `https://eslint.org/docs/latest`               |
+| `rxjs`                                 | `https://rxjs.dev/guide/overview`              |
+| `@types/express`, `express`            | `https://expressjs.com/en/api.html`            |
+| `supertest`                            | `https://github.com/ladjs/supertest`           |
+| `bcrypt`, `bcryptjs`                   | `https://www.npmjs.com/package/bcrypt`         |
+| `@nestjs/passport`, `passport-*`       | `https://www.passportjs.org/docs`              |
+| `@nestjs/jwt`, `jsonwebtoken`          | `https://jwt.io/introduction`                  |
+| `class-validator`, `class-transformer` | `https://github.com/typestack/class-validator` |
+| `ioredis`, `redis`                     | `https://redis.io/docs`                        |
+| Any other npm package                  | `https://www.npmjs.com/package/<package-name>` |
+
+### Tools not in package.json
+
+Use WebSearch with `<tool name> official documentation`, e.g.:
+
+- `Docker Compose official documentation` → `docs.docker.com/compose`
+- `PostgreSQL 16 official documentation` → `postgresql.org/docs/current`
+
+Then use WebSearch with `site:` to find the exact section: `site:docs.nestjs.com guards`
+
+---
+
+## Comprehension question examples
+
+Asked after the user confirms a step is done. One question at a time, targeting the _why_.
+
+### Good questions — probe reasoning
+
+| Step context                            | Question                                                                                            |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Just installed `@nestjs/config` + `joi` | "Why do we validate env vars at boot rather than when they're first read?"                          |
+| Just set up Docker Compose              | "If we didn't run Postgres in Docker, what would change about how teammates onboard?"               |
+| Just created a Prisma schema            | "Why define the schema in one file rather than splitting it per module?"                            |
+| Just added a JWT Guard                  | "What's the difference between authentication and authorisation — which one does the Guard handle?" |
+| Just ran a migration                    | "Why do we commit migration files to git instead of regenerating them each time?"                   |
+
+### Bad questions — test mechanics, not understanding
+
+| ❌ Bad                                             | Why it fails                    |
+| -------------------------------------------------- | ------------------------------- |
+| "What command do you run to generate a migration?" | Tests memory, not understanding |
+| "What is the name of the guard we just created?"   | Trivial recall                  |
+| "Which file did we edit?"                          | Already visible in the diff     |
+
+### After the user answers
+
+- **Correct:** "Exactly — [one sentence reinforcing the key insight]. Ready for the next step."
+- **Partially correct:** "Close — the missing piece is [one sentence]. Does that make sense?"
+- **Wrong:** "Not quite — [one sentence redirection, no lecture]. Want to try again or shall we move on?"
+
+Never ask a follow-up to the comprehension question. One question, one answer, move on.
 
 ---
 
 ## Checklist format
 
-Create:
+Create `planning/todo/checklists/<phase>-<task-id>-checklist.md` at the start of each task.
 
-`planning/todo/checklists/<phase>-<task-id>-checklist.md`
-
-Template:
-
-```md
-# Checklist - Task <ID>: <Task name>
+```markdown
+# Checklist — Task <ID>: <Task name>
 
 **Branch:** <username>/feat/<phase>/<task-slug>
-**Started:** <YYYY-MM-DD>
-**Status:** 🔵 In progress
-
-## Summary
-
-- Output: <what this task produces>
-- Done means: <practical acceptance result>
+**Started:** <today's date>
 
 ## Steps
 
@@ -35,291 +91,146 @@ Template:
 - [ ] <criterion 1>
 - [ ] <criterion 2>
 
-## Verify
-
-- [ ] <main verification command or check>
-
 ## Ship
 
-- [ ] Optional commit created
-- [ ] Optional push completed
+- [ ] git add + commit
+- [ ] git push
+- [ ] PR opened
 ```
 
-Rules:
+Fill steps from `## 🛠️ Các bước thực hiện` and criteria from `## ✅ Tiêu chí nghiệm thu` in the task file.
 
-- Fill `Steps` from the task file.
-- Fill `Acceptance criteria` from the task file.
-- Update checkboxes only when the user reports completion or verification.
-- Keep the checklist lightweight; it is a progress aid, not a second spec.
+Update checkboxes (`- [ ]` → `- [x]`) as the user reports each step done.
 
 ---
 
 ## Learning log format
 
-File:
+File: `planning/todo/learning-log.md`
 
-`planning/todo/learning-log.md`
+If the file does not exist, create it with this header:
 
-If missing, create:
-
-```md
-# Learning Log - NestJS Self-Study
+```markdown
+# Learning Log — NestJS Self-Study
 
 > Notes captured after each completed task.
 ```
 
 Append one entry per completed task:
 
-```md
+```markdown
 ---
 
-## Task <ID> - <Task name> · <YYYY-MM-DD>
+## Task <ID> — <Task name> · <date>
 
 **Branch:** <username>/feat/<phase>/<task-slug>
 
 **Learned:**
 
-- <main concept learned>
-- <repo-specific pattern or convention reinforced>
+- <most important concept this task taught>
+- <new NestJS pattern or technique>
 
 **Difficulties:**
 
-- <error, blocker, or confusion point>
+- <any error or blocker encountered, even if resolved>
 
 **Personal notes:**
 
-- <user's own reminder, if any>
-```
-
-If the user has no personal note, synthesize one concise reminder from the session.
-
----
-
-## Task evaluation format
-
-Create:
-
-`planning/todo/reviews/<phase>-<task-id>-review.md`
-
-Create the `reviews/` folder if it does not exist.
-
-Purpose:
-
-- leave a durable evaluation artifact after each completed task
-- make it easy to review quality without reopening the whole chat
-- record both delivery status and learning status
-
-Template:
-
-```md
-# Task Review - <Task ID>: <Task name>
-
-**Date:** <YYYY-MM-DD>
-**Branch:** <username>/feat/<phase>/<task-slug>
-**Task file:** `planning/todo/<phase>/<task-file>.md`
-**Status:** ✅ Done
-
-## Acceptance criteria review
-
-- [x] <criterion 1>
-- [x] <criterion 2>
-
-## What was completed
-
-- <implemented or verified outcome 1>
-- <implemented or verified outcome 2>
-
-## Gaps found during review
-
-- None
-
-## Risks or follow-ups
-
-- <small follow-up, if any>
-
-## Verification evidence
-
-- <command run>
-- <observable result>
-
-## Learning snapshot
-
-- <main concept that clicked>
-- <common mistake to avoid next time>
-
-## Mentor verdict
-
-<2-4 sentence evaluation of whether the task is truly complete and whether the user is ready for the next task>
-```
-
-Rules:
-
-- Write this file only when the task is actually complete.
-- If the task is not complete, do not create the review file yet.
-- If there are no gaps, write `- None` explicitly.
-- Keep the verdict concrete and repo-specific.
-- This file is an evaluation note, not a replacement for the checklist or learning log.
-
----
-
-## Step explanation template
-
-Use this when mentoring an implementation step:
-
-```md
-#### Step N - <name>
-
-**What:** <one-line description>
-
-**Why this step matters:**
-<practical consequence of skipping it>
-
-**How:**
-- Open: <file or folder>
-- Change: <what to add/edit>
-- Run: <command if needed>
-
-**Expected result:**
-<observable success condition>
-```
-
-Prefer concrete repo actions over generic tutorial language.
-
----
-
-## Comprehension question examples
-
-Ask after the user confirms the step is done. One question only.
-
-### Good questions
-
-| Step context | Question |
-| --- | --- |
-| Added env validation | "Why do we validate env vars at boot instead of waiting until the first request needs them?" |
-| Added Docker Compose | "Why is a shared containerized Postgres setup better for onboarding than relying on everyone's local install?" |
-| Added Prisma schema | "Why do we lock the schema shape before writing service logic on top of it?" |
-| Added auth guard | "Why is a default-protected route model safer than manually protecting routes one by one?" |
-| Added migration | "Why do we commit migration files instead of regenerating them on each machine?" |
-
-### Bad questions
-
-| Bad question | Why it is weak |
-| --- | --- |
-| "What command did you run?" | tests recall, not understanding |
-| "Which file changed?" | the answer is already visible |
-| "What is the decorator name?" | trivia instead of reasoning |
-
-### Response patterns
-
-- Correct: `Exactly - <one sentence reinforcing the principle>.`
-- Partly correct: `Close - the missing piece is <one sentence>.`
-- Wrong: `Not quite - <one sentence redirection>.`
-
-Do not turn the comprehension check into a quiz session.
-
----
-
-## Error explanation
-
-Use this 3-layer format:
-
-```md
-**What it is:** <plain-language translation of the error>
-
-**Why it happens:** <the underlying mechanism, not just the surface symptom>
-
-**How to fix:**
-1. <specific fix option>
-2. <specific alternative, if helpful>
-```
-
-Example:
-
-```md
-**What it is:** TypeScript cannot resolve the `@common/utils` alias.
-
-**Why it happens:** `tsconfig.json` teaches the TypeScript compiler about aliases, but Jest and Node do not automatically read that mapping at runtime.
-
-**How to fix:**
-1. Add the equivalent alias mapping to the test/runtime config.
-2. Or derive the mapping from `tsconfig.json` to avoid duplicating it by hand.
+- <anything the user wants to remember>
 ```
 
 ---
 
-## Review format
+## WHY explanation examples
 
-When the user asks for a review, present findings first.
+### Good — teaches the reasoning
 
-Pattern:
+> Installing `@nestjs/config` and `joi` to validate environment variables.
+>
+> **Why this step matters:** Without it, if `.env` is missing `JWT_SECRET`, the app boots
+> normally but crashes on the first request — very hard to trace. Validating at boot gives
+> fail-fast behaviour: the app refuses to start if config is wrong.
+>
+> **Why `joi` over `zod`:** Both work, but `@nestjs/config` ships with built-in `joi`
+> integration — less boilerplate in a NestJS context. Use `zod` if you prefer it and are
+> willing to wire it manually.
 
-```md
-1. <severity> - <issue summary>
-   Why it matters: <risk or regression>
-   Next move: <what to change>
+### Bad — only tells what, not why
+
+> ~~Install the config library. Run `npm install @nestjs/config`.~~
+
+The bad version gives the user nothing to reason with. If they hit a problem, they have
+no mental model to debug from.
+
+---
+
+## Error explanation format
+
+When the user pastes an error, explain in 3 layers:
+
+```markdown
+**What it is:** <translate the error message into plain language>
+
+**Why it happens:** <root mechanism — not just "file missing" but why the system
+behaves this way>
+
+**How to fix:** <1–2 specific options, with a short reason why each one works>
 ```
 
-Then, if needed:
+### Example
 
-- assumptions or open questions
-- short summary of what already looks aligned
+Error: `Cannot find module '@common/utils'`
 
-Do not start with praise or a long overview.
-
----
-
-## Task status updates
-
-Update the task file's status line:
-
-| Situation | Status |
-| --- | --- |
-| Acceptance criteria all pass | `✅ Done` |
-| Some work remains but progress exists | `🔵 In progress` |
-| Blocked by environment or external dependency | `🔴 Blocked` |
-
-Accept either English or Vietnamese status labels already present in the file; preserve the file's existing style when editing.
+> **What it is:** TypeScript cannot resolve the `@common/utils` path alias.
+>
+> **Why it happens:** The alias is declared in `tsconfig.json`, which the TypeScript
+> compiler reads. But Jest and Node runtime do not read `tsconfig.json` — they need
+> their own mapping configuration.
+>
+> **How to fix:**
+>
+> 1. Add `moduleNameMapper` to `jest.config.ts` so Jest knows where `@common/*` points.
+> 2. Alternatively, use `ts-jest` with `pathsToModuleNameMapper` to auto-derive the
+>    mapping from `tsconfig.json` — less duplication.
 
 ---
 
-## Close-out artifacts
+## Commit conventions
 
-For a completed task, the mentor should leave these files updated:
-
-1. task file status updated in `planning/todo/...`
-2. checklist updated in `planning/todo/checklists/...`
-3. learning log appended in `planning/todo/learning-log.md`
-4. review note created in `planning/todo/reviews/...`
-
-If one of these is missing, the close-out is incomplete.
-
----
-
-## Next-task rule
-
-When the user asks `what's next`:
-
-1. Keep the current phase order from `planning/todo/README.md`.
-2. Do not skip unfinished prerequisites.
-3. If the repo already contains partial implementation for an earlier task, still verify that earlier task before moving on.
-4. Prefer the next smallest actionable task, not the most interesting one.
-
----
-
-## Commit message hints
-
-Use Conventional Commits:
+Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```text
 <type>(<scope>): <short description>
 ```
 
-Examples:
+| Type       | When to use                                |
+| ---------- | ------------------------------------------ |
+| `feat`     | New feature or capability                  |
+| `chore`    | Setup, tooling, config (no business logic) |
+| `fix`      | Bug fix                                    |
+| `refactor` | Code change without behaviour change       |
+| `test`     | Adding or updating tests                   |
+| `docs`     | Documentation only                         |
+
+Examples from this project:
 
 ```text
-chore(docker): add postgres and redis compose services
-chore(prisma): connect prisma to local postgres
 feat(auth): implement JWT access token flow
-test(users): cover create-user validation rules
-docs(todo): mark task 03 as done after verification
+feat(docker): add postgres and redis containers
+chore(prisma): add initial schema and migrate
+fix(guard): handle expired token without 500 error
+test(auth): add e2e tests for login endpoint
 ```
+
+---
+
+## Task sequence
+
+```text
+phase-b: 00 → 01 → 02 → 02b → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → 13 → 14 → 15
+phase-c: 01 → 02 → 03 → 04 → 05 → 06
+phase-d: 01 → 02 → 03 → 04
+phase-e: 01 → 02
+```
+
+Phase B must be fully complete before starting Phase C.
