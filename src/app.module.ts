@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config'; // loads .env and exposes ConfigS
 import { appConfig, jwtConfig } from '@config/app.config';
 import { envValidationSchema } from '@config/env.validation';
 import { HealthModule } from '@health/health.module';
+import { PrismaModule } from '@common/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { HealthModule } from '@health/health.module';
         abortEarly: true,     // stop at first invalid var instead of collecting all errors
       },
     }),
+    PrismaModule,
     HealthModule,
   ],
 })

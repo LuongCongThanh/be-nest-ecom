@@ -1,16 +1,66 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider   = "prisma-client-js"
+  engineType = "library"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  firstName     String?
+  lastName      String?
+  phone         String?
+  role          Role           @default(USER)
+  isActive      Boolean        @default(true)
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+  addresses     Address[]
+  refreshTokens RefreshToken[]
+
+  @@index([deletedAt])
+  @@map("users")
+}
+
+model Address {
+  id            String   @id @default(uuid())
+  userId        String
+  label         String?
+  recipientName String
+  phone         String
+  street        String
+  ward          String?
+  district      String
+  city          String
+  country       String   @default("VN")
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String
+  familyId  String
+  tokenHash String    @unique
+  usedAt    DateTime?
+  revokedAt DateTime?
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_tokens")
 }
 
 enum Role {
@@ -18,63 +68,4 @@ enum Role {
   USER
   STAFF
   ADMIN
-}
-
-model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
-  password       String
-  firstName      String?
-  lastName       String?
-  phone          String?
-  role           Role      @default(USER)
-  isActive       Boolean   @default(true)
-  emailVerified  Boolean   @default(false)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  deletedAt      DateTime?
-
-  addresses      Address[]
-  refreshTokens  RefreshToken[]
-
-  @@index([deletedAt])
-  @@map("users")
-}
-
-model Address {
-  id           String   @id @default(uuid())
-  userId       String
-  label        String?
-  recipientName String
-  phone        String
-  street       String
-  ward         String?
-  district     String
-  city         String
-  country      String   @default("VN")
-  isDefault    Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@map("addresses")
-}
-
-model RefreshToken {
-  id         String    @id @default(uuid())
-  userId     String
-  familyId   String
-  tokenHash  String    @unique
-  usedAt     DateTime?
-  revokedAt  DateTime?
-  expiresAt  DateTime
-  createdAt  DateTime  @default(now())
-
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([familyId])
-  @@map("refresh_tokens")
 }

@@ -127,3 +127,75 @@
 - **Prettier `{ }` với space**: constructor body rỗng phải là `{}` không phải `{ }`.
 
 ---
+
+## Task 03 — Docker + PostgreSQL Setup
+
+**Date:** 2026-05-26
+**Phase:** B — Foundation
+
+### Task 03 — Kết quả verify
+
+- `docker-compose.yml` tạo ở root với PostgreSQL 16 + Redis 7 ✅
+- `.env` tạo từ `.env.example`, có đủ biến DB + Redis ✅
+- Kết nối PostgreSQL local thành công — `npx prisma db pull` nhận diện đúng 3 models ✅
+- `npx prisma migrate deploy` apply migration `20260525161724_init` thành công ✅
+- Đang dùng **PostgreSQL local** (Homebrew) thay vì Docker container — Docker Compose chưa chạy
+
+### Task 03 — Điều đã học
+
+- **Docker Compose là gì**: file YAML mô tả các container cần chạy (`services`), cách data được lưu (`volumes`), và cách kiểm tra container sẵn sàng (`healthcheck`). Chạy 1 lệnh `docker compose up -d` là tất cả khởi động.
+- **Tại sao cần healthcheck**: Prisma kết nối DB ngay khi app start. Nếu không có healthcheck, app có thể connect vào PostgreSQL đang khởi động và fail ngay từ đầu. Healthcheck đảm bảo Postgres báo `pg_isready` trước khi app kết nối.
+- **Named volumes (`pgdata`, `redisdata`)**: data tồn tại qua `docker compose down/up`, chỉ mất khi `docker compose down -v`. Docker tự quản lý vị trí lưu trữ.
+- **Cú pháp `${BIẾN:-mặc_định}`**: đọc từ `.env` nếu có, fallback về giá trị mặc định nếu không — tách config ra `.env` để không hardcode password trong code.
+- **Format `host:container` trong ports**: `5432:5432` — cổng bên trái là cổng máy bạn (DBeaver kết nối), cổng bên phải là cổng trong container.
+- **PostgreSQL Homebrew trên macOS**: superuser mặc định là username macOS (`thanh.luong`), không phải `postgres`. Không cần password khi kết nối local.
+
+### Task 03 — Lỗi gặp phải
+
+- **`Cannot find module 'dotenv/config'`** khi chạy `npx prisma db pull`: `prisma.config.ts` import `dotenv/config` nhưng package chưa cài. Fix: `npm install --save-dev dotenv`.
+- **P1010 — User denied access**: `DATABASE_URL` dùng `postgres:root123` nhưng PostgreSQL local không có user `postgres`. Fix: dùng user macOS — `DATABASE_URL=postgresql://thanh.luong@localhost:5432/ecom_db`.
+- **P4001 — Database empty**: `ecom_db` mới tạo nên chưa có table. Không phải lỗi kết nối — fix bằng `npx prisma migrate deploy`.
+
+### Task 03 — Ghi chú
+
+- Đang dùng local PostgreSQL Homebrew (port 5432) thay Docker. `docker-compose.yml` đã tạo sẵn để dùng khi cần môi trường chuẩn hoặc làm việc theo team.
+- Redis chưa setup — sẽ cần khi đến Task 10 (JWT + Redis).
+- Task 04 (Prisma Connect) đã được implement trong Task 07 (PrismaService, PrismaModule) — cần verify health endpoints trước khi mark Done.
+
+---
+
+## Task 04 — Kết nối Prisma với NestJS
+
+**Date:** 2026-05-26
+**Phase:** B — Foundation
+
+### Task 04 — Kết quả verify
+
+- `PrismaModule` import vào `AppModule` ✅
+- `[PrismaService] Prisma connected` xuất hiện khi app start ✅
+- App start thành công, không có lỗi ✅
+- `/health/ready` với DB check — chưa implement (sẽ làm tiếp)
+
+### Task 04 — Điều đã học
+
+- **Prisma 7 breaking change — engine mặc định**: Prisma 7 đổi engine mặc định từ "library" (Rust binary) sang "client" (Wasm). Engine "client" KHÔNG đọc `DATABASE_URL` trực tiếp — bắt buộc phải có `adapter` hoặc `accelerateUrl`.
+- **`@prisma/adapter-pg`**: driver adapter để kết nối PostgreSQL với Prisma 7 engine "client". Cách dùng: `new PrismaPg({ connectionString: process.env.DATABASE_URL })` rồi truyền vào `super({ adapter })`.
+- **Prisma 7 breaking change — constructor**: `super()` (không có argument) bây giờ throw `PrismaClientInitializationError`. Phải truyền ít nhất `super({ adapter })`.
+- **`prisma-client` vs `prisma-client-js`**: Prisma 7 có 2 generator. `prisma-client` (mới) sinh TypeScript source với `import.meta.url` — gây lỗi ESM/CJS. `prisma-client-js` sinh JavaScript compiled — tương thích NestJS CJS.
+- **Custom output directory sinh conflict**: khi `output = "../generated/prisma"`, Prisma generate cả file `.ts` (generator cũ) lẫn `.js` (generator mới). TypeScript compile `.ts` → overwrite `.js` → lỗi. Fix: bỏ custom `output`, dùng default `node_modules/.prisma/client`.
+
+### Task 04 — Lỗi gặp phải
+
+- **`exports is not defined in ES module scope`**: generator `prisma-client` sinh `.ts` dùng `import.meta.url`. TypeScript `module: nodenext` để nguyên `import.meta.url` trong CJS output → Node.js v24 load file như ESM → `exports` không tồn tại. Fix: đổi sang `prisma-client-js` + bỏ custom output.
+- **`engine: "classic"` không tồn tại trong `PrismaConfig`**: `prisma.config.ts` được generate với field `engine` không hợp lệ trong Prisma 7. Fix: xóa dòng `engine: "classic"`.
+- **`Cannot find module '../../../generated/prisma/index.js'`**: TypeScript compile `.ts` của generator cũ → `dist/generated/prisma/client.js` bị overwrite bởi code lỗi. Fix: xóa toàn bộ `.ts` cũ trong `generated/prisma/` + clear `dist/generated/`.
+- **`PrismaClientInitializationError: needs to be constructed with a non-empty, valid PrismaClientOptions`**: `super()` không có argument → Prisma 7 throw. Fix: `super({ adapter })`.
+- **`PrismaClientConstructorValidationError: Using engine type "client" requires either "adapter" or "accelerateUrl"`**: Prisma 7 engine "client" không nhận `DATABASE_URL` trực tiếp. `engineType = "library"` trong schema bị ignore. Fix: cài `@prisma/adapter-pg`, tạo adapter từ connection string, truyền vào constructor.
+
+### Task 04 — Ghi chú
+
+- `@prisma/adapter-pg` là cách chuẩn để kết nối PostgreSQL với Prisma 7.
+- Health endpoints `/health/live` và `/health/ready` cần implement thêm vào `HealthController` (việc tiếp theo).
+- `prisma.config.ts` chỉ dùng cho Prisma CLI (migrate, generate, studio) — không ảnh hưởng đến PrismaClient runtime. Runtime chỉ đọc từ adapter được truyền vào constructor.
+
+---

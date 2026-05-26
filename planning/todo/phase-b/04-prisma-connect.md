@@ -4,7 +4,7 @@
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 03
 **Ưu tiên**: 🔴 CAO (Data layer — mọi task sau đều cần)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: 🔵 In progress
 **Spec gốc**: [02-connect-postgres.md](../../setup/02-database/02-connect-postgres.md)
 
 > **Repo snapshot 2026-05-21:** repo chưa có thư mục `prisma/`, chưa có `@prisma/client`, `prisma` package, `PrismaModule`, `PrismaService`, hay `/health/ready`.
