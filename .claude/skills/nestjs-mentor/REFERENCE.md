@@ -4,6 +4,40 @@ Detailed formats and examples referenced from SKILL.md.
 
 ---
 
+## Docs URL table
+
+### npm packages (read `package.json` first)
+
+| Package pattern                        | Official docs URL                              |
+| -------------------------------------- | ---------------------------------------------- |
+| `@nestjs/*`                            | `https://docs.nestjs.com`                      |
+| `prisma`, `@prisma/*`                  | `https://www.prisma.io/docs`                   |
+| `jest`, `@types/jest`, `ts-jest`       | `https://jestjs.io/docs/getting-started`       |
+| `joi`                                  | `https://joi.dev/api`                          |
+| `typescript`, `typescript-eslint`      | `https://www.typescriptlang.org/docs`          |
+| `prettier`                             | `https://prettier.io/docs/en/index.html`       |
+| `eslint`, `eslint-*`                   | `https://eslint.org/docs/latest`               |
+| `rxjs`                                 | `https://rxjs.dev/guide/overview`              |
+| `@types/express`, `express`            | `https://expressjs.com/en/api.html`            |
+| `supertest`                            | `https://github.com/ladjs/supertest`           |
+| `bcrypt`, `bcryptjs`                   | `https://www.npmjs.com/package/bcrypt`         |
+| `@nestjs/passport`, `passport-*`       | `https://www.passportjs.org/docs`              |
+| `@nestjs/jwt`, `jsonwebtoken`          | `https://jwt.io/introduction`                  |
+| `class-validator`, `class-transformer` | `https://github.com/typestack/class-validator` |
+| `ioredis`, `redis`                     | `https://redis.io/docs`                        |
+| Any other npm package                  | `https://www.npmjs.com/package/<package-name>` |
+
+### Tools not in package.json
+
+Use WebSearch with `<tool name> official documentation`, e.g.:
+
+- `Docker Compose official documentation` → `docs.docker.com/compose`
+- `PostgreSQL 16 official documentation` → `postgresql.org/docs/current`
+
+Then use WebSearch with `site:` to find the exact section: `site:docs.nestjs.com guards`
+
+---
+
 ## Comprehension question examples
 
 Asked after the user confirms a step is done. One question at a time, targeting the _why_.
@@ -134,7 +168,7 @@ no mental model to debug from.
 
 When the user pastes an error, explain in 3 layers:
 
-```
+```markdown
 **What it is:** <translate the error message into plain language>
 
 **Why it happens:** <root mechanism — not just "file missing" but why the system
@@ -165,7 +199,7 @@ Error: `Cannot find module '@common/utils'`
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
-```
+```text
 <type>(<scope>): <short description>
 ```
 
@@ -180,7 +214,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 Examples from this project:
 
-```
+```text
 feat(auth): implement JWT access token flow
 feat(docker): add postgres and redis containers
 chore(prisma): add initial schema and migrate
@@ -192,7 +226,7 @@ test(auth): add e2e tests for login endpoint
 
 ## Task sequence
 
-```
+```text
 phase-b: 00 → 01 → 02 → 02b → 03 → 04 → 05 → 06 → 07 → 08 → 09 → 10 → 11 → 12 → 13 → 14 → 15
 phase-c: 01 → 02 → 03 → 04 → 05 → 06
 phase-d: 01 → 02 → 03 → 04
