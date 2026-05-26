@@ -176,68 +176,34 @@ gh pr create --title "feat(<phase>): <task name>" --base main
 
 ## Delegating to specialist skills
 
-Use the **Skill tool** to invoke these — do not just follow their description from memory.
+Use the **Skill tool** to invoke these — do not follow descriptions from memory. Always tell the user which skill you're invoking and why.
 
-### Session & learning
-
-| Situation                                                | Action                                                             |
-| -------------------------------------------------------- | ------------------------------------------------------------------ |
-| Task introduces a new NestJS/DDD term                    | Invoke `ubiquitous-language` → saves to `UBIQUITOUS_LANGUAGE.md`   |
-| User says "done for today" / "pausing"                   | Invoke `handoff` → creates session summary for next time           |
-| User asks "why are we doing this?" / seems lost          | Invoke `zoom-out` → maps the task in the broader architecture      |
-| Task uses external library heavily (JWT, Docker, Prisma) | Invoke `grill-with-docs` → comprehension grounded in official docs |
-
-### Debugging & quality
-
-| Situation                                           | Action                                                                 |
-| --------------------------------------------------- | ---------------------------------------------------------------------- |
-| Error not resolved after 2 attempts                 | Invoke `diagnose` → runs Reproduce→Minimise→Fix loop                   |
-| Task involves writing tests                         | Invoke `tdd` → Red→Green→Refactor cycle                                |
-| Reached Task 09 or user wants commit-time checks    | Invoke `setup-pre-commit` → configures Husky + lint-staged + typecheck |
-| Phase C/D/E — found a bug while testing an endpoint | Invoke `qa` → files GitHub issue from conversational bug report        |
-
-### Architecture & design
-
-| Situation                                                | Action                                                                            |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Phase B exit gate passed, about to start Phase C         | Invoke `improve-codebase-architecture` → reviews DDD structure via CONTEXT.md     |
-| Task 05 (Prisma schema) — unsure about data model        | Invoke `prototype` → sanity-checks schema/state-machine before migration          |
-| Phase D — planning error-logging or auth refactor        | Invoke `request-refactor-plan` → creates incremental refactor plan                |
-| Task 07 — explaining entities, value objects, aggregates | Invoke `ddd-tactical-patterns` → tactical DDD patterns with explicit invariants   |
-| Phase C — designing catalog/order bounded contexts       | Invoke `ddd-strategic-design` → subdomains, bounded contexts, ubiquitous language |
-| Task 14 or Phase C — reviewing REST endpoint design      | Invoke `api-design-principles` → REST best practices and API contract review      |
-| Task 02b or Phase D Task 02 — OpenAPI/Swagger spec       | Invoke `openapi-spec-generation` → generates and validates OpenAPI 3.1 spec       |
-
-### NestJS & TypeScript
-
-| Situation                                                | Action                                                                        |
-| -------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Tasks 10–14 — explaining guards, interceptors, pipes, DI | Invoke `nestjs-expert` → enterprise NestJS patterns grounded in official docs |
-| Any task with complex TypeScript types or decorators     | Invoke `typescript-pro` → advanced types, generics, strict type safety        |
-
-### Auth & security
-
-| Situation                                                | Action                                                                                                                       |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Tasks 10–13 — JWT, refresh token, session design         | Invoke `auth-implementation-patterns` → secure auth patterns and best practices                                              |
-| Any auth or security code review                         | Invoke `backend-security-coder` → proactive security audit for backend code                                                  |
-| Step 7 review — checking layered architecture compliance | Invoke `backend-dev-guidelines` → architecture doctrine review (ignore Express-specific conventions, use NestJS equivalents) |
-
-### Database
-
-| Situation                                               | Action                                                                            |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Tasks 04–06 — Prisma schema, migrations, queries        | Invoke `prisma-expert` → schema design, relations, migration strategy             |
-| Tasks 03–04 or Phase D — PostgreSQL schema/query review | Invoke `postgres-best-practices` → indexing, query patterns, schema conventions   |
-| Phase D — production database performance tuning        | Invoke `postgresql-optimization` → query tuning, explain plans, indexing strategy |
-
-### Error handling
-
-| Situation                                                 | Action                                                                          |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Phase D Task 01 — designing exception filters and logging | Invoke `error-handling-patterns` → resilient error boundaries and observability |
-
-Always tell the user which skill you're invoking and why before doing it.
+| Situation | Skill |
+| --------- | ----- |
+| Task introduces a new NestJS/DDD term | `ubiquitous-language` |
+| User says "done for today" / "pausing" | `handoff` |
+| User asks "why are we doing this?" / seems lost | `zoom-out` |
+| Task uses external library heavily (JWT, Docker, Prisma) | `grill-with-docs` |
+| Error not resolved after 2 attempts | `diagnose` |
+| Task involves writing tests | `tdd` |
+| Reached Task 09 or user wants commit-time checks | `setup-pre-commit` |
+| Phase C/D/E — found a bug while testing an endpoint | `qa` |
+| Phase B exit gate passed, about to start Phase C | `improve-codebase-architecture` |
+| Task 05 (Prisma schema) — unsure about data model | `prototype` |
+| Phase D — planning error-logging or auth refactor | `request-refactor-plan` |
+| Task 07 — entities, value objects, aggregates | `ddd-tactical-patterns` |
+| Phase C — designing catalog/order bounded contexts | `ddd-strategic-design` |
+| Task 14 or Phase C — reviewing REST endpoint design | `api-design-principles` |
+| Task 02b or Phase D Task 02 — OpenAPI/Swagger spec | `openapi-spec-generation` |
+| Tasks 10–14 — guards, interceptors, pipes, DI | `nestjs-expert` |
+| Any task with complex TypeScript types or decorators | `typescript-pro` |
+| Tasks 10–13 — JWT, refresh token, session design | `auth-implementation-patterns` |
+| Any auth or security code review | `backend-security-coder` |
+| Step 7 review — layered architecture compliance | `backend-dev-guidelines` |
+| Tasks 04–06 — Prisma schema, migrations, queries | `prisma-expert` |
+| Tasks 03–04 or Phase D — PostgreSQL schema/query review | `postgres-best-practices` |
+| Phase D — production database performance tuning | `postgresql-optimization` |
+| Phase D Task 01 — exception filters and logging | `error-handling-patterns` |
 
 ---
 
