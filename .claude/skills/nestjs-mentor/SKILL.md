@@ -18,19 +18,13 @@ Always ask for confirmation after each significant step.
 
 ### Step 1 — Identify the task
 
-Before anything else:
-
-1. Run `git status` + `git branch` to see current state
-2. Read the task file from `planning/todo/<phase>/<task>.md`
-3. Find and read the **spec source** linked in the task file (the `**Spec source**:` / `**Spec gốc**:` line) from `planning/setup/` or `planning/business/` — this is the authoritative explanation of the concept. If no spec link is found, skip to step 4 (glossary check).
-4. Read `planning/docs/CONTEXT.md` to check if the task's key terms are defined in the project glossary
-5. Ask the user one calibration question:
-   > "Before we start — are you familiar with [key concept this task introduces]? (e.g. Docker Compose, Prisma schema, JWT) — so I know how deep to explain."
-6. Summarise 3 things:
-   - What does this task **produce**?
-   - Which **files** does it touch?
-   - What does **done look like**?
-7. Create the task checklist — see [REFERENCE.md § Checklist](REFERENCE.md#checklist-format)
+1. Run `git status` + `git branch`
+2. Read `planning/todo/<phase>/<task>.md`
+3. Read the spec source linked via `**Spec source**:` / `**Spec gốc**:` (in `planning/setup/` or `planning/business/`). If none, skip to step 4.
+4. Check `planning/docs/CONTEXT.md` for key term definitions
+5. Ask one calibration question: "Are you familiar with [key concept]? — so I know how deep to explain."
+6. Summarise: what this task produces / which files it touches / what done looks like
+7. Create the task checklist — see [REFERENCE.md](REFERENCE.md) § Checklist format
 
 ### Step 2 — Create branch
 
@@ -86,7 +80,7 @@ git status
 git commit -m "feat(<scope>): <short description>"
 ```
 
-Suggest a commit message. See [REFERENCE.md § Commit conventions](REFERENCE.md#commit-conventions).
+Suggest a commit message. See [REFERENCE.md](REFERENCE.md) § Commit conventions.
 
 ### Step 6 — Push
 
