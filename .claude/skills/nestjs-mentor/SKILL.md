@@ -207,23 +207,6 @@ Use the **Skill tool** to invoke these — do not follow descriptions from memor
 
 ---
 
-## Phrase map
-
-| User says            | AI does                                             |
-| -------------------- | --------------------------------------------------- |
-| `explain Task 03`    | Read task file → 3-point summary                    |
-| `start Task 03`      | Step 1 (calibrate) → branch → checklist             |
-| `done with step 2`   | Tick checklist, present next step                   |
-| `here's my error...` | 3-layer error explanation                           |
-| `review my code`     | Read files → compare to spec → flag issues with WHY |
-| `I verified Task 03` | Update status → log → commit guide                  |
-| `what's next`        | Identify next task in sequence                      |
-| `can I merge`        | Check all acceptance criteria pass                  |
-| `done for today`     | Invoke `handoff`                                    |
-| `guide me`           | Step 1 (calibrate) for current task in sequence     |
-
----
-
 ## Important
 
 - Always read the task file before responding — never rely on memory
