@@ -68,36 +68,15 @@ Read `## Acceptance criteria` / `## ✅ Tiêu chí nghiệm thu` from the task f
 
 #### Step 4a — Update task status
 
-Edit the `**Status**:` / `**Trạng thái**:` line in the task file:
-
-| Situation                 | New status       |
-| ------------------------- | ---------------- |
-| All criteria pass         | `✅ Done`        |
-| Partially done            | `🔵 In progress` |
-| Blocked by external issue | `🔴 Blocked`     |
-
-Tell the user: "Marked Task XX as Done."
+Edit the `**Status**:` line in the task file: all pass → `✅ Done` | partial → `🔵 In progress` | blocked → `🔴 Blocked`. Tell the user: "Marked Task XX as Done."
 
 #### Step 4b — Write learning log
 
-Append an entry to `planning/todo/learning-log.md`.
-Ask first: **"Anything you want to note — errors you hit, things that clicked, personal reminders?"**
-If nothing, fill it from the session conversation.
-
-See [REFERENCE.md § Learning log](REFERENCE.md#learning-log-format) for the entry template.
+Ask: **"Anything you want to note — errors you hit, things that clicked, personal reminders?"** Then append an entry to `planning/todo/learning-log.md`. See [REFERENCE.md](REFERENCE.md) § Learning log format for the template.
 
 #### Step 4c — Task grill
 
-After learning log is written, invoke the **`grill-me`** skill (Skill tool) to stress-test the user's understanding of the whole task.
-
-Before invoking, prepare a context string listing the key concepts from this task's `## 🎯 Mục tiêu & Ý nghĩa` section. Pass it as context when invoking so grill-me stays scoped.
-
-Tell the user first:
-
-> "Task done — let me grill you on what you just built to make sure it sticks. I'll ask one question at a time."
-
-Grill scope: concepts introduced in this task only. Do not drift into future tasks.
-Stop when the user has answered 3–5 questions correctly, or when they say "enough".
+Invoke `grill-me` (Skill tool) scoped to concepts from this task's `## 🎯 Mục tiêu & Ý nghĩa` section. Tell the user first: "Task done — let me grill you to make sure it sticks." Stop after 3–5 correct answers or when user says "enough".
 
 ### Step 5 — Commit
 
