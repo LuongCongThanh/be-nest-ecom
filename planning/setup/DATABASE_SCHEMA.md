@@ -67,13 +67,18 @@ erDiagram
     }
 
     addresses {
-        int id PK
+        uuid id PK
         uuid userId FK
-        string fullName
+        string label
+        string recipientName
         string phone
-        string address
+        string street
+        string ward
+        string district
         string city
+        string country
         boolean isDefault
+        timestamp deletedAt
     }
 
     carts {
@@ -128,11 +133,13 @@ erDiagram
 
 ## Delete Strategy
 
-| Relationship                     | Rule         | Reason                                                    |
-| -------------------------------- | ------------ | --------------------------------------------------------- |
-| `Product` → `OrderItem`          | **RESTRICT** | Cannot delete a product that exists in a historical order |
-| `User` → `RefreshToken`, `Cart`  | **CASCADE**  | Session data is owned by the user — delete together       |
-| `Category` → `Product`           | **SET NULL** | Products become uncategorized, not deleted                |
+| Relationship                     | Rule                  | Reason                                                    |
+| -------------------------------- | --------------------- | --------------------------------------------------------- |
+| `Product` → `OrderItem`          | **RESTRICT**          | Cannot delete a product that exists in a historical order |
+| `User` → `RefreshToken`, `Cart`  | **CASCADE**           | Session data is owned by the user — delete together       |
+| `Category` → `Product`           | **SET NULL**          | Products become uncategorized, not deleted                |
+| `User` → `Address`               | **App-level soft-delete cascade** | Khi User bị soft-delete (`deletedAt` set), app chạy `UPDATE addresses SET deletedAt = NOW() WHERE userId = :id` trong cùng transaction. Address có field `deletedAt` riêng. |
+| `User` → `Order`, `Payment`      | **GIỮ NGUYÊN**        | Pháp lý/kiểm toán — không xóa hay soft-delete            |
 
 ---
 
@@ -176,6 +183,10 @@ CREATE INDEX idx_users_email_active ON users(email, isActive);
 
 -- Active Cart Resolution
 CREATE UNIQUE INDEX idx_carts_userId_active ON carts(userId, isActive);
+
+-- Default Address: chỉ 1 default per user (partial unique index — không hỗ trợ trực tiếp trong Prisma schema, phải thêm vào migration SQL)
+CREATE UNIQUE INDEX addresses_one_default_per_user
+ON addresses (userId) WHERE isDefault = true AND deletedAt IS NULL;
 ```
 
 ### Query Optimization Strategies
