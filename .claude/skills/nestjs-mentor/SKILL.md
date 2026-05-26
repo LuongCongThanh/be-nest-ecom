@@ -60,61 +60,9 @@ Never explain using only AI knowledge if an official doc or project spec exists.
 
 **How to find official docs:**
 
-**Step A — Read `package.json` first**
+Read `package.json` first to know what is installed, then look up the official docs URL in [REFERENCE.md § Docs URL table](REFERENCE.md#docs-url-table). For tools not in `package.json` (Docker, PostgreSQL, etc.), use WebSearch with `<tool> official documentation`. If the Context7 MCP server is available, prefer `mcp__plugin_context7_context7__resolve-library-id` + `mcp__plugin_context7_context7__query-docs` over raw WebFetch — it returns version-accurate docs.
 
-At the start of every session (or when a new package is mentioned), read `package.json` to know what is actually installed. Then map package names to their official docs using these rules:
-
-| Package pattern                        | Official docs URL                              |
-| -------------------------------------- | ---------------------------------------------- |
-| `@nestjs/*`                            | `https://docs.nestjs.com`                      |
-| `prisma`, `@prisma/*`                  | `https://www.prisma.io/docs`                   |
-| `jest`, `@types/jest`, `ts-jest`       | `https://jestjs.io/docs/getting-started`       |
-| `joi`                                  | `https://joi.dev/api`                          |
-| `typescript`, `typescript-eslint`      | `https://www.typescriptlang.org/docs`          |
-| `prettier`                             | `https://prettier.io/docs/en/index.html`       |
-| `eslint`, `eslint-*`                   | `https://eslint.org/docs/latest`               |
-| `rxjs`                                 | `https://rxjs.dev/guide/overview`              |
-| `@types/express`, `express`            | `https://expressjs.com/en/api.html`            |
-| `supertest`                            | `https://github.com/ladjs/supertest`           |
-| `bcrypt`, `bcryptjs`                   | `https://www.npmjs.com/package/bcrypt`         |
-| `@nestjs/passport`, `passport-*`       | `https://www.passportjs.org/docs`              |
-| `@nestjs/jwt`, `jsonwebtoken`          | `https://jwt.io/introduction`                  |
-| `class-validator`, `class-transformer` | `https://github.com/typestack/class-validator` |
-| `ioredis`, `redis`                     | `https://redis.io/docs`                        |
-| Any other npm package                  | `https://www.npmjs.com/package/<package-name>` |
-
-**Step B — For tools NOT in package.json** (Docker, PostgreSQL, Redis server, etc.)
-
-Use WebSearch with query: `<tool name> official documentation`
-
-Examples:
-
-- `Docker Compose official documentation` → finds `docs.docker.com/compose`
-- `PostgreSQL 16 official documentation` → finds `postgresql.org/docs/current`
-
-Then WebFetch the exact page found.
-
-**Step C — Fetch the right section**
-
-Use WebSearch with `site:` to find the exact page, then WebFetch that URL:
-
-```
-site:docs.nestjs.com guards
-site:www.prisma.io/docs migrate
-site:docs.docker.com compose networking
-```
-
-Do not dump the entire page — extract only the section that answers the user's question.
-
-**Optional — if the Context7 MCP server is available:**
-Call `mcp__plugin_context7_context7__resolve-library-id` with the library name to get the Context7 ID, then `mcp__plugin_context7_context7__query-docs` with that ID to fetch version-accurate docs. This returns cleaner, more structured content than raw WebFetch and matches the exact version in `package.json`.
-
-**Step D — Explain grounded in the source**
-
-- Quote the doc's own definition if it's short and precise
-- Explain in plain language — keep technical terms in English
-- Always connect to how **this project** uses it — note if project conventions differ from library defaults:
-  > "The official Prisma docs show X as default, but this project uses Y because [reason from spec file]"
+Explain grounded in the source: quote the doc's definition when short and precise, then connect to how **this project** uses it (note differences from library defaults).
 
 Read `## Steps` / `## 🛠️ Các bước thực hiện` from the task file.
 
