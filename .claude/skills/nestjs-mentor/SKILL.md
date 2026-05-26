@@ -49,58 +49,15 @@ If user tries to skip a task (e.g. "can we skip Task 04?"), warn:
 
 ### Step 3 — Walk through each step
 
-**Source priority when explaining any concept or library:**
+**Source priority:** project spec > project glossary (`CONTEXT.md`) > official docs > AI knowledge. Never use AI knowledge alone if a doc or spec exists.
 
-1. **Project spec** — read `planning/setup/` or `planning/business/` file linked via `**Spec source**:` / `**Spec gốc**:` in the task file
-2. **Project glossary** — check `planning/docs/CONTEXT.md` for term definitions
-3. **Official docs** — search the concept's homepage using WebSearch or WebFetch (see table below)
-4. **AI training knowledge** — only when none of the above have coverage
+**Finding docs:** read `package.json` first, then look up the URL in [REFERENCE.md](REFERENCE.md) § Docs URL table. For tools not in `package.json`, use WebSearch with `<tool> official documentation`. Prefer Context7 MCP (`resolve-library-id` + `query-docs`) over raw WebFetch when available.
 
-Never explain using only AI knowledge if an official doc or project spec exists.
+Read `## Steps` / `## 🛠️ Các bước thực hiện` from the task file. Present each step as: **What / Why this step matters / Library used / How / Expected result** — WHY always before HOW. See [REFERENCE.md](REFERENCE.md) § WHY explanation examples for the format.
 
-**How to find official docs:**
-
-Read `package.json` first to know what is installed, then look up the official docs URL in [REFERENCE.md § Docs URL table](REFERENCE.md#docs-url-table). For tools not in `package.json` (Docker, PostgreSQL, etc.), use WebSearch with `<tool> official documentation`. If the Context7 MCP server is available, prefer `mcp__plugin_context7_context7__resolve-library-id` + `mcp__plugin_context7_context7__query-docs` over raw WebFetch — it returns version-accurate docs.
-
-Explain grounded in the source: quote the doc's definition when short and precise, then connect to how **this project** uses it (note differences from library defaults).
-
-Read `## Steps` / `## 🛠️ Các bước thực hiện` from the task file.
-
-Present each step using this structure — **WHY always comes before HOW**:
-
-```
-#### Step N — <name>
-
-**What:** one-line description
-
-**Why this step matters:**
-<consequence of skipping it — what breaks, what stays hidden until too late>
-
-**Library / tool used:** (if any)
-- `<name>` — why this over the alternative? what problem does it solve?
-- Brief comparison if relevant (e.g. "bcrypt not md5 because...")
-
-**How:**
-<specific actions, files to create/edit, commands to run>
-
-**Expected result:**
-<what correct output looks like>
-```
-
-After each step, ask **two things in sequence**:
-
+After each step, ask two things in sequence:
 1. **Status check:** "Done with this step? Any errors?"
-2. **Comprehension check** (after user confirms done, no errors): ask exactly **one** question that probes the _why_ — not the mechanics.
-
-Comprehension question rules:
-
-- One question at a time — never a list
-- Target the _reason_, not the syntax (e.g. "Why does this need to be in the boot phase?" not "What flag do you pass?")
-- Give your recommended answer after the user responds — don't leave them hanging
-- If the user answers correctly, confirm it and move on
-- If the answer is off, redirect without lecturing: one short correction, then continue
-
-See [REFERENCE.md § Comprehension questions](REFERENCE.md#comprehension-question-examples) for examples.
+2. **Comprehension check** (one question only, targeting the _why_ not the mechanics). See [REFERENCE.md](REFERENCE.md) § Comprehension questions for examples and response rules.
 
 ### Step 4 — Verify
 
