@@ -160,8 +160,8 @@ export class CategoriesService {
 Tạo `src/modules/catalog/dto/create-product.dto.ts`:
 
 ```typescript
-import { IsString, IsNumber, IsOptional, IsUUID, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsNumberString, IsOptional, IsUUID } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateProductDto {
   @IsString()
@@ -175,14 +175,17 @@ export class CreateProductDto {
   @IsUUID()
   categoryId?: string;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
-  basePrice: number;
+  // Client gửi string hoặc number → server parse sang BigInt (đơn vị đồng VND)
+  @Transform(({ value }) => BigInt(value))
+  @IsNumberString()
+  basePrice: bigint;
 
-  @Type(() => Number)
-  @IsNumber()
-  @Min(0)
+  @IsOptional()
+  @Transform(({ value }) => BigInt(value))
+  @IsNumberString()
+  comparePrice?: bigint;
+
+  @Transform(({ value }) => Number(value))
   stock: number;
 }
 ```
@@ -390,7 +393,8 @@ POST http://localhost:3000/api/v1/products
 Authorization: Bearer <admin_token>
 Content-Type: application/json
 
-{ "name": "iPhone 15 Pro", "basePrice": 29990000, "stock": 100 }
+{ "name": "iPhone 15 Pro", "basePrice": "29990000", "stock": 100 }
+// basePrice gửi dưới dạng string — server parse sang BigInt. Response trả về string.
 
 ### Tìm kiếm product (public)
 GET http://localhost:3000/api/v1/products?search=iphone&page=1&limit=10

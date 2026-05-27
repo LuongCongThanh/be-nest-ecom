@@ -51,7 +51,7 @@ model Product {
   slug        String    @unique
   description String?
   categoryId  String?
-  basePrice   Decimal   @db.Decimal(12, 2)
+  basePrice   BigInt
   stock       Int       @default(0)
   isActive    Boolean   @default(true)
   createdAt   DateTime  @default(now())
@@ -76,7 +76,7 @@ model ProductVariant {
   productId  String
   name       String
   sku        String   @unique
-  price      Decimal  @db.Decimal(12, 2)
+  price      BigInt
   stock      Int      @default(0)
   attributes Json     @default("{}")
   isActive   Boolean  @default(true)

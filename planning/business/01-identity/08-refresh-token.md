@@ -42,8 +42,10 @@ Cân bằng UX (không bắt user re-login mỗi 30 phút) và bảo mật (acce
 
 ### 3. Replay detection
 
-- Nếu một RT đã có `usedAt != null` được dùng lại → **kill toàn bộ family** (revoke mọi RT cùng `familyId`).
-- Coi như attacker đã chiếm RT — buộc user re-login.
+- Nếu RT đã có `usedAt != null` được dùng lại:
+  - **Trong vòng 5 giây** kể từ `usedAt` → **5s Tolerance Window**: coi là retry do mạng mobile flaky. Server tra `replacedByTokenId` của RT cũ để tìm RT mới, trả lại cặp token mới đó. KHÔNG kill family.
+  - **Sau 5 giây** → coi là attacker đã chiếm RT → **kill toàn bộ family** (revoke mọi RT cùng `familyId`). Buộc user re-login.
+- `replacedByTokenId`: explicit pointer từ RT cũ → RT kế tiếp sau rotation. Dùng để tra cứu trong tolerance window.
 
 ### 4. Revocation triggers
 

@@ -23,8 +23,7 @@ Implement Order system: tạo order atomic (trừ stock + snapshot giá), state 
 enum OrderStatus {
   PENDING
   PAID
-  PROCESSING
-  SHIPPED
+  SHIPPING
   DELIVERED
   CANCELLED
   REFUNDED
@@ -35,8 +34,8 @@ model Order {
   orderNumber             String      @unique
   userId                  String
   status                  OrderStatus @default(PENDING)
-  subtotal                Decimal     @db.Decimal(12, 2)
-  total                   Decimal     @db.Decimal(12, 2)
+  subtotal                BigInt
+  grandTotal              BigInt
   shippingAddressSnapshot Json
   customerEmailSnapshot   String
   idempotencyKey          String?     @unique
@@ -61,9 +60,9 @@ model OrderItem {
   variantId            String?
   productNameSnapshot  String
   productSkuSnapshot   String?
-  priceSnapshot        Decimal @db.Decimal(12, 2)
+  priceSnapshot        BigInt
   quantity             Int
-  lineTotal            Decimal @db.Decimal(12, 2)
+  lineTotal            BigInt
 
   order   Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product         @relation(fields: [productId], references: [id])
@@ -101,17 +100,16 @@ Tạo `src/modules/order/services/order.service.ts`:
 
 ```typescript
 import { Injectable, BadRequestException, ConflictException, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+// Không import randomUUID — orderNumber sinh bằng Postgres sequence
 import { PrismaService } from '../../../common/prisma/prisma.service';
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
-  PENDING:    ['PAID', 'CANCELLED'],
-  PAID:       ['PROCESSING', 'REFUNDED'],
-  PROCESSING: ['SHIPPED'],
-  SHIPPED:    ['DELIVERED'],
-  DELIVERED:  [],
-  CANCELLED:  [],
-  REFUNDED:   [],
+  PENDING:   ['PAID', 'CANCELLED'],
+  PAID:      ['SHIPPING', 'CANCELLED', 'REFUNDED'],
+  SHIPPING:  ['DELIVERED', 'REFUNDED'],
+  DELIVERED: ['REFUNDED'],
+  CANCELLED: [],
+  REFUNDED:  [],
 };
 
 @Injectable()
@@ -176,12 +174,13 @@ export class OrderService {
         }
       }
 
-      // Tạo order number không phụ thuộc count() để tránh race condition
-      const orderNumber = `ORD-${new Date().getFullYear()}-${randomUUID().slice(0, 8).toUpperCase()}`;
+      // Postgres sequence — atomic, không collision, không cần retry
+      const [{ nextval }] = await tx.$queryRaw<[{ nextval: bigint }]>`SELECT nextval('order_number_seq')`;
+      const orderNumber = `ORD-${new Date().getFullYear()}-${String(nextval).padStart(6, '0')}`;
 
       const subtotal = cart.items.reduce(
-        (sum, item) => sum + Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
-        0
+        (sum, item) => sum + (item.variant?.price ?? item.product.basePrice) * BigInt(item.quantity),
+        0n
       );
 
       // Tạo order + items (snapshot giá tại thời điểm đặt hàng)
@@ -190,7 +189,7 @@ export class OrderService {
           orderNumber,
           userId,
           subtotal,
-          total: subtotal,
+          grandTotal: subtotal,
           idempotencyKey: dto.idempotencyKey,
           customerEmailSnapshot: user!.email,
           shippingAddressSnapshot: {
@@ -208,7 +207,7 @@ export class OrderService {
               productSkuSnapshot: item.variant?.sku ?? null,
               priceSnapshot: item.variant?.price ?? item.product.basePrice,
               quantity: item.quantity,
-              lineTotal: Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
+              lineTotal: (item.variant?.price ?? item.product.basePrice) * BigInt(item.quantity),
             })),
           },
           statusLogs: {

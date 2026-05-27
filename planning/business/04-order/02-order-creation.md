@@ -50,8 +50,10 @@ Checkout là **transaction quan trọng nhất của commerce flow**. Bất bi�
 
 ### Order Number generation
 
-- Format: `ORD-YYYYMMDD-XXXXX` (XXXXX là crypto-safe random 5 uppercase alphanumeric).
-- Collision → retry tối đa 5 lần.
+- Format: `ORD-{YYYY}-{6 chữ số padded}` (vd `ORD-2026-000123`).
+- Sinh bằng **Postgres sequence** `order_number_seq` — atomic, không collision, không cần retry.
+- Migration tạo sequence: `CREATE SEQUENCE order_number_seq START 1;`
+- Trong transaction: `SELECT nextval('order_number_seq')` → format thành `ORD-${year}-${val.toString().padStart(6, '0')}`.
 
 ---
 

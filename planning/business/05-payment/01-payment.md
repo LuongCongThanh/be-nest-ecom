@@ -90,6 +90,12 @@ interface PaymentProvider {
 - **When** reconciliation job chạy
 - **Then** alert log + email Admin với danh sách Order khả nghi
 
+**AC-8: Idempotency-Key chặn double payment initiation**
+- **Given** Client gửi 2 POST `/payment/:provider/initiate` với cùng `Idempotency-Key` header (mạng chậm, user bấm 2 lần)
+- **When** cả 2 request đến server
+- **Then** request 2 nhận lại đúng `redirectUrl` của request 1; KHÔNG tạo 2 payment session trên provider; Order không bị charge 2 lần
+- **Note**: dùng `IdempotencyService` (Task C-03b), không tự implement
+
 ---
 
 ## 🚫 Out of Scope
