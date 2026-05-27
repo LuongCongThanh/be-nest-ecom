@@ -25,7 +25,7 @@ Identity KHÔNG bao gồm Catalog/Cart/Order — các entity đó được đặ
 | :------------------- | :----------------- | :------------------------------------------------------------------------- |
 | **Data Foundation**  | TASK-106           | Chiến lược schema chung (snapshot, FK rules, delete strategy)              |
 | **Identity Entity**  | TASK-107           | User entity + Address entity (N per User + `isDefault`)                    |
-| **Authentication**   | TASK-114, 115, 116 | JWT strategy (15m access + 30d refresh rolling), Auth DTOs, Register/Login |
+| **Authentication**   | TASK-114, 115, 116 | JWT strategy (30 phút access + 7 ngày refresh, không rolling), Auth DTOs, Register/Login |
 | **Account Mgmt**     | TASK-118, 119, 120 | Users CRUD, Profile, Change Password (revoke all token families on change) |
 | **Session**          | TASK-123           | Refresh Token family + rotation + 5s tolerance window                      |
 | **Account Recovery** | TASK-124           | Email verification, Password reset                                         |
@@ -45,7 +45,7 @@ Identity chỉ được xem là đạt baseline khi **TẤT CẢ** điều kiệ
 
 1. ✅ User có thể đăng ký, đăng nhập, đổi mật khẩu, khôi phục mật khẩu, xác thực email.
 2. ✅ Mọi API non-public đều bị chặn nếu không có JWT hợp lệ.
-3. ✅ Token TTL: access **15 phút**, refresh **30 ngày rolling** (mỗi `/refresh` extend). Transport header `Authorization: Bearer`.
+3. ✅ Token TTL: access **30 phút**, refresh **7 ngày (không rolling)**. Transport header `Authorization: Bearer`.
 4. ✅ Refresh token family rotation hoạt động. Triggers revoke: T1 reuse revoked (sau 5s tolerance), T2 change password (revoke all), T3 logout-all-devices, T6 logout đơn.
 5. ✅ Password rule (NIST 2024): ≥8 ký tự + không trong top 100 common + check HaveIBeenPwned breach (k-anonymity). KHÔNG bắt complexity (hoa/số/đặc biệt).
 6. ✅ Role enum (`USER`/`STAFF`/`ADMIN`) đã đóng băng và có decorator phân quyền dùng được.

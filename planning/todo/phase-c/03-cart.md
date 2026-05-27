@@ -175,15 +175,15 @@ export class CartService {
       include: { items: { include: { product: true, variant: true } } },
     });
 
-    if (!cart) return { subtotal: 0, total: 0, items: [] };
+    if (!cart) return { subtotal: 0n, total: 0n, items: [] };
 
     const items = cart.items.map(item => ({
       ...item,
-      unitPrice: Number(item.variant?.price ?? item.product.basePrice),
-      lineTotal: Number(item.variant?.price ?? item.product.basePrice) * item.quantity,
+      unitPrice: item.variant?.price ?? item.product.basePrice,
+      lineTotal: (item.variant?.price ?? item.product.basePrice) * BigInt(item.quantity),
     }));
 
-    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0);
+    const subtotal = items.reduce((sum, item) => sum + item.lineTotal, 0n);
 
     return { subtotal, total: subtotal, items };
   }
@@ -328,4 +328,4 @@ GET http://localhost:3000/api/v1/cart
 
 ## Xong thì làm gì?
 
-→ [04-order.md](./04-order.md)
+→ [03b-idempotency.md](./03b-idempotency.md)

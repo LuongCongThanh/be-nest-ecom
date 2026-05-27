@@ -16,7 +16,7 @@ Mọi task **về nghiệp vụ** chia theo bounded context. Mỗi thư mục = 
 | Task | Mô tả |
 | :--- | :--- |
 | TASK-107 | User Entity (+ Address entity N per User, `isDefault`) |
-| TASK-114 | JWT Authentication (access 15m, refresh 30d rolling, Bearer header) |
+| TASK-114 | JWT Authentication (access 30 phút, refresh 7 ngày không rolling, Bearer header) |
 | TASK-115 | Auth DTOs (class-validator) |
 | TASK-116 | Register & Login |
 | TASK-118 | Users CRUD |

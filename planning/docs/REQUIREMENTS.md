@@ -158,7 +158,7 @@ flowchart LR
 
 - Tạo và cập nhật category.
 - Tạo và cập nhật product, bao gồm giá bán, SKU, tồn kho và trạng thái active.
-- Theo dõi đơn hàng theo trạng thái: pending, confirmed, processing, shipped, delivered, cancelled, refunded.
+- Theo dõi đơn hàng theo trạng thái: PENDING, PAID, SHIPPING, DELIVERED, CANCELLED, REFUNDED.
 - Theo dõi thanh toán: pending, paid, failed, refunded.
 
 ---

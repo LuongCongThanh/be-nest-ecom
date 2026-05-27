@@ -40,11 +40,11 @@ Thêm vào `prisma/schema.prisma`:
 
 ```prisma
 enum Role {
-  GUEST
   USER
   STAFF
   ADMIN
 }
+// KHÔNG thêm GUEST — Guest được track qua cookie guestSessionId, không có User row trong DB
 ```
 
 > **Tại sao dùng enum thay vì String?** Enum được validate ở tầng database — nếu code vô tình gán `role = "SUPERUSER"` thì PostgreSQL sẽ từ chối ngay, không cần viết validation thủ công. String thì database chấp nhận bất kỳ giá trị nào.

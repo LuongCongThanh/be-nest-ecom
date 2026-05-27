@@ -29,7 +29,7 @@ model Payment {
   id             String        @id @default(uuid())
   orderId        String        @unique
   provider       String        @default("VNPAY")
-  amount         Decimal       @db.Decimal(12, 2)
+  amount         BigInt
   status         PaymentStatus @default(PENDING)
   providerTxId   String?       @unique
   providerData   Json?
@@ -112,7 +112,7 @@ export class VNPayService {
       vnp_TxnRef: txnRef,
       vnp_OrderInfo: `Thanh toan don hang ${order.orderNumber}`,
       vnp_OrderType: 'other',
-      vnp_Amount: String(Number(order.total) * 100),
+      vnp_Amount: String(order.grandTotal * 100n), // VNPay nhận VND * 100; grandTotal là BigInt đơn vị đồng
       vnp_ReturnUrl: this.returnUrl,
       vnp_IpAddr: '127.0.0.1',
       vnp_CreateDate: createDate,

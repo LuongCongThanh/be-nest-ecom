@@ -258,7 +258,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 1. Cài `@nestjs/jwt`, `passport`, `passport-jwt`, `bcrypt`, `class-validator`.
 2. Bật `ValidationPipe` global trong `main.ts` (`whitelist`, `forbidNonWhitelisted`).
 3. DTO `RegisterDto` (email, password ≥ 8). Endpoint `POST /auth/register` → hash bcrypt → save.
-4. Endpoint `POST /auth/login` → compare bcrypt → sign JWT 15 phút.
+4. Endpoint `POST /auth/login` → compare bcrypt → sign JWT 30 phút.
 5. `JwtAuthGuard` (đăng ký global `APP_GUARD`) + `@Public()` decorator. `@CurrentUser()` để inject user.
 6. `GET /me` → trả user từ token. Test bằng Postman: không token → 401, sai token → 401.
 

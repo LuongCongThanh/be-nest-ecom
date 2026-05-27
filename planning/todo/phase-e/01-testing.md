@@ -81,15 +81,15 @@ describe('CartService', () => {
       prisma.cart.findUnique.mockResolvedValue({
         id: 'cart-1',
         items: [
-          { id: 'item-1', productId: 'p1', quantity: 2, product: { basePrice: 100000 } },
-          { id: 'item-2', productId: 'p2', quantity: 1, product: { basePrice: 50000 } },
+          { id: 'item-1', productId: 'p1', quantity: 2, product: { basePrice: 100_000n } },
+          { id: 'item-2', productId: 'p2', quantity: 1, product: { basePrice: 50_000n } },
         ],
       } as any);
 
       const result = await service.calculate('cart-1');
 
-      expect(result.subtotal).toBe(250000);
-      expect(result.total).toBe(250000);
+      expect(result.subtotal).toBe(250_000n);
+      expect(result.total).toBe(250_000n);
       expect(result.items).toHaveLength(2);
     });
 
@@ -97,12 +97,12 @@ describe('CartService', () => {
       prisma.cart.findUnique.mockResolvedValue({
         id: 'cart-1',
         items: [
-          { id: 'item-1', productId: 'p1', quantity: 3, product: { basePrice: 99000 } },
+          { id: 'item-1', productId: 'p1', quantity: 3, product: { basePrice: 99_000n } },
         ],
       } as any);
 
       const result = await service.calculate('cart-1');
-      expect(result.items[0].lineTotal).toBe(297000);
+      expect(result.items[0].lineTotal).toBe(297_000n);
     });
   });
 });

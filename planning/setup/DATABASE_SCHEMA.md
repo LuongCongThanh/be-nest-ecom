@@ -54,16 +54,18 @@ erDiagram
     }
 
     products {
-        int id PK
+        uuid id PK
         string name
         string slug UK
         string sku UK
-        decimal price
+        BigInt price
+        BigInt comparePrice "optional, >= price"
         int stock
         json images
-        int categoryId FK
+        uuid categoryId FK
         boolean isActive
         boolean isFeatured
+        timestamp deletedAt "soft-delete"
     }
 
     addresses {
@@ -88,48 +90,70 @@ erDiagram
     }
 
     cart_items {
-        int id PK
-        int cartId FK
-        int productId FK
+        uuid id PK
+        uuid cartId FK
+        uuid productId FK
         int quantity
-        decimal price
+        BigInt priceAtAdded "snapshot giá khi thêm vào cart"
     }
 
     orders {
-        int id PK
-        string orderNumber UK
+        uuid id PK
+        string orderNumber UK "ORD-{YYYY}-{6 digits}, Postgres sequence"
         uuid userId FK
-        decimal total
-        enum status
-        enum paymentStatus
-        json addressSnapshot
+        BigInt subtotal
+        BigInt discountAmount
+        BigInt shippingFee
+        BigInt vatTotal "MVP = 0"
+        BigInt grandTotal "= max(0,subtotal-discountAmount) + shippingFee"
+        string customerEmailSnapshot
+        json shippingAddressSnapshot "immutable snapshot tại checkout"
+        enum status "PENDING|PAID|SHIPPING|DELIVERED|CANCELLED|REFUNDED"
+        enum paymentStatus "UNPAID|PAID|REFUNDED"
+        timestamp placedAt
+        timestamp cancelledAt
+        timestamp deliveredAt
     }
 
     order_items {
-        int id PK
-        int orderId FK
-        int productId FK
-        string productName
-        decimal price
+        uuid id PK
+        uuid orderId FK
+        uuid productId FK
+        json productSnapshot "name, sku, image — immutable"
+        BigInt unitPrice "snapshot giá tại checkout"
         int quantity
+        BigInt lineTotal "= unitPrice × quantity"
     }
 
     payments {
-        int id PK
-        int orderId FK
-        enum method
-        decimal amount
-        enum status
-        string transactionId
+        uuid id PK
+        uuid orderId FK
+        string provider "vnpay|cod|stripe"
+        BigInt amount "= Order.grandTotal"
+        enum status "PENDING|PAID|FAILED|REFUNDED"
+        string providerTxId UK
+        json providerData
     }
 ```
+
+    idempotency_keys {
+        uuid id PK
+        string key UK "UUID do client sinh, header Idempotency-Key"
+        string resultId "orderId hoặc paymentId"
+        string bodyHash "SHA-256 của request body"
+        timestamp expiresAt "createdAt + 24h, cron cleanup"
+        timestamp createdAt
+    }
 
 ---
 
 ## Design Decisions
 
-- **Audit & Historical Integrity**: Price points and shipping addresses must never mutate retroactively. `cart_items` and `order_items` capture localized snapshots of the product prices. The `orders` table captures a static `addressSnapshot` JSON payload at the moment of checkout.
+- **Audit & Historical Integrity**: Price points and shipping addresses must never mutate retroactively. `cart_items` and `order_items` capture localized snapshots of the product prices. The `orders` table captures a static `shippingAddressSnapshot` JSON payload at the moment of checkout.
 - **Hierarchical Categories**: The `categories` table uses Adjacency List modeling (a `parentId` pointing to itself) to construct infinite-depth category trees (e.g., Electronics > Phones > Smartphones).
+- **Money Type = BigInt (đồng VND)**: Mọi field tiền dùng `BigInt` đơn vị đồng VND (không có cent). KHÔNG dùng `Decimal`/`Float`/`number`. Serialization ra JSON → convert BigInt sang `string` qua interceptor hoặc `@Transform`. Client nhận string và tự parse.
+- **Order Number = Postgres Sequence**: `order_number_seq` atomic counter, format `ORD-{YYYY}-{6 chữ số}` (vd `ORD-2026-000123`). Không dùng random/UUID cho orderNumber.
+- **Order Math Formula**: `grandTotal = max(0, subtotal - discountAmount) + shippingFee`. MVP: `vatTotal = 0`. Discount trừ TRƯỚC khi tính VAT (đúng luật thuế VN).
 
 ## Delete Strategy
 
