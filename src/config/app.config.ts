@@ -10,3 +10,7 @@ export const jwtConfig = registerAs('jwt', () => ({
 	expiresIn: process.env.JWT_EXPIRES_IN ?? '30m',
 	refreshExpiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN ?? '7d',
 }));
+
+export const databaseConfig = registerAs('database', () => ({
+	url: process.env.DATABASE_URL,
+}));
