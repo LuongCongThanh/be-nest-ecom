@@ -12,20 +12,27 @@ git checkout -b feat/<phase>/<task-slug>
 ## Commit template
 
 ```
-<type>(<phase>/<task-number>): <short description>
+<type>(<scope>): <short description>
 ```
 
 > Không thêm `Co-Authored-By: Claude` vào commit message.
 
-Ví dụ: `feat(phase-b/09): add global validation pipe`
+**Scope** phải là một trong: `auth | user | catalog | cart | order | payment | media | common | config | db`
+
+Chọn scope theo **domain/folder** của file thay đổi, không dùng phase/task number.
+
+Ví dụ:
+- `feat(common): add global validation pipe and exception filter`
+- `feat(auth): implement register and login endpoints`
+- `feat(config): add jwt and redis configuration`
 
 ## Kết thúc task
 
 ```powershell
 git add <files>
-git commit -m "feat(<phase>/<task-number>): <description>"
+git commit -m "feat(<scope>): <description>"
 git push -u origin feat/<phase>/<task-slug>
-gh pr create --base main --title "feat(<phase>/<task-number>): <description>" --body "..."
+gh pr create --base main --title "feat(<scope>): <description>" --body "..."
 # Chỉ merge khi user yêu cầu tường minh:
 # gh pr merge --squash --delete-branch
 ```
