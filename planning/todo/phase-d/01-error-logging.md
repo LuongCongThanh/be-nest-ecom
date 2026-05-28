@@ -1,15 +1,22 @@
 # Task D-01 — Error Filter + Logging + Response Transform
 
-**Phase**: D — Polish  
-**Ước lượng**: 5 giờ  
-**Phụ thuộc**: Phase C hoàn thành  
+**Phase**: D — Polish
+**Ước lượng**: 5 giờ
+**Phụ thuộc**: Phase C hoàn thành
+**Ưu tiên**: 🔴 BLOCKING (API contract — FE không thể parse response ổn định nếu thiếu chuẩn hóa này)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [01-error-filter.md](../../setup/04-cross-cutting/01-error-filter.md) · [02-logging.md](../../setup/04-cross-cutting/02-logging.md) · [03-response-transform.md](../../setup/04-cross-cutting/03-response-transform.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Nâng cấp GlobalExceptionFilter đầy đủ, thêm Request Logging Interceptor với correlation ID, và Response Transform Interceptor để wrap các JSON success response về format chuẩn.
+Nâng cấp GlobalExceptionFilter đầy đủ, thêm Request Logging Interceptor với correlation ID, và Response Transform Interceptor.
+
+- **GlobalExceptionFilter đã có một phần ở Phase B Task 09** — Phase D nâng cấp thêm: `requestId` (correlation ID), Prisma error mapping đầy đủ hơn, và log level phân biệt (warn cho 4xx, error cho 5xx).
+- **Correlation ID** (`X-Request-ID`): mỗi request có UUID duy nhất, xuất hiện trong log lẫn response header. Khi bug report đến, support team dùng correlation ID để trace log — không có thì debug rất khó.
+- **Response transform**: wrap success response về `{ success: true, data: ..., timestamp: ... }` — FE chỉ cần đọc `data` field, không cần xử lý raw object. `204 No Content` phải bypass interceptor (không wrap empty body).
+- **Log format chuẩn**: `[METHOD] /path 200 12ms [correlationId]` — parseable bởi log aggregation tool (Loki, CloudWatch) sau này.
 
 ---
 

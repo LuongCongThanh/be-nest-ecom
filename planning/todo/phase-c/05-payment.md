@@ -1,15 +1,24 @@
 # Task C-05 — VNPay Payment Integration
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 5 giờ  
-**Phụ thuộc**: Task C-04  
+**Phase**: C — Core MVP
+**Ước lượng**: 5 giờ
+**Phụ thuộc**: Task C-04
+**Ưu tiên**: 🟡 SHOULD (cần trước Phase C exit gate, nhưng có thể dùng mock VNPay để demo trước)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [01-payment.md](../../business/05-payment/01-payment.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
 Integrate VNPay: tạo payment URL, xử lý IPN/return callback (verify HMAC, idempotent), chuyển order PENDING → PAID atomic.
+
+- **HMAC-SHA512 signature verification**: VNPay gửi callback với chữ ký — phải verify trước khi xử lý. Bỏ qua bước này thì attacker có thể giả mạo callback để mark order là đã thanh toán mà không thực sự trả tiền.
+- **Idempotent IPN handler**: VNPay có thể gửi IPN callback nhiều lần (retry). Handler phải check `providerTxId` đã xử lý chưa — không để 1 payment xử lý 2 lần.
+- **Atomic order status update**: khi IPN success, cập nhật `Order.status = PAID` và tạo `Payment` record trong cùng 1 transaction.
+- **Mock-first approach**: Phase C có thể bắt đầu với mock VNPay (trả success ngay) để demo flow. Integrate VNPay sandbox thật sau khi flow đã ổn định.
+
+> 🟡 **Có thể dùng mock**: Nếu chưa có VNPay sandbox credentials, implement `MockPaymentService` trả `success` ngay — đủ để demo Phase C exit gate. VNPay thật integrate khi cần test payment flow đầy đủ.
 
 ---
 

@@ -35,13 +35,13 @@ graph LR
 
 ```text
 Phase A — Requirements & Design        [████████████████████] 100%  ✅ Đóng
-Phase B — Foundation Impl  (W1-4)      [███░░░░░░░░░░░░░░░░░]  18%  🔵 Đang làm
+Phase B — Foundation Impl  (W1-4)      [████████░░░░░░░░░░░░]  53%  🔵 Đang làm
 Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa (chờ B)
 Phase D — Polish Impl     (W10-11)    [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase E — Verification    (W12)       [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase F — Maintenance     (post-MVP)  [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Backlog
 ─────────────────────────────────────────────────────────────────────────
-TỔNG (Phase B-E, execution files)      [██░░░░░░░░░░░░░░░░░░]   7%  (2/29 done, 1 in progress)
+TỔNG (Phase B-E, execution files)      [████░░░░░░░░░░░░░░░░]  28%  (8/29 done, 1 in progress)
 ```
 
 ---
@@ -106,13 +106,25 @@ TỔNG (Phase B-E, execution files)      [██░░░░░░░░░░�
 
 ### Execution tracker (`todo/phase-b/`)
 
-| Task file | Status | Note |
-|------|:------:|------|
-| `todo/phase-b/00-tools-setup.md` | ⏳ | toolchain máy local không thể xác nhận chỉ từ repo; cần verify thủ công |
-| `todo/phase-b/01-nestjs-scaffold.md` | 🔵 | app scaffold + `/health` cơ bản + prefix + aliases đã có; structure target chưa hội tụ đủ |
-| `todo/phase-b/02-env-config.md` | ✅ | `ConfigModule` + schema validation + config factory đã khớp task |
-| `todo/phase-b/02b-swagger.md` | ✅ | Swagger bootstrap + `addBearerAuth()` + port qua `ConfigService` đã khớp task |
-| `todo/phase-b/03-docker-postgres.md` → `15-phase-b-exit-gate.md` | ⏳ | canonical execution chain |
+| Task file | Scope | Status | Note |
+| ------ | :-----: | :------: | ------ |
+| `00-tools-setup.md` | 🔴 BLOCKING | ✅ Done | 2026-05-22 |
+| `01-nestjs-scaffold.md` | 🔴 BLOCKING | ✅ Done | 2026-05-23 — app scaffold, `/health`, prefix, aliases |
+| `02-env-config.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — ConfigModule + schema validation |
+| `02b-swagger.md` | 🟡 SHOULD | ✅ Done | 2026-05-25 — Swagger bootstrap + addBearerAuth() |
+| `03-docker-postgres.md` | 🔴 BLOCKING | ✅ Done | 2026-05-26 — Docker compose PostgreSQL |
+| `04-prisma-connect.md` | 🔴 BLOCKING | ✅ Done | 2026-05-26 — PrismaService + driver adapter |
+| `05-prisma-schema.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — User/Address/RefreshToken schema |
+| `06-migrations.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — migration workflow |
+| `07-base-classes.md` | 🟡 SHOULD | ✅ Done | 2026-05-27 — PaginatedResult, slugify, generateOrderId, UserRepository |
+| `08-seed-data.md` | 🟡 SHOULD | 🔵 In progress | `admin@ecom.dev` + `user@ecom.dev` seed |
+| `09-validation-pipe.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `10-jwt-redis.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `11-guards-decorators.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `12-auth-feature.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `13-refresh-token.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `14-users-crud.md` | 🟡 SHOULD | ⏳ Not started | — |
+| `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ⏳ Not started | — |
 
 **Tổng ước**: ~32 giờ ≈ 4 tuần × 8h.
 
@@ -253,15 +265,19 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 [2026-05-21 00:20] [Phase B] [task-02/02b]       [UPDATE] `ConfigModule` đã load typed config factories; `main.ts` dùng `ConfigService` cho port. Nâng Task 02 và 02b lên DONE.
 ```
 
+[2026-05-28 00:00] [Phase B] [task-03..07]       [DONE] Docker+Postgres, Prisma connect, schema, migrations, base-classes hoàn thành.
+[2026-05-28 00:00] [Phase B] [task-08]            [IN PROGRESS] Seed data đang làm.
+[2026-05-28 00:00] [docs]    [refactor-planning]  [DONE] Issue #7: sync planning/setup spec + todo/ task files. 10 commits trên branch docs/sync-planning-todo-consistency. Fixes: generateId→generateOrderId drift, thêm scope labels (BLOCKING/SHOULD/BACKLOG) toàn bộ Phase B-E, upgrade Phase C-E từ format ngắn lên format đầy đủ, thêm Prisma 7 adapter note vào spec.
+
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Cài tools Tuần 0** — Node 20 + Docker Desktop + DBeaver + VSCode extensions (ESLint/Prettier/Prisma/REST Client).
-2. **Init repo** — `npm init nest`, `git init`, commit "chore: scaffold NestJS".
-3. **Task `01-bootstrap-nestjs`** — đọc spec ở `setup/01-project/01-bootstrap-nestjs.md`, code theo Acceptance Criteria, verify `GET /health` 200.
+1. **Hoàn thành Task 08** — chạy `npx prisma db seed`, verify bảng `users` có 2 rows, `addresses` có 3 rows.
+2. **Task 09 — Validation Pipe** — chú ý chạy `npm install` + `npx prisma generate` trước `npm run build` (xem note trong task file).
+3. **Task 10 → 12** — JWT setup → Guards → Auth register/login. Cuối chuỗi này có thể demo `POST /auth/register` + `POST /auth/login` → access token.
 
 ---
 

@@ -1,14 +1,20 @@
 # Task E-02 — Ship: UAT + Release v1.0.0
 
-**Phase**: E — Verification  
-**Ước lượng**: 3 giờ  
-**Phụ thuộc**: Task E-01  
+**Phase**: E — Verification
+**Ước lượng**: 3 giờ
+**Phụ thuộc**: Task E-01
+**Ưu tiên**: 🔴 BLOCKING (final ship gate — project không hoàn thành nếu thiếu task này)
+**Trạng thái**: ⏳ Not started
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
 Manual UAT checklist, cập nhật README, tạo CHANGELOG, tag release v1.0.0.
+
+- **README viết sau khi có code**: theo nguyên tắc của roadmap — viết README khi đã có cái để mô tả, không viết placeholder trước. Task này là thời điểm đúng nhất.
+- **CHANGELOG = learning log dạng release**: liệt kê các features đã implement theo phase — nhìn lại hành trình tự học và cũng là artifact đẹp để show portfolio.
+- **`git tag v1.0.0`**: đánh dấu milestone rõ ràng — sau đây là backlog features, không phải MVP fixes.
 
 ---
 

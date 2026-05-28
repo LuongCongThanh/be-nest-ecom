@@ -30,5 +30,5 @@
 - Global ValidationPipe đăng ký ở `main.ts` (xem template trong CONVENTIONS §14).
 - Global AuthGuard ở `APP_GUARD`. `@Public()`, `@CurrentUser()`, `@Roles()` chạy đúng.
 - Shared utilities/repository boundary được chuẩn hóa; không bắt buộc generic `BaseRepository<T>` nếu abstraction đó làm giảm type-safety.
-- `slugify()` + `formatCurrency()` + `generateId(prefix)` ở `src/shared/utils/`.
+- `slugify()` + `formatCurrency()` + `generateOrderId(sequence)` ở `src/shared/utils/`.
 - Seed script tạo 1 admin + 5 category + 20 product, idempotent.
