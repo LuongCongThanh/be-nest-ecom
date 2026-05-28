@@ -6,7 +6,7 @@ Mỗi task phải theo đúng quy trình sau. Xem chi tiết tại `docs/git-wor
 
 ```powershell
 git checkout main && git pull origin main
-git checkout -b ThanhLuongCong/feat/<phase>/<task-slug>
+git checkout -b feat/<phase>/<task-slug>
 ```
 
 ## Commit template
@@ -15,6 +15,8 @@ git checkout -b ThanhLuongCong/feat/<phase>/<task-slug>
 <type>(<phase>/<task-number>): <short description>
 ```
 
+> Không thêm `Co-Authored-By: Claude` vào commit message.
+
 Ví dụ: `feat(phase-b/09): add global validation pipe`
 
 ## Kết thúc task
@@ -22,10 +24,10 @@ Ví dụ: `feat(phase-b/09): add global validation pipe`
 ```powershell
 git add <files>
 git commit -m "feat(<phase>/<task-number>): <description>"
-git push -u origin <branch>
-gh pr create --base main --title "feat(<phase>/<task-number>): <description>"
-# self-review diff → squash merge → delete branch
-gh pr merge --squash --delete-branch
+git push -u origin feat/<phase>/<task-slug>
+gh pr create --base main --title "feat(<phase>/<task-number>): <description>" --body "..."
+# Chỉ merge khi user yêu cầu tường minh:
+# gh pr merge --squash --delete-branch
 ```
 
 ---
@@ -33,10 +35,12 @@ gh pr merge --squash --delete-branch
 # nestjs-mentor
 
 - **nestjs-mentor** (`.claude/skills/nestjs-mentor/SKILL.md`) — hướng dẫn tự học NestJS theo từng task
-- Trigger khi user nhắc đến: "task tiếp theo", "giải thích task", "bắt đầu task", "làm task", "hướng dẫn tôi", "phase-b", "phase-c", "phase-d", "phase-e", hoặc số task (Task 03, Task 10...)
+- Trigger khi user nhắc đến: "task tiếp theo", "giải thích task", "bắt đầu task", "làm task", hoặc số task cụ thể (Task 03, Task 10...)
 - Khi user nói `/nestjs-mentor`, gọi Skill tool với `skill: "nestjs-mentor"`
 
-## Agent skills
+---
+
+# Agent Skills
 
 ### Issue tracker
 

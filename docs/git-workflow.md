@@ -8,7 +8,7 @@ Quy trình làm việc cho mỗi task trong dự án.
 
 ```
 main
- └── checkout → ThanhLuongCong/feat/<phase>/<task-slug>
+ └── checkout → feat/<phase>/<task-slug>
                       ↓ làm task
                       ↓ commit
                       ↓ push
@@ -26,16 +26,16 @@ Mỗi task là một branch riêng. Checkout từ `main`:
 ```powershell
 git checkout main
 git pull origin main
-git checkout -b ThanhLuongCong/feat/<phase>/<task-slug>
+git checkout -b feat/<phase>/<task-slug>
 ```
 
 **Ví dụ:**
 
 ```powershell
-git checkout -b ThanhLuongCong/feat/phase-b/09-validation-pipe
+git checkout -b feat/phase-b/09-validation-pipe
 ```
 
-**Convention đặt tên branch:** `<username>/feat/<phase>/<task-slug>`
+**Convention đặt tên branch:** `feat/<phase>/<task-slug>`
 
 ---
 
@@ -85,7 +85,7 @@ git commit -m "feat(phase-b/09): add global validation pipe with class-validator
 ## Bước 4 — Push
 
 ```powershell
-git push -u origin ThanhLuongCong/feat/<phase>/<task-slug>
+git push -u origin feat/<phase>/<task-slug>
 ```
 
 ---
@@ -116,7 +116,7 @@ gh pr merge --squash --delete-branch
 
 ```
 [ ] git checkout main && git pull
-[ ] git checkout -b ThanhLuongCong/feat/<phase>/<task>
+[ ] git checkout -b feat/<phase>/<task>
 [ ] ... làm task ...
 [ ] git add <files>
 [ ] git commit -m "feat(<phase>/<task-number>): <description>"
