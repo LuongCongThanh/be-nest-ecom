@@ -8,11 +8,11 @@ import { PrismaModule } from '@common/prisma/prisma.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true,         // no need to re-import ConfigModule in child modules
+      isGlobal: true, // no need to re-import ConfigModule in child modules
       load: [appConfig, jwtConfig, databaseConfig],
       validationSchema: envValidationSchema, // validate .env on startup; missing required vars crash the process
       validationOptions: {
-        abortEarly: true,     // stop at first invalid var instead of collecting all errors
+        abortEarly: true, // stop at first invalid var instead of collecting all errors
       },
     }),
     PrismaModule,

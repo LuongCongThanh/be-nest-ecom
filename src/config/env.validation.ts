@@ -3,9 +3,7 @@ import Joi from 'joi';
 // Validated at app startup — missing or invalid values will crash the process immediately.
 export const envValidationSchema = Joi.object({
   // App
-  NODE_ENV: Joi.string()
-    .valid('development', 'production', 'test')
-    .default('development'),
+  NODE_ENV: Joi.string().valid('development', 'production', 'test').default('development'),
   PORT: Joi.number().default(3000),
 
   // Database
