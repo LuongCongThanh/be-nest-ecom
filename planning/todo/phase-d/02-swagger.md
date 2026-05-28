@@ -1,15 +1,22 @@
 # Task D-02 — Swagger / OpenAPI
 
-**Phase**: D — Polish  
-**Ước lượng**: 2 giờ  
-**Phụ thuộc**: Task D-01  
+**Phase**: D — Polish
+**Ước lượng**: 2 giờ
+**Phụ thuộc**: Task D-01
+**Ưu tiên**: 🟡 SHOULD (DX — không block ship nhưng cần trước exit gate)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [04-swagger.md](../../setup/04-cross-cutting/04-swagger.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Hoàn thiện Swagger UI tại `/docs`. Mọi endpoint phải có documentation, DTO phải có examples, và phải khớp với response envelope thực tế của project.
+Hoàn thiện Swagger UI tại `/docs`. Mọi endpoint phải có documentation, DTO phải có examples, và khớp với response envelope thực tế.
+
+- **Swagger đã setup ở Phase B Task 02b** — Phase D chỉ hoàn thiện: thêm `@ApiTags`, `@ApiOperation`, `@ApiProperty` + examples cho tất cả DTOs đã implement trong Phase C.
+- **`@ApiBearerAuth()` trên các endpoint cần auth**: Swagger UI có nút "Authorize" để test trực tiếp với JWT — không cần copy-paste token thủ công vào Postman.
+- **Consistent với response envelope**: nếu D-01 đã thêm `ResponseTransformInterceptor`, Swagger docs phải reflect đúng format `{ success, data, timestamp }` — không mô tả raw object.
+- **Không tạo Swagger từ đầu**: chỉ extend config đã có từ Phase B. Kiểm tra `/docs` đang chạy trước khi làm task này.
 
 ---
 
