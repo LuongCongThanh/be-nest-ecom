@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 3 giờ
 **Phụ thuộc**: Task 12
-**Ưu tiên**: 🔴 CAO (Security — UX không thể dùng nếu thiếu, và thiếu thì có lỗ hổng bảo mật)
+**Ưu tiên**: 🔴 BLOCKING (Security — UX không thể dùng nếu thiếu, và thiếu thì có lỗ hổng bảo mật)
 **Trạng thái**: ⏳ Not started
 **Spec gốc**: [08-refresh-token.md](../../business/01-identity/08-refresh-token.md)
 

@@ -1,15 +1,23 @@
 # Task E-01 — Unit Tests + E2E Tests
 
-**Phase**: E — Verification  
-**Ước lượng**: 10 giờ  
-**Phụ thuộc**: Phase D hoàn thành  
+**Phase**: E — Verification
+**Ước lượng**: 10 giờ
+**Phụ thuộc**: Phase D hoàn thành
+**Ưu tiên**: 🔴 BLOCKING (ship gate — không ship code chưa có test coverage)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [01-unit-tests.md](../../setup/05-scale-infra/01-unit-tests.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Viết unit tests cho service layer (coverage ≥ 60%) và E2E tests cho full flow. CartService.calculate() và OrderService.createOrder() phải có 100% branch coverage.
+Viết unit tests cho service layer (coverage ≥ 60%) và E2E tests cho full flow.
+
+- **Test sau khi code chạy được** (không TDD ở phase này): self-learner cần "see it work" trước — tests confirm behavior đúng, không phải drive design. Sau MVP, áp dụng TDD cho feature mới.
+- **`CartService.calculate()` và `OrderService.createOrder()` — 100% branch**: hai hàm này chứa business logic quan trọng nhất (price calculation, stock check, atomic transaction). Bug ở đây = money issue.
+- **`@golevelup/ts-jest` để mock Prisma**: mock PrismaService mà vẫn có type-safety. Không dùng `jest.fn()` raw vì mất type hints. Prior art: xem `CONVENTIONS.md §9`.
+- **E2E test 1 happy path**: `POST /auth/register → /auth/login → /products → /cart/items → /orders` — đủ để confirm integration không bị broken. Không cần test mọi edge case ở E2E level.
+- **Coverage target Phase E**: service layer ≥ 60%, controllers không tính (test ở E2E level đủ rồi).
 
 ---
 

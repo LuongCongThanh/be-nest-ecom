@@ -1,7 +1,18 @@
 # Task D-04 — Phase D Exit Gate
 
-**Phase**: D — Polish  
-**Ước lượng**: 1 giờ  
+**Phase**: D — Polish
+**Ước lượng**: 1 giờ
+**Phụ thuộc**: Task D-01 → D-03 đều phải DONE
+**Ưu tiên**: 🔴 BLOCKING — phải pass trước khi mở Phase E
+**Trạng thái**: ⏳ Not started
+
+---
+
+## 🎯 Mục tiêu & Ý nghĩa
+
+Verify toàn bộ Phase D hoạt động trước khi chuyển sang Phase E (Testing & Ship).
+
+- **Gate function**: Phase E sẽ viết tests dựa trên behavior đã stable ở Phase D. Nếu error format, response envelope hay auth flow còn thay đổi thì tests sẽ flaky.
 
 ---
 

@@ -1,17 +1,24 @@
 # Task C-03 — Shopping Cart
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 4 giờ  
-**Phụ thuộc**: Task C-02  
+**Phase**: C — Core MVP
+**Ước lượng**: 4 giờ
+**Phụ thuộc**: Task C-02
+**Ưu tiên**: 🔴 BLOCKING (checkout flow — không có cart thì không có order)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [02-shopping-cart.md](../../business/03-cart/02-shopping-cart.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
 Implement Shopping Cart với guest cart (cookie) và user cart (JWT). Khi guest login → merge cart.
 
-> Vì Phase B đang dùng default-deny global auth, các endpoint cart cần `@Public()` kết hợp với một cơ chế optional auth riêng nếu muốn vừa đọc được JWT user, vừa cho guest vào. Nếu chưa có `OptionalJwtAuthGuard`, hãy implement nó trước khi làm controller này.
+- **`priceAtAdded` snapshot**: lưu giá tại thời điểm thêm vào giỏ, không phải giá hiện tại. Khi `GET /cart`, compare `priceAtAdded` vs `product.price` để hiện cờ `priceChanged: true` — UX tốt, không bất ngờ khi checkout.
+- **Guest cart (cookie-based)**: user chưa login vẫn thêm được sản phẩm. Cookie lưu guest session ID. Khi login → merge guest cart vào user cart (tránh mất giỏ hàng đã chọn).
+- **Idempotent `addItem`**: nếu product đã có trong giỏ thì cộng quantity, không tạo thêm row. Giúp UI "thêm vào giỏ" nhiều lần không bị duplicate.
+- **1 active cart/user**: khi order PENDING → PAID, cart bị xóa. Mỗi user chỉ có 1 cart active tại 1 thời điểm.
+
+> ⚠️ **Lưu ý quan trọng**: Phase B dùng default-deny global auth. Cart endpoint cần `@Public()` + `OptionalJwtAuthGuard` để vừa serve guest (không có token) vừa serve authenticated user (có token). Implement `OptionalJwtAuthGuard` trước khi làm CartController.
 
 ---
 

@@ -22,20 +22,25 @@ Chuẩn hóa **base fields** + **shared utilities** + định hướng tách l�
 
 ### Repository boundary
 
-- [ ] Nếu module có query logic phức tạp, tạo repository concrete riêng cho module đó (`users.repository.ts`, `orders.repository.ts`, ...).
-- [ ] Không bắt buộc `BaseRepository<T>` generic. Nếu có shared contract/helper thì nó phải giữ được type-safety, không dùng dynamic model lookup mù mờ.
+- [ ] Nếu module có query logic phức tạp (soft-delete filter, eager load, pagination), tạo repository concrete riêng (`users.repository.ts`, `orders.repository.ts`, ...).
+- [ ] Không bắt buộc `BaseRepository<T>` generic — dynamic model lookup (`prisma[modelName]`) làm mất type-safety vốn là lợi thế lớn nhất của Prisma. Phase B không tạo generic base.
 - [ ] Với module rất mỏng, service có thể dùng Prisma trực tiếp nếu code vẫn rõ ràng và dễ test.
+
+  > **Quyết định thực tế (Phase B)**: `UserRepository` được tạo với 2 methods — `findActiveById` và `findByEmail` — để encapsulate soft-delete filter. Các module mỏng hơn (Address) dùng Prisma trực tiếp trong service.
 
 ### Shared utilities (ở `src/shared/utils/`)
 
 - [ ] `slugify(text: string): string` — URL-safe, lowercase, ASCII fold.
 - [ ] `formatCurrency(amount: number, locale?: string): string` — default `vi-VN` VND.
-- [ ] `generateId(prefix: string): string` — chỉ dùng cho ID nghiệp vụ (vd `ORD-2026-000123`), không thay UUID.
+- [ ] `generateOrderId(sequence: number): string` — chỉ dùng cho ID nghiệp vụ human-readable (vd `ORD-2026-000001`), không thay UUID. Prefix và year được hard-code trong util; `sequence` lấy từ DB counter khi implement Order feature (Phase C).
+
+  > **Quyết định thực tế**: tên `generateOrderId` rõ ràng hơn `generateId(prefix)` vì util này chỉ dùng cho Order. Nếu sau này cần ID nghiệp vụ cho entity khác, tạo util riêng (vd `generateInvoiceId`) thay vì generic prefix-based util.
 
 ### Tests
 
 - [ ] Soft-delete user → `findById` trả `null`, raw `SELECT *` thấy `deletedAt` set.
 - [ ] `slugify("Điện Thoại 15 Pro")` → `"dien-thoai-15-pro"`.
+- [ ] `generateOrderId(1)` → `"ORD-2026-000001"`.
 - [ ] Repository concrete hoặc Prisma dependency mock được rõ ràng cho unit test service.
 
 ---

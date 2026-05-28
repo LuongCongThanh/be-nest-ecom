@@ -3,8 +3,8 @@
 **Phase**: B — Foundation
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 07
-**Ưu tiên**: 🟡 TRUNG BÌNH (Developer experience — không block build, nhưng verify rất khó nếu thiếu)
-**Trạng thái**: ⏳ Not started
+**Ưu tiên**: 🟡 SHOULD (Developer experience — không block build ngay, nhưng thiếu thì verify Task 12+ rất chậm)
+**Trạng thái**: ✅ Done
 **Spec gốc**: [02-seed-data.md](../../setup/03-conventions/02-seed-data.md)
 
 ---

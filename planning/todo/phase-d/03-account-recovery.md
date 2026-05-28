@@ -1,15 +1,24 @@
 # Task D-03 — Account Recovery (Email Verification + Forgot Password)
 
-**Phase**: D — Polish  
-**Ước lượng**: 5 giờ  
-**Phụ thuộc**: Task D-02  
+**Phase**: D — Polish
+**Ước lượng**: 5 giờ
+**Phụ thuộc**: Task D-02
+**Ưu tiên**: 🟡 SHOULD (UX security — cần cho production, có thể skip nếu demo internal)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [09-account-recovery.md](../../business/01-identity/09-account-recovery.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Implement email verification flow và forgot password flow với one-time token. `PASSWORD_RESET` hết hạn sau 1 giờ; `EMAIL_VERIFICATION` nên dài hơn, ví dụ 24 giờ.
+Implement email verification flow và forgot password flow với one-time token.
+
+- **One-time token**: token dùng được đúng 1 lần — sau khi click link verify/reset thì `usedAt` được set. Nếu click link lần 2 thì trả lỗi `TOKEN_ALREADY_USED`. Không dùng JWT cho flow này vì không thể revoke JWT đã phát.
+- **`PASSWORD_RESET` expiry 1 giờ, `EMAIL_VERIFICATION` 24 giờ**: password reset nhạy cảm hơn nên TTL ngắn. Email verify cho user nhiều thời gian hơn để check inbox.
+- **Hash token trước khi lưu DB**: giống refresh token — chỉ lưu hash, không lưu raw token. Nếu DB bị lộ thì token đã phát không dùng được.
+- **Dùng Mailtrap cho dev**: Mailtrap chặn email thật, chỉ hiện trong UI — không bao giờ spam user thật khi develop. Đổi sang Resend/SES khi production.
+
+> `PASSWORD_RESET` expires 1 giờ; `EMAIL_VERIFICATION` expires 24 giờ.
 
 ---
 

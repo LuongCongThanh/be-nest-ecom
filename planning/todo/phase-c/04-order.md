@@ -1,17 +1,25 @@
 # Task C-04 — Order Creation & Management
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 7 giờ  
-**Phụ thuộc**: Task C-03  
+**Phase**: C — Core MVP
+**Ước lượng**: 7 giờ
+**Phụ thuộc**: Task C-03
+**Ưu tiên**: 🔴 BLOCKING (MVP milestone — đây là tính năng cốt lõi nhất của e-commerce)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [02-order-creation.md](../../business/04-order/02-order-creation.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Implement Order system: tạo order atomic (trừ stock + snapshot giá), state machine, cleanup job cho order pending quá 15 phút.
+Implement Order system: tạo order atomic (trừ stock + snapshot giá), state machine, cleanup job.
 
-> Order creation phải an toàn với concurrency. Không dùng `count() + 1` để sinh `orderNumber` vì có race condition khi 2 request tạo order cùng lúc.
+- **Atomic transaction = all or nothing**: khi checkout, phải đồng thời (1) kiểm tra stock đủ, (2) trừ stock, (3) tạo Order + OrderItem với snapshot, (4) xóa cart. Nếu bất kỳ bước nào fail thì rollback toàn bộ — không có tình trạng "tiền đã trừ nhưng stock không giảm".
+- **`productSnapshot` JSONB**: lưu toàn bộ thông tin product (tên, giá, sku) vào OrderItem tại thời điểm order. Order là tài liệu pháp lý — không được thay đổi khi product gốc bị edit/xóa sau này.
+- **State machine**: chỉ cho phép transition hợp lệ (`PENDING → PAID`, `PENDING → CANCELLED`, v.v.). Service phải có `assertCanTransition(from, to)` để throw lỗi rõ ràng thay vì để invalid state vào DB.
+- **Cleanup job**: order PENDING quá 15 phút tự động CANCELLED + restore stock. Tránh stock bị giữ vô thời hạn bởi abandoned checkout.
+- **`orderNumber` không phải UUID**: dùng format `ORD-2026-000001` cho support team tra cứu dễ. Dùng Postgres sequence (`CREATE SEQUENCE`) để sinh số atomic, không race condition.
+
+> ⚠️ **Concurrency**: Không dùng `count() + 1` để sinh `orderNumber` — race condition khi 2 request checkout cùng lúc sẽ tạo trùng orderNumber. Dùng Postgres native sequence.
 
 ---
 

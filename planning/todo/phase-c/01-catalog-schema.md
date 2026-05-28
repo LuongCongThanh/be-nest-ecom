@@ -1,17 +1,23 @@
 # Task C-01 — Catalog Schema (Category + Product)
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 2 giờ  
-**Phụ thuộc**: Phase B hoàn thành  
+**Phase**: C — Core MVP
+**Ước lượng**: 2 giờ
+**Phụ thuộc**: Phase B hoàn thành
+**Ưu tiên**: 🔴 BLOCKING (foundation schema — mọi task C sau đều phụ thuộc vào migration này)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [README.md](../../business/02-catalog/README.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Thêm `Category`, `Product`, `ProductVariant`, `ProductImage` models vào `prisma/schema.prisma`. Sau đó generate migration.
+Thêm `Category`, `Product`, `ProductVariant`, `ProductImage` models vào `prisma/schema.prisma` và generate migration.
 
-> Quy ước Phase C: catalog read là public, write là admin/staff; soft delete được dùng cho `Category` và `Product`. Inventory có thể nằm ở `Product.stock` hoặc `ProductVariant.stock`, nhưng các task sau phải dùng cùng một rule thống nhất.
+- **Schema là foundation của cả Phase C**: không có bảng thì không có CRUD, không có CRUD thì không có cart, không có cart thì không có order. Làm đúng schema lần đầu tiết kiệm nhiều migration fixup sau.
+- **Soft delete bắt buộc cho Category và Product**: xóa category không xóa sản phẩm cũ trong order history — đây là invariant domain quan trọng.
+- **Inventory rule phải nhất quán ngay từ schema**: Phase C dùng `Product.stock` (integer trực tiếp) cho MVP. Variants dùng `ProductVariant.stock` — nhưng nếu product không có variant thì stock nằm ở Product. Ghi rõ convention này để task C-02 và C-04 không bị drift.
+
+> **Quy ước Phase C**: catalog read là public, write là admin/staff. Inventory nằm ở `Product.stock` cho trường hợp không có variant. Nếu product có variant thì `Product.stock` = sum của tất cả variant stock (denormalized, update khi variant stock thay đổi).
 
 ---
 

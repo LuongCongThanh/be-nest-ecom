@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 00 → 14 đều phải DONE
-**Ưu tiên**: 🔴 CAO — KHÔNG được bỏ qua
+**Ưu tiên**: 🔴 BLOCKING — KHÔNG được bỏ qua, phải pass trước khi mở Phase C
 **Trạng thái**: ⏳ Not started
 
 ---
