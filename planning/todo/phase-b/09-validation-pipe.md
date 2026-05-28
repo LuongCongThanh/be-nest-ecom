@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 08
-**Ưu tiên**: 🔴 CAO (API contract — tất cả endpoint sau cần validation và error format nhất quán)
+**Ưu tiên**: 🔴 BLOCKING (API contract — tất cả endpoint sau cần validation và error format nhất quán)
 **Trạng thái**: ⏳ Not started
 **Spec gốc**: [03-validation-error.md](../../setup/03-conventions/03-validation-error.md)
 
@@ -234,24 +234,36 @@ bootstrap();
 
 ## Verify hoàn thành
 
+⚠️ **Prerequisite** — Trước khi build, chạy theo thứ tự:
+
+```bash
+npm install          # cài @prisma/adapter-pg nếu chưa có
+npx prisma generate  # generate Prisma client — thiếu bước này thì build lỗi TS2305
+npm run build        # phải pass 0 errors
+```
+
 ### Test 1 — Validation hoạt động
+
 Gửi request sai body (sau khi có Auth DTO ở task sau), phải trả:
+
 ```json
 {
   "success": false,
   "statusCode": 422,
   "code": "VALIDATION_FAILED",
   "message": "Validation failed",
-  "errors": [...],
+  "errors": [],
   "timestamp": "...",
   "path": "/api/v1/..."
 }
 ```
 
 ### Test 2 — 404 đúng format
-```
+
+```http
 GET http://localhost:3000/api/v1/nonexistent
 ```
+
 Phải trả JSON đúng format, không phải HTML của Express.
 
 ---

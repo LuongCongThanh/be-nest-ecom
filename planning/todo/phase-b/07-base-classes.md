@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 06
-**Ưu tiên**: 🟡 TRUNG BÌNH (Architecture — tạo nền abstraction, nhưng có thể add sau)
+**Ưu tiên**: 🟡 SHOULD (Architecture — cần trước exit gate nhưng không block task tiếp theo ngay)
 **Trạng thái**: ✅ Done
 **Spec gốc**: [01-base-classes.md](../../setup/03-conventions/01-base-classes.md)
 
@@ -165,6 +165,7 @@ describe('slugify', () => {
 ```
 
 Chạy:
+
 ```bash
 npm run test -- slugify
 # 2 tests passed
