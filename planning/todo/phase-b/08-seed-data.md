@@ -4,7 +4,7 @@
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 07
 **Ưu tiên**: 🟡 SHOULD (Developer experience — không block build ngay, nhưng thiếu thì verify Task 12+ rất chậm)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [02-seed-data.md](../../setup/03-conventions/02-seed-data.md)
 
 ---
