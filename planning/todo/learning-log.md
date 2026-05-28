@@ -233,3 +233,32 @@
 - AC-4 (login với seed credentials trả `accessToken`) sẽ verify sau Task 12 khi auth endpoints đã implement.
 
 ---
+
+## Task 09 — Global Validation Pipe & Exception Filter
+
+**Date:** 2026-05-28
+**Phase:** B — Foundation
+
+### Task 09 — Kết quả verify
+
+- `GlobalExceptionFilter` đăng ký global — mọi exception đều đi qua filter ✅
+- `ValidationPipe` với `whitelist: true` + `forbidNonWhitelisted: true` ✅
+- AC-3: `GET /api/v1/nonexistent` trả JSON `{ success: false, statusCode: 404, code: "NOT_FOUND", ... }` — không phải HTML ✅
+- AC-1, AC-2, AC-4, AC-5: defer đến Task 12 khi có auth endpoints ✅
+
+### Task 09 — Thắc mắc & Giải đáp
+
+- **ValidationPipe và ExceptionFilter là gì?** Hai "lớp bảo vệ" global của API. `ValidationPipe` đứng đầu vào — reject request sai DTO trước khi vào business logic. `ExceptionFilter` đứng đầu ra — bắt mọi exception và format thành JSON chuẩn. Không có hai thứ này thì mỗi chỗ báo lỗi theo kiểu riêng, FE phải handle nhiều format khác nhau.
+- **Tại sao dùng `express` (Request/Response) trong NestJS?** NestJS chạy trên nền Express — không thay thế Express mà wrap thêm lớp decorator/DI lên trên. `Request` và `Response` là object HTTP thật của Express. Khi cần đọc `request.url` hay gọi `response.status().json()`, đó là Express API.
+- **`success: false` là literal type, không phải `boolean` — tại sao?** Để TypeScript biết field này CHỈ có thể là `false`. Dùng trong discriminated union: `if (response.success === false)` → TypeScript tự narrow sang `ErrorResponse`. Nếu dùng `boolean` thì mất tính an toàn này.
+- **`Unsafe assignment of an 'any' value`** — ESLint rule `@typescript-eslint/no-unsafe-assignment`. Fix: thêm `// eslint-disable-next-line` cho dòng dùng `any`. Vẫn dùng `any` vì `exceptionResponse` có shape bất định. Phase D sẽ refactor.
+- **`@common` alias không resolve khi chạy** — TypeScript `paths` chỉ dùng lúc compile, không transform trong JS output. Node.js không biết `@common` là gì. Fix: thêm `"webpack": true` vào `nest-cli.json` — webpack dịch alias thành đường dẫn thật lúc bundle.
+- **Lỗi `.js` extension với webpack** — `moduleResolution: "nodenext"` yêu cầu `.js` extension nhưng webpack không hiểu mapping `.js` → `.ts`. Fix: bỏ `.js` trong alias import (`@common/filters/...` thay vì `@common/filters/....js`).
+
+### Task 09 — Ghi chú
+
+- `nest-cli.json` đã thêm `"webpack": true` — alias `@common`, `@config`, `@modules`, `@shared` hoạt động toàn project từ giờ.
+- Với alias import: không thêm `.js` extension.
+- AC-1, AC-2, AC-4, AC-5 sẽ verify lại sau Task 12.
+
+---
