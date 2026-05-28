@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 10
-**Ưu tiên**: 🔴 CAO (Security — default-deny, mọi endpoint sau đây cần guards này)
+**Ưu tiên**: 🔴 BLOCKING (Security — default-deny, mọi endpoint sau đây cần guards này)
 **Trạng thái**: ⏳ Not started
 **Spec gốc**: [04-guards-decorators.md](../../setup/03-conventions/04-guards-decorators.md)
 

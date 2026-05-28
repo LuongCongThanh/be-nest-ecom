@@ -3,7 +3,7 @@
 **Phase**: B — Foundation
 **Ước lượng**: 3 giờ
 **Phụ thuộc**: Task 11
-**Ưu tiên**: 🔴 CAO (Core Business — tất cả feature sau đều cần user đã login)
+**Ưu tiên**: 🔴 BLOCKING (Core Business — tất cả feature sau đều cần user đã login)
 **Trạng thái**: ⏳ Not started
 **Spec gốc**: [04-register-login.md](../../business/01-identity/04-register-login.md)
 
