@@ -4,7 +4,7 @@
 
 > Từ thời điểm này, `STATUS.md` track theo **execution phase trong `todo/`**. Task ID trong `planning/docs/TASK_INDEX.md` vẫn dùng để tra cứu spec gốc, nhưng không còn là trục chính để điều phối thực thi hàng ngày.
 
-📍 Hôm nay: `2026-05-20` · Canon rule base: `planning/` · Canon execution order: `todo/` · Phase hiện tại: **Phase B — Foundation Implementation** ⏳
+📍 Hôm nay: `2026-05-28` · Canon rule base: `planning/` · Canon execution order: `todo/` · Phase hiện tại: **Phase B — Foundation Implementation** ⏳
 
 ---
 
@@ -35,13 +35,13 @@ graph LR
 
 ```text
 Phase A — Requirements & Design        [████████████████████] 100%  ✅ Đóng
-Phase B — Foundation Impl  (W1-4)      [████████░░░░░░░░░░░░]  53%  🔵 Đang làm
+Phase B — Foundation Impl  (W1-4)      [████████████░░░░░░░░]  60%  🔵 Đang làm
 Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa (chờ B)
 Phase D — Polish Impl     (W10-11)    [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase E — Verification    (W12)       [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase F — Maintenance     (post-MVP)  [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Backlog
 ─────────────────────────────────────────────────────────────────────────
-TỔNG (Phase B-E, execution files)      [████░░░░░░░░░░░░░░░░]  28%  (8/29 done, 1 in progress)
+TỔNG (Phase B-E, execution files)      [███████░░░░░░░░░░░░░]  34%  (10/29 done)
 ```
 
 ---
@@ -117,7 +117,7 @@ TỔNG (Phase B-E, execution files)      [████░░░░░░░░�
 | `05-prisma-schema.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — User/Address/RefreshToken schema |
 | `06-migrations.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — migration workflow |
 | `07-base-classes.md` | 🟡 SHOULD | ✅ Done | 2026-05-27 — PaginatedResult, slugify, generateOrderId, UserRepository |
-| `08-seed-data.md` | 🟡 SHOULD | 🔵 In progress | `admin@ecom.dev` + `user@ecom.dev` seed |
+| `08-seed-data.md` | 🟡 SHOULD | ✅ Done | 2026-05-28 — seed admin + user accounts |
 | `09-validation-pipe.md` | 🔴 BLOCKING | ⏳ Not started | — |
 | `10-jwt-redis.md` | 🔴 BLOCKING | ⏳ Not started | — |
 | `11-guards-decorators.md` | 🔴 BLOCKING | ⏳ Not started | — |
@@ -266,7 +266,7 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 ```
 
 [2026-05-28 00:00] [Phase B] [task-03..07]       [DONE] Docker+Postgres, Prisma connect, schema, migrations, base-classes hoàn thành.
-[2026-05-28 00:00] [Phase B] [task-08]            [IN PROGRESS] Seed data đang làm.
+[2026-05-28 00:00] [Phase B] [task-08]            [DONE] Seed data hoàn thành — admin + user accounts seeded.
 [2026-05-28 00:00] [docs]    [refactor-planning]  [DONE] Issue #7: sync planning/setup spec + todo/ task files. 10 commits trên branch docs/sync-planning-todo-consistency. Fixes: generateId→generateOrderId drift, thêm scope labels (BLOCKING/SHOULD/BACKLOG) toàn bộ Phase B-E, upgrade Phase C-E từ format ngắn lên format đầy đủ, thêm Prisma 7 adapter note vào spec.
 
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
@@ -275,9 +275,9 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Hoàn thành Task 08** — chạy `npx prisma db seed`, verify bảng `users` có 2 rows, `addresses` có 3 rows.
-2. **Task 09 — Validation Pipe** — chú ý chạy `npm install` + `npx prisma generate` trước `npm run build` (xem note trong task file).
-3. **Task 10 → 12** — JWT setup → Guards → Auth register/login. Cuối chuỗi này có thể demo `POST /auth/register` + `POST /auth/login` → access token.
+1. **Task 09 — Validation Pipe** — chú ý chạy `npm install` + `npx prisma generate` trước `npm run build` (xem note trong task file).
+2. **Task 10 — JWT + Redis** — setup JWT module + Redis store cho refresh token.
+3. **Task 11 → 12** — Guards + Decorators → Auth register/login. Cuối chuỗi này có thể demo `POST /auth/register` + `POST /auth/login` → access token.
 
 ---
 

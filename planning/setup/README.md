@@ -60,19 +60,19 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 | :--- | :--- |
 | TASK-301 | Write Unit Tests |
 | TASK-302 | Write E2E Tests |
-| TASK-304 | Database Optimization |
-| TASK-306 | Add Caching |
+| TASK-313 | Rate Limiting & Abuse Protection |
 | TASK-307 | Security Enhancements |
+| TASK-320 | Role-Based Access Control (RBAC) |
 | TASK-308 | Setup CI/CD |
 | TASK-309 | Production Deployment |
+| TASK-312 | Logging, Monitoring, Tracing |
+| TASK-304 | Database Optimization |
+| TASK-306 | Add Caching |
 | TASK-310 | Enforce Clean Architecture Boundaries |
 | TASK-311 | Advanced Caching Strategy |
-| TASK-312 | Logging, Monitoring, Tracing |
-| TASK-313 | Rate Limiting & Abuse Protection |
 | TASK-314 | API Versioning |
 | TASK-315 | Feature Flags & Config Toggle |
 | TASK-316 | Elasticsearch Integration |
-| TASK-320 | Role-Based Access Control (RBAC) |
 | TASK-321 | Docker & Kubernetes |
 
 ## ⚠️ Lưu ý
