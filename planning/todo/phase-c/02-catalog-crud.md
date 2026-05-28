@@ -1,17 +1,24 @@
 # Task C-02 — Categories & Products CRUD
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 5 giờ  
-**Phụ thuộc**: Task C-01  
+**Phase**: C — Core MVP
+**Ước lượng**: 5 giờ
+**Phụ thuộc**: Task C-01
+**Ưu tiên**: 🔴 BLOCKING (core product browsing — user cần xem sản phẩm trước khi có thể đặt hàng)
+**Trạng thái**: ⏳ Not started
 **Spec gốc**: [03-categories-crud.md](../../business/02-catalog/03-categories-crud.md)
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
-Implement đầy đủ CRUD cho Categories và Products, bao gồm: category tree, text search, stock management, product variants.
+Implement đầy đủ CRUD cho Categories và Products: category tree, text search, stock management.
 
-> Phase C dùng text search `contains + insensitive` qua Prisma. Nếu sau này cần full-text search thật sự của PostgreSQL, đó là một task Phase D/E riêng.
+- **Public read, admin write**: bất kỳ ai cũng có thể browse products — không cần login. Admin mới create/update/delete. Pattern này là nền tảng cho UX e-commerce.
+- **Slug = URL-friendly identifier**: product có slug để URL đẹp (`/products/iphone-15-pro`) thay vì UUID. Slug dùng `slugify()` util đã tạo ở Phase B Task 07.
+- **Text search MVP**: dùng `contains + insensitive` qua Prisma trước — đủ cho demo, không cần Elasticsearch hay PostgreSQL FTS. Upgrade search engine là task riêng sau khi có user thật.
+- **Stock update qua transaction**: admin cập nhật stock phải dùng `prisma.$transaction` để tránh race condition khi 2 request checkout cùng lúc.
+
+> 🔵 **BACKLOG — Product variants**: `ProductVariant` model có trong schema nhưng CRUD variants là Phase D/E. Trong Phase C chỉ implement product đơn giản (không có variants). Đánh dấu endpoint variants là `// TODO: Phase D`.
 
 ---
 

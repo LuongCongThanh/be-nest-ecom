@@ -1,13 +1,20 @@
 # Task C-06 — Phase C Exit Gate
 
-**Phase**: C — Core MVP  
-**Ước lượng**: 2 giờ  
+**Phase**: C — Core MVP
+**Ước lượng**: 2 giờ
+**Phụ thuộc**: Task C-01 → C-05 đều phải DONE
+**Ưu tiên**: 🔴 BLOCKING — KHÔNG được bỏ qua, phải pass trước khi mở Phase D
+**Trạng thái**: ⏳ Not started
 
 ---
 
-## Nhiệm vụ
+## 🎯 Mục tiêu & Ý nghĩa
 
 Test thủ công full flow end-to-end trước khi chuyển Phase D.
+
+- **Gate function**: đảm bảo tất cả 5 tasks C-01 đến C-05 đều hoạt động đúng khi kết hợp với nhau — không chỉ từng task riêng lẻ.
+- **MVP demo-ready check**: sau khi pass exit gate, app phải demo được flow: register → browse → cart → checkout → pay (mock hoặc VNPay sandbox).
+- **Phát hiện integration bug sớm**: edge cases (insufficient stock, idempotency replay, order expiration) thường chỉ nổi lên khi test end-to-end, không phải khi test từng service riêng.
 
 ---
 
