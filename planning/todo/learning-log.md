@@ -262,3 +262,47 @@
 - AC-1, AC-2, AC-4, AC-5 sẽ verify lại sau Task 12.
 
 ---
+
+## Task 10 — JWT + Redis Setup
+
+**Date:** 2026-05-29
+**Phase:** B — Foundation
+
+### Task 10 — Kết quả verify
+
+- `RedisModule` + `RedisService` tạo tại `src/common/redis/` ✅
+- `JwtStrategy` tạo tại `src/modules/identity/strategies/jwt.strategy.ts` ✅
+- `TokenService` tạo tại `src/modules/identity/services/token.service.ts` ✅
+- `RedisModule` và `JwtModule.registerAsync` đăng ký trong `AppModule` với `global: true` ✅
+- AC-2, AC-3, AC-4: defer đến Task 11 khi Guards được setup — JwtStrategy chưa được gắn vào endpoint nào ✅
+
+### Task 10 — Điều đã học
+
+- **Tại sao access token TTL ngắn (30 phút)**: JWT không thể revoke trước khi hết hạn — nếu bị đánh cắp, attacker có cửa sổ tấn công đúng bằng TTL. Giải pháp: TTL ngắn + refresh token stateful trong DB (revoke được ngay).
+- **`validate()` trong JwtStrategy check DB mỗi request**: Passport gọi `validate()` sau khi verify signature thành công. Check thêm `isActive = true` và `deletedAt IS NULL` để đảm bảo user bị suspend → 401 ngay, dù token còn hạn.
+- **`@Global()` trên RedisModule**: giống PrismaModule — import 1 lần ở AppModule, mọi module inject `RedisService` trực tiếp mà không cần import lại.
+- **`JwtModule.registerAsync` thay vì `register`**: đọc secret từ `ConfigService` (async) thay vì hardcode — bắt buộc khi dùng `.env`. `global: true` để không phải import `JwtModule` ở từng module.
+- **Không lưu raw refresh token**: chỉ lưu `sha256(token)` vào DB. Nếu DB bị leak, attacker không dùng được hash — phải có raw token mới gọi được refresh endpoint.
+- **`familyId` cho refresh token rotation**: group toàn bộ token của một phiên login. Khi detect replay (token cũ bị dùng lại), revoke toàn bộ family — buộc user re-login. Implement chi tiết ở Task 13.
+- **HS256 vs RS256**: HS256 dùng 1 secret duy nhất — đủ cho single service Phase B, đơn giản hơn. RS256 dùng private/public key pair — cần khi nhiều service cần verify token mà không share secret. Quyết định migrate khi tách microservices.
+
+### Task 10 — Thắc mắc & Giải đáp
+
+- **JWT là gì, tại sao không lưu session trên server?** JWT (JSON Web Token) là chuỗi base64 gồm 3 phần: header, payload, signature. Server ký token bằng secret — client giữ token, gửi lên mỗi request. Server chỉ cần verify signature, không cần tra DB hay memory. Trade-off: không thể revoke trước TTL → giải quyết bằng TTL ngắn (30 phút) + refresh token stateful.
+- **Tại sao cần 2 loại token (access + refresh)?** Access token TTL ngắn → ít risk nếu bị leak. Nhưng bắt user login lại mỗi 30 phút thì UX tệ. Refresh token TTL dài (7 ngày) lưu trong DB → có thể revoke ngay (logout, change password, admin suspend). Hai token phân tách vai trò: access token cho tốc độ, refresh token cho kiểm soát.
+- **`PassportStrategy` là gì, NestJS dùng nó thế nào?** Passport là middleware auth cho Node.js — có hàng trăm "strategy" sẵn (JWT, Local, Google OAuth…). NestJS wrap Passport qua `@nestjs/passport`. `JwtStrategy extends PassportStrategy(Strategy)` — khi request đến, Passport extract token từ header, verify signature, rồi gọi `validate()`. Kết quả `validate()` được gắn vào `request.user`.
+- **Tại sao `validate()` phải query DB thêm sau khi đã verify signature?** Signature hợp lệ chỉ chứng minh token chưa bị giả mạo — không chứng minh user còn active. User bị suspend sau khi token được phát → token vẫn valid về signature. Check `isActive = true` và `deletedAt IS NULL` trong DB đảm bảo state hiện tại của user được enforce mỗi request.
+- **HS256 là gì, khi nào cần đổi sang RS256?** HS256 (HMAC SHA-256) dùng 1 secret duy nhất để vừa ký vừa verify — mọi service cần verify phải biết secret. Đủ cho Phase B single service. RS256 dùng private key để ký, public key để verify — service khác verify mà không cần biết private key, phù hợp kiến trúc microservices. Quyết định migrate khi tách service.
+- **Tại sao payload JWT chỉ có `{ sub, email, role }`, không thêm thứ khác?** JWT có thể decode client-side không cần secret (chỉ base64). Nhét thêm `phone`, `address`, hay bất kỳ PII nào → data nhạy cảm phơi ra. Nguyên tắc: payload chỉ chứa những gì server cần để authorize request — không hơn.
+- **Tại sao không lưu raw refresh token vào DB?** Nếu DB bị leak (SQL injection, backup bị lộ), attacker có raw token → gọi được refresh endpoint → lấy access token mới vô thời hạn. Lưu `sha256(token)` — hash không thể reverse. Attacker cần raw token mới có thể exploit.
+- **`familyId` trên RefreshToken để làm gì?** Group toàn bộ token của một phiên login thành 1 "family". Khi implement refresh token rotation (Task 13): mỗi lần refresh → issue token mới, revoke token cũ. Nếu token cũ bị dùng lại (replay attack) → phát hiện → revoke toàn bộ family, buộc re-login.
+- **`@Global()` trên RedisModule có nghĩa gì?** Module được đăng ký global — chỉ cần import 1 lần ở `AppModule`, các module con inject `RedisService` trực tiếp không cần import `RedisModule` lại. Tương tự cách `PrismaModule` đã làm ở Task 07. Tránh import lặp lại ở mọi module dùng Redis.
+- **Redis được setup từ Task 10 nhưng chưa dùng — tại sao không để sau?** Redis là shared infrastructure — nhiều feature sau dùng: denylist access token (revocation), rate-limit, cache. Setup sớm để các Task sau chỉ inject `RedisService` mà dùng, không phải quay lại wiring. Cũng verify Redis connection ngay từ sớm — phát hiện config sai trước khi build feature trên đó.
+
+### Task 10 — Ghi chú
+
+- `clockTolerance: 30` (30s clock skew) có trong task spec nhưng chưa có trong implementation thực tế — sẽ thêm khi cần thiết.
+- AC-2 (token expired → 401) và AC-3 (user suspended → 401 ACCOUNT_INACTIVE) sẽ verify sau Task 11 khi có `JwtAuthGuard` gắn vào endpoint.
+- Redis hiện dùng cho infrastructure plumbing (connect, log) — chưa có business logic. Phase D/E sẽ dùng cho denylist và rate-limit.
+
+---
