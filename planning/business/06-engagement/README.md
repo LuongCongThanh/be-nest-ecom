@@ -1,4 +1,4 @@
-# 💬 Engagement — Tương tác khách hàng
+# 💬 Engagement — Tương tác người dùng
 
 > Bounded context **Engagement** (phụ trợ doanh thu). Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md).
 
@@ -6,7 +6,7 @@
 
 ## 🎯 Mục đích
 
-Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Review, Wishlist, Coupon, Shipping methods, Inventory alert. Không phải core revenue nhưng đẩy conversion + giảm churn.
+Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Review, Wishlist, Coupon, Shipping methods, Inventory alert. Không phải core revenue nhưng giúp tăng conversion + giảm churn.
 
 ---
 

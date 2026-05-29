@@ -17,7 +17,7 @@ Trong thương mại điện tử, niềm tin được xây dựng từ trải n
 
 - **Social Proof**: Khẳng định chất lượng sản phẩm qua lăng kính khách quan của cộng đồng.
 - **Feedback Loop**: Cung cấp dữ liệu quý giá cho người bán để cải thiện chất lượng sản phẩm và dịch vụ.
-- **Customer Engagement**: Tạo không gian trao đổi, giúp khách hàng cảm thấy mình là một phần của cộng đồng mua sắm.
+- **User Engagement**: Tạo không gian trao đổi, giúp người dùng cảm thấy mình là một phần của cộng đồng mua sắm.
 
 ---
 

@@ -66,5 +66,5 @@ CRUD ở đây **không phải public CRUD** — là cổng vận hành dành ch
 
 - Self-service profile (user thao tác trên chính mình) → TASK-119.
 - Self-service password change → TASK-120.
-- Audit log cho admin actions → Phase 3 TASK-312 (Observability).
+- Audit log cho admin actions → giai đoạn scale sau, TASK-312 (Observability).
 - Bulk operations (suspend nhiều user một lúc) → backlog.

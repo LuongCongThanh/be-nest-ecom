@@ -17,8 +17,8 @@ Bootstrap dự án NestJS với **cấu trúc thư mục chuẩn theo [`../PROJE
 
 ## ✅ Definition of Done cho nhóm
 
-- `nest new` chạy xong, structure `src/{common,config,modules,migrations}/` đầy đủ.
+- `nest new` chạy xong, structure `src/{common,config,shared,modules,infrastructure,jobs}/` đầy đủ.
 - `npm run start:dev` log ra `Nest application successfully started`.
 - `GET /health` (kể cả chưa có DB) trả `200`.
-- `.env.example` có đủ biến, `ConfigModule` validate bằng `class-validator` `EnvSchema`, app crash khi thiếu biến bắt buộc.
+- `.env.example` có đủ biến, `ConfigModule` validate tập trung trong `src/config/**`, app crash khi thiếu biến bắt buộc.
 - Path alias `@common`, `@modules` hoạt động trong tsconfig + ts-jest.

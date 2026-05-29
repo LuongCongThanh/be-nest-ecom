@@ -16,8 +16,8 @@
 
 `User` là **aggregate root duy nhất** của bounded context Identity. Mọi tương tác trong hệ thống đều có một User đứng sau. Đặc tả này chốt **shape nghiệp vụ** của User, không phải triển khai schema.
 
-- **Identity = email + role**; không có cơ chế multi-email hay multi-tenant trong Phase 1.
-- **Role là enum 3 giá trị cố định**: `USER`, `STAFF`, `ADMIN` (xem `CONTEXT.md`). KHÔNG mở rộng thành permission-based RBAC ở Phase 1 — đẩy xuống Phase 3 (TASK-320).
+- **Identity = email + role**; không có cơ chế multi-email hay multi-tenant trong baseline đầu.
+- **Role là enum 3 giá trị cố định**: `USER`, `STAFF`, `ADMIN` (xem `CONTEXT.md`). KHÔNG mở rộng thành permission-based RBAC trong baseline đầu — đẩy xuống scale phase sau (TASK-320).
 - **Password là write-only** từ góc nhìn API: client gửi vào lúc đăng ký / change password, không bao giờ đọc ra.
 
 ---
@@ -40,7 +40,7 @@
 ### 2. Account Governance
 
 - **Soft delete**: dùng cờ `deletedAt`; KHÔNG hard-delete (xem TASK-106).
-- **Email immutable sau khi verified**: muốn đổi email phải qua flow re-verify (ngoài Phase 1).
+- **Email immutable sau khi verified**: muốn đổi email phải qua flow re-verify (ngoài baseline identity).
 - **Role escalation**: chỉ `ADMIN` được đổi role. Self-update bị ignore.
 
 ---
@@ -75,6 +75,6 @@
 
 ## 🚫 Out of Scope
 
-- Permission/scope-based access (RBAC chi tiết) → Phase 3 TASK-320.
+- Permission/scope-based access (RBAC chi tiết) → giai đoạn scale sau, TASK-320.
 - Email change flow → backlog.
-- Multi-factor authentication → Phase 3 TASK-319.
+- Multi-factor authentication → giai đoạn scale sau, TASK-319.

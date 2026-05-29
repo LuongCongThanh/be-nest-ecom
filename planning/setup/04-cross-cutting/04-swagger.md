@@ -1,6 +1,6 @@
 # TASK-215: Đặc tả Giao diện: Tài liệu Sống & Khám phá API (Interface Specification: Living Documentation & API Exploration)
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
+> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
 > **Intent:** OpenAPI auto-generation + Swagger UI mount.
 > **Single Source of Truth:** ../CONVENTIONS.md (§4 JSDoc + Swagger)
 > **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)
@@ -61,7 +61,7 @@ graph LR
 
 ## ✅ TIÊU CHUẨN THÀNH CÔNG (Definition of Success)
 
-- [ ] **Always Sync**: Tài liệu Swagger luôn truy cập được tại `/api/docs` và khớp hoàn toàn với các Controller thực tế.
+- [ ] **Always Sync**: Tài liệu Swagger luôn truy cập được tại `/docs` và khớp hoàn toàn với các Controller thực tế.
 - [ ] **Complete Model Mapping**: Tất cả các trường trong Request Body và Response Body đều được mô tả rõ ràng kiểu dữ liệu và ràng buộc (Constraints).
 - [ ] **Status Code Transparency**: Mỗi Endpoint phải liệt kê đủ các mã trạng thái có thể xảy ra (200, 201, 400, 401, 403, 500).
 

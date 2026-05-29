@@ -105,5 +105,5 @@ Product master có nhiều **Variant** (kết hợp các attribute như size, co
 ## 🚫 Out of Scope
 
 - Bulk variant generation (Color × Size matrix) UI helper → backlog.
-- Per-variant images gallery → simple `image` field đủ Phase 2.
+- Per-variant images gallery → simple `image` field là đủ cho MVP commerce.
 - Variant search facets → một phần của TASK-204.

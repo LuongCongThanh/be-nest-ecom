@@ -13,11 +13,11 @@
 
 ## 🎯 Business Intent
 
-Checkout là **transaction quan trọng nhất Phase 2**. Bất biến:
+Checkout là **transaction quan trọng nhất của commerce flow**. Bất biến:
 
 - **All-or-nothing**: 5 bước (calc → stock commit → snapshot create → cart clear → emit event) phải atomic. Lỗi ở bước nào → rollback toàn bộ.
 - **Idempotency-Key**: client phải gửi key duy nhất; duplicate POST trong window 10 phút → trả lại Order cũ, không tạo mới.
-- **Stock commit ngay**: Phase 2 không có reservation; commit luôn lúc tạo Order (status `PENDING`/`PAID` tuỳ provider). Nếu payment fail → release stock.
+- **Stock commit ngay**: MVP không có reservation; commit luôn lúc tạo Order. Nếu payment fail hoặc Order timeout/cancel → release stock theo rule của Order context.
 
 ---
 
@@ -50,8 +50,10 @@ Checkout là **transaction quan trọng nhất Phase 2**. Bất biến:
 
 ### Order Number generation
 
-- Format: `ORD-YYYYMMDD-XXXXX` (XXXXX là crypto-safe random 5 uppercase alphanumeric).
-- Collision → retry tối đa 5 lần.
+- Format: `ORD-{YYYY}-{6 chữ số padded}` (vd `ORD-2026-000123`).
+- Sinh bằng **Postgres sequence** `order_number_seq` — atomic, không collision, không cần retry.
+- Migration tạo sequence: `CREATE SEQUENCE order_number_seq START 1;`
+- Trong transaction: `SELECT nextval('order_number_seq')` → format thành `ORD-${year}-${val.toString().padStart(6, '0')}`.
 
 ---
 

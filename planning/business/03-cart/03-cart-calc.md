@@ -16,7 +16,7 @@
 Tính tổng tiền checkout. Một sai số nhỏ = mất tiền hoặc kiện cáo.
 
 - **Server-only calculation**: KHÔNG tin client tính tổng. Mọi total đều tính lại ở server trước khi tạo Order.
-- **Decimal arithmetic**: dùng `Decimal` library — không dùng `number` JS (floating point).
+- **BigInt arithmetic**: dùng `BigInt` integer math — không dùng `number` JS (floating point) hay `Decimal` library. VND không có cent → integer thuần là đủ chính xác.
 - **Apply order**: `Subtotal → Discount → Shipping → Tax → Total`. Discount áp dụng trên subtotal, KHÔNG trên shipping.
 - **Audit-ready**: lưu breakdown đầy đủ ở Order (không chỉ total cuối).
 
@@ -68,11 +68,11 @@ totalAmount   = subtotal - discountValue + shippingFee + tax
 
 ## ✅ Acceptance Criteria
 
-**AC-1: Decimal precision (không floating point)**
+**AC-1: BigInt precision (không floating point)**
 
-- **Given** 3 item `0.10` mỗi cái
+- **Given** 3 item `100_000n` (100,000₫) mỗi cái
 - **When** tính subtotal
-- **Then** `subtotal = 0.30` exact (không phải `0.30000000000000004`)
+- **Then** `subtotal = 300_000n` exact (không có floating point error vì dùng BigInt integer math)
 
 **AC-2: Discount apply trên subtotal, không trên shipping**
 
@@ -108,6 +108,6 @@ totalAmount   = subtotal - discountValue + shippingFee + tax
 
 ## 🚫 Out of Scope
 
-- Multi-currency → Phase 3 TASK-326.
+- Multi-currency → giai đoạn scale sau, TASK-326.
 - Per-region tax rules → backlog (BRD §14 open).
-- Loyalty points redemption → Phase 3 TASK-303.
+- Loyalty points redemption → giai đoạn scale sau, TASK-303.

@@ -16,7 +16,7 @@
 Trong thế giới thương mại điện tử cạnh tranh, các chương trình khuyến mãi là công cụ then chốt để thu hút khách hàng mới và tri ân khách hàng cũ. Một hệ thống mã giảm giá (Coupon) linh hoạt cho phép bộ phận Marketing triển khai các chiến dịch đa dạng mà không cần thay đổi mã nguồn hệ thống.
 
 - **Conversion Booster**: Thúc đẩy khách hàng hoàn tất giỏ hàng thông qua các ưu đãi về giá.
-- **Customer Segmentation**: Thiết lập các chương trình dành riêng cho từng nhóm đối tượng (Ví dụ: Khách hàng mới, Khách VIP).
+- **User Segmentation**: Thiết lập các chương trình dành riêng cho từng nhóm đối tượng (Ví dụ: người mua mới, khách VIP).
 - **Financial Control**: Kiểm soát chặt chẽ ngân sách khuyến mãi thông qua các điều kiện giới hạn sử dụng.
 
 ---
