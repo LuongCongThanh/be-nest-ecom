@@ -15,7 +15,7 @@
 
 ## 🎯 Business Intent
 
-Tài liệu này quyết định **các nguyên tắc dữ liệu ở mức nghiệp vụ** — KHÔNG phải định nghĩa từng cột. ERD chi tiết sống ở `DATABASE_SCHEMA.md` (engineering). Giai đoạn foundation chỉ chốt các nguyên tắc bất biến mà mọi entity về sau phải tuân theo.
+Tài liệu này quyết định **các nguyên tắc dữ liệu ở mức nghiệp vụ** — KHÔNG phải định nghĩa từng cột. ERD chi tiết sống ở `DATABASE_SCHEMA.md` (engineering). Phase 1 chỉ chốt các nguyên tắc bất biến mà mọi entity về sau phải tuân theo.
 
 - **Snapshot là bất di bất dịch**: Đơn hàng KHÔNG được phụ thuộc dữ liệu nguồn động (giá Product, địa chỉ User). Mọi đơn hàng phải "đông cứng" bản ghi nghiệp vụ tại thời điểm tạo.
 - **Soft retire mọi danh tính / sản phẩm có lịch sử giao dịch**: hard-delete cấm.

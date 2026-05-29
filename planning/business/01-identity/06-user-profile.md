@@ -66,7 +66,7 @@ End-user self-service: xem và cập nhật thông tin của **chính họ**. T�
 
 ## 🚫 Out of Scope
 
-- Avatar / file upload → post-identity, dùng TASK-223.
+- Avatar / file upload → Phase 2 TASK-223.
 - Email change flow (re-verify) → backlog.
-- Address book management → commerce phase tiếp theo (gắn với Order).
+- Address book management → Phase 2 (gắn với Order).
 - Password change → TASK-120.

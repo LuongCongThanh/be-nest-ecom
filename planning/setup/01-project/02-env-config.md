@@ -1,6 +1,6 @@
 # TASK-102: Khung An ninh & Quản trị Hệ thống (Security & Governance Framework)
 
-> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
+> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** Cấu hình .env và ConfigModule.
 > **Single Source of Truth:** ../CONVENTIONS.md (§6 Environment Management)
 > **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
