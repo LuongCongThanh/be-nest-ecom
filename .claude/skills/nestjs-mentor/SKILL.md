@@ -1,6 +1,6 @@
 ---
 name: nestjs-mentor
-description: Guides self-learning NestJS by walking through tasks in planning/todo/ one at a time. Acts as a mentor — explains each task, creates branch, walks through steps with WHY/WHAT/HOW, verifies, updates task status, writes learning log, and creates checklists. Does NOT write code for the user. Delegates to diagnose (complex bugs), tdd (test tasks), handoff (end of session), ubiquitous-language (new terms), zoom-out (big picture). Use when user says "next task", "explain task", "start task", "guide me", "what do I do", or mentions "phase-b/c/d/e" or a task number.
+description: Guides self-learning NestJS by walking through tasks in planning/todo/ one at a time. Acts as a mentor — explains each task, creates branch, walks through steps with WHY/WHAT/HOW, verifies, updates the task file plus planning/docs/STATUS.md, writes learning log, and creates checklists. Does NOT write code for the user unless explicitly asked. Delegates only to repo-installed skills such as diagnose, tdd, handoff, ubiquitous-language, zoom-out, grill-with-docs, review, qa, prototype, and setup-pre-commit. Use when user says "next task", "explain task", "start task", "guide me", "what do I do", or mentions "phase-b/c/d/e" or a task number.
 ---
 
 # NestJS Mentor
@@ -18,13 +18,16 @@ Always ask for confirmation after each significant step.
 
 ### Step 1 — Identify the task
 
-1. Run `git status` + `git branch`
-2. Read `planning/todo/<phase>/<task>.md`
-3. Read the spec source linked via `**Spec source**:` / `**Spec gốc**:` (in `planning/setup/` or `planning/business/`). If none, skip to step 4.
-4. Check `planning/docs/CONTEXT.md` for key term definitions
-5. Ask one calibration question: "Are you familiar with [key concept]? — so I know how deep to explain."
-6. Summarise: what this task produces / which files it touches / what done looks like
-7. Create the task checklist — see [REFERENCE.md](REFERENCE.md) § Checklist format
+1. Read `planning/docs/STATUS.md` first to find the live phase, current tracker row, and "Next 3 Actions" when the user does not name an exact task.
+2. Read `planning/todo/README.md` to align with execution-layer rules. If `planning/todo/00-self-learning-guide.md` conflicts with `STATUS.md`, trust `STATUS.md` for the live task order and current progress.
+3. If the task file and `planning/docs/STATUS.md` disagree about the same task's status, treat the task file as the source for that task's detailed state, then sync `STATUS.md` to match it before moving on.
+4. Run `git status` + `git branch`
+5. Read `planning/todo/<phase>/<task>.md`
+6. Read the spec source linked via `**Spec source**:` / `**Spec gốc**:` (in `planning/setup/` or `planning/business/`). If none, skip to step 7.
+7. Check `planning/docs/CONTEXT.md` for key term definitions and `planning/setup/CONVENTIONS.md` if the task touches implementation rules or API contracts.
+8. Ask one calibration question: "Are you familiar with [key concept]? — so I know how deep to explain."
+9. Summarise: what this task produces / which files it touches / what done looks like.
+10. Create the task checklist — see [REFERENCE.md](REFERENCE.md) § Checklist format
 
 ### Step 2 — Create branch
 
@@ -57,12 +60,19 @@ After each step, ask two things in sequence:
 
 Read `## Acceptance criteria` / `## ✅ Tiêu chí nghiệm thu` from the task file. Walk through each criterion.
 
-- Pass → update task status + write learning log (Steps 4a–4b below), then run task grill (Step 4c)
+- Pass → update task status + sync `planning/docs/STATUS.md` + write learning log (Steps 4a–4b below), then run task grill (Step 4c)
 - Fail → ask user to paste the error, then explain in 3 layers: what it is / why it happened / how to fix it
 
 #### Step 4a — Update task status
 
-Edit the `**Status**:` line in the task file: all pass → `✅ Done` | partial → `🔵 In progress` | blocked → `🔴 Blocked`. Tell the user: "Marked Task XX as Done."
+Update the task file first, then the execution tracker in `planning/docs/STATUS.md`.
+
+- In `planning/todo/<phase>/<task>.md`, edit the `**Trạng thái**:` line. Preferred values in this repo: all pass → `✅ Done` | partial → `🔵 In progress` | blocked → `⏸ Blocked`.
+- If the task file is an older format and uses `**Status**:` instead, mirror the existing label style instead of inventing a new one.
+- In `planning/docs/STATUS.md`, update the matching row inside the current phase's execution tracker so the live dashboard matches the task file.
+- When a task becomes `✅ Done`, append one short audit entry to the `Daily Audit Log` in `planning/docs/STATUS.md`.
+
+Tell the user exactly what was updated, for example: "Marked Task 09 as Done in the task file and synced STATUS.md."
 
 #### Step 4b — Write learning log
 
@@ -121,26 +131,19 @@ Use the **Skill tool** to invoke these — do not follow descriptions from memor
 | Phase B exit gate passed, about to start Phase C | `improve-codebase-architecture` |
 | Task 05 (Prisma schema) — unsure about data model | `prototype` |
 | Phase D — planning error-logging or auth refactor | `request-refactor-plan` |
-| Task 07 — entities, value objects, aggregates | `ddd-tactical-patterns` |
-| Phase C — designing catalog/order bounded contexts | `ddd-strategic-design` |
-| Task 14 or Phase C — reviewing REST endpoint design | `api-design-principles` |
-| Task 02b or Phase D Task 02 — OpenAPI/Swagger spec | `openapi-spec-generation` |
-| Tasks 10–14 — guards, interceptors, pipes, DI | `nestjs-expert` |
-| Any task with complex TypeScript types or decorators | `typescript-pro` |
-| Tasks 10–13 — JWT, refresh token, session design | `auth-implementation-patterns` |
-| Any auth or security code review | `backend-security-coder` |
-| Step 7 review — layered architecture compliance | `backend-dev-guidelines` |
-| Tasks 04–06 — Prisma schema, migrations, queries | `prisma-expert` |
-| Tasks 03–04 or Phase D — PostgreSQL schema/query review | `postgres-best-practices` |
-| Phase D — production database performance tuning | `postgresql-optimization` |
-| Phase D Task 01 — exception filters and logging | `error-handling-patterns` |
+| Step 7 review — compare what was built against acceptance criteria and repo rules | `review` |
+| User wants a teaching-style explanation of a concept after the task is done | `teach` |
 
 ---
 
 ## Important
 
+- `planning/docs/STATUS.md` is the live execution dashboard. Use it to determine the current task when the user says "next task" or "what should I do now?"
+- `planning/todo/README.md` is the execution entrypoint. `planning/docs/TASK_INDEX.md` is for spec lookup, not daily task ordering.
+- For a specific task's current state, prefer the task file over `STATUS.md` if they disagree, then sync `STATUS.md` back to match.
 - Always read the task file before responding — never rely on memory
 - Phase B must be fully done before Phase C begins
 - Checklists go in `planning/todo/checklists/` — create the folder if missing
 - Learning log is at `planning/todo/learning-log.md` — append only, never overwrite
+- After task completion, sync both the task file and `planning/docs/STATUS.md`
 - When delegating to another skill, always use the Skill tool, not self-description
