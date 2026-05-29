@@ -15,22 +15,22 @@
 
 Vận hành Order sau khi đã tạo. State machine enforce ở mọi API.
 
-- **User scope**: xem orders của chính mình; self-cancel khi `PENDING`, hoặc `PAID` trong self-cancel window theo `CONTEXT.md`.
+- **Customer scope**: xem orders của chính mình; cancel chỉ khi `PENDING`.
 - **Admin scope**: xem all, transition state, refund.
 - **Mọi transition emit event**: subscriber (notification, inventory release, analytics) lo phần ngoại biên (TASK-222).
-- **Auto-cancel PENDING > 15 phút**: scheduler job — release stock.
+- **Auto-cancel PENDING > 24h**: scheduler job — release stock.
 
 ---
 
 ## 📄 Endpoints
 
-### User scope
+### Customer scope
 
 | Endpoint | Method | Mô tả |
 | :--- | :--- | :--- |
 | `/orders` | GET | List orders của user (filter status, pagination) |
 | `/orders/:id` | GET | Detail (chỉ owner) |
-| `/orders/:id/cancel` | POST | User self-cancel — `PENDING`, hoặc `PAID` trong self-cancel window |
+| `/orders/:id/cancel` | POST | Customer cancel — chỉ `PENDING` |
 
 ### Admin scope
 
@@ -44,7 +44,7 @@ Vận hành Order sau khi đã tạo. State machine enforce ở mọi API.
 | `/admin/orders/:id/refund` | POST | ADMIN | `PAID/DELIVERED → REFUNDED`; body `{ reason, partial?: number }` |
 
 ### Auto-cancel job
-- Cron mỗi 5 phút: scan `Order status=PENDING AND placedAt < now - 15m` → set `CANCELLED`, release stock, emit event.
+- Cron mỗi 5 phút: scan `Order status=PENDING AND placedAt < now - 24h` → set `CANCELLED`, release stock, emit event.
 
 ---
 
@@ -55,9 +55,9 @@ Vận hành Order sau khi đã tạo. State machine enforce ở mọi API.
 - **When** A gọi GET `/orders`
 - **Then** trả về 3 orders của A; gọi `/orders/<B_order_id>` → `403`
 
-**AC-2: User self-cancel chỉ trong cửa sổ cho phép**
-- **Given** Order ở `PAID` nhưng đã quá self-cancel window
-- **When** user POST `/orders/:id/cancel`
+**AC-2: Customer cancel chỉ ở PENDING**
+- **Given** Order ở `PAID`
+- **When** customer POST `/orders/:id/cancel`
 - **Then** `409 INVALID_TRANSITION`
 
 **AC-3: Cancel/Refund auto-release stock**
@@ -70,8 +70,8 @@ Vận hành Order sau khi đã tạo. State machine enforce ở mọi API.
 - **When** xử lý
 - **Then** `422 TRACKING_REQUIRED`
 
-**AC-5: Auto-cancel PENDING > 15 phút**
-- **Given** Order PENDING tạo lúc T-16 phút, chưa pay
+**AC-5: Auto-cancel PENDING > 24h**
+- **Given** Order PENDING tạo lúc T-25h, chưa pay
 - **When** scheduler chạy
 - **Then** Order chuyển CANCELLED; stock được release; event `order.cancelled` emit; reason = `AUTO_TIMEOUT`
 

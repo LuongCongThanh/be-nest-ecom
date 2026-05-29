@@ -2,8 +2,6 @@
 
 > **Mục đích**: Refactor 80 task của `planning/` thành lộ trình **tự cài đặt, tự code tay** theo **đường cong học BE**.
 > **Nguyên tắc**: mỗi bước nhỏ, chạy được, hiểu khái niệm trước khi gõ phím. Khi xong 1 milestone thì commit.
->
-> `ROADMAP.md` là **learning map**, không phải execution checklist sống hằng ngày. Khi bắt tay làm thật, dùng `../todo/README.md` và các `todo/phase-*` để biết bước tiếp theo.
 
 ---
 
@@ -15,11 +13,11 @@
 graph TD
     W0([🛠️ Tuần 0<br/>Setup Tools<br/>Node + Docker + IDE]):::pre
     W1[Tuần 1<br/>Hello NestJS + Postgres<br/>health check]:::found
-    W2[Tuần 2<br/>User Entity + Migration<br/>shared utilities]:::found
+    W2[Tuần 2<br/>User Entity + Migration<br/>base classes]:::found
     W3[Tuần 3<br/>Auth: Register / Login<br/>JWT + Guards]:::auth
     W4[Tuần 4<br/>Refresh Token + Profile<br/>Change Password]:::auth
-    W5[Tuần 5<br/>Category + Product CRUD<br/>money rule + role guard]:::catalog
-    W6[Tuần 6<br/>Filter + Search + Stock<br/>transaction safety]:::catalog
+    W5[Tuần 5<br/>Category + Product CRUD<br/>BigInt money + role guard]:::catalog
+    W6[Tuần 6<br/>Filter + Search FTS + Stock<br/>row-level lock]:::catalog
     W7[Tuần 7<br/>Shopping Cart<br/>Guest cookie + snapshot]:::commerce
     W8[🎯 Tuần 8<br/>Order CHECKOUT<br/>Eager stock + Idempotency<br/>State machine<br/>MVP DEMO-READY]:::mvp
     W9[Tuần 9<br/>Payment VNPay<br/>HMAC webhook]:::commerce
@@ -88,8 +86,8 @@ graph LR
         C4[Refresh rotation<br/>Token family<br/>5s tolerance]
     end
     subgraph "📦 Catalog (W5-6)"
-        C5[Repository boundary<br/>Pagination DTO<br/>Money rule]
-        C6[Search strategy<br/>Stock safety<br/>Transaction]
+        C5[Repository pattern<br/>Pagination DTO<br/>BigInt money]
+        C6[Postgres FTS<br/>Row-level lock<br/>Transaction]
     end
     subgraph "🛒 Commerce (W7-9)"
         C7[Cart Guest+User<br/>Snapshot pattern]
@@ -138,9 +136,9 @@ Color: ⚪Pre  🔵Foundation  🟣Auth  🟦Catalog  🟧Commerce  🟡MVP  �
 
 Đứng từ góc nhìn của một dev tự học BE, tài liệu hiện tại có 3 trở ngại:
 
-1. **Quá tải (80 task)** — không biết bắt đầu từ đâu, dễ bỏ cuộc. Giai đoạn đầu nhồi 25 task setup+entity+auth lẫn lộn.
+1. **Quá tải (80 task)** — không biết bắt đầu từ đâu, dễ bỏ cuộc. Phase 1 nhồi 25 task setup+entity+auth lẫn lộn.
 2. **Sắp xếp theo "business value", không phải "learning curve"** — ví dụ TASK-122 (Base Classes) bị đẩy vào engineering trong khi người mới chưa cần abstraction; TASK-117 (Guards) đặt trước khi học khái niệm Provider/DI.
-3. **Giai đoạn scale lẫn must-have vs nice-to-have** — Unit Test (301) đứng cạnh Microservices (323), Kubernetes (321), GraphQL (322). Người tự học không phân biệt được cái nào skip được.
+3. **Phase 3 lẫn must-have vs nice-to-have** — Unit Test (301) đứng cạnh Microservices (323), Kubernetes (321), GraphQL (322). Người tự học không phân biệt được cái nào skip được.
 
 Kết quả: đọc xong tài liệu không biết viết file `.ts` đầu tiên là file nào.
 
@@ -155,7 +153,7 @@ Refactor thành **roadmap 12 tuần** theo learning curve, mỗi tuần một **
 - **Build → Break → Fix → Understand**: code chạy được trước, refactor sau.
 - **Học khái niệm trước khi gõ**: mỗi tuần có 1 mục "What you learn" liệt kê concept NestJS/DB.
 - **MVP đầu tiên ở tuần 8**: đăng ký → xem sản phẩm → bỏ giỏ → đặt hàng → thanh toán (mock VNPay).
-- **Khối scale cắt 80% → backlog**: chỉ giữ Unit Test, Caching, Rate Limit, RBAC. Bỏ Microservices/K8s/GraphQL/ML khỏi roadmap chính.
+- **Phase 3 cắt 80% → backlog**: chỉ giữ Unit Test, Caching, Rate Limit, RBAC. Bỏ Microservices/K8s/GraphQL/ML khỏi roadmap chính.
 
 ---
 
@@ -203,16 +201,16 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Task gốc**: TASK-101, 102, 103, 104
 
-**📐 ĐỌC TRƯỚC**: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md) — đây là **target structure** cho repo. Nếu code hiện tại đang ở trạng thái chuyển tiếp, dùng file này như đích cần hội tụ về, không mặc định coi repo đã bám 100%.
+**📐 ĐỌC TRƯỚC**: [`../setup/PROJECT_STRUCTURE.md`](../setup/PROJECT_STRUCTURE.md) — tạo đúng layout `src/{common, config, shared, modules, infrastructure, jobs}/` từ đầu, không refactor sau.
 
-**Mục tiêu**: `GET /health/live` trả 200 khi app còn sống, `GET /health/ready` trả 200 khi DB connected. App ở `/api/v1/*`, healthcheck ở root.
+**Mục tiêu**: `GET /health/live` + `GET /health/ready` (terminus) trả 200 với DB connected. App ở `/api/v1/*`, healthcheck ở root.
 
 **Step-by-step**:
 
 1. `nest new ecom-api --strict` → chạy `npm run start:dev` → mở `localhost:3000`.
 2. Tạo cấu trúc folder theo `PROJECT_STRUCTURE.md`: `src/{common, config, shared, modules, infrastructure, jobs}/`.
 3. Setup path alias `@common/*`, `@modules/*`, ... trong `tsconfig.json` + `nest-cli.json`.
-4. Cài `@nestjs/config`, tạo `.env`, làm 1 `ConfigModule` validate tập trung trong `src/config/**` (ví dụ `env.validation.ts`) để fail-fast khi thiếu `DATABASE_URL`, `PORT`, `NODE_ENV`, `CORS_ORIGINS`, `LOG_FORMAT`.
+4. Cài `@nestjs/config class-validator class-transformer`, tạo `.env`, làm 1 `ConfigModule` validate qua class-validator `EnvSchema` (biến: `DATABASE_URL`, `PORT`, `NODE_ENV`, `CORS_ORIGINS`, `LOG_FORMAT`).
 5. `main.ts`: `app.setGlobalPrefix('api/v1', { exclude: ['health', 'metrics'] })`, enable CORS env-based whitelist (xem CONVENTIONS §12), setup Helmet.
 6. Docker compose PostgreSQL 16 local (1 file `docker-compose.yml`, 15 dòng).
 7. Cài Prisma, `prisma init`, viết model placeholder, `prisma migrate dev --name init`.
@@ -229,7 +227,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **What you learn**: Prisma schema, migration đúng cách, UUID, soft-delete, base entity.
 
-**Task gốc**: TASK-106 (schema strategy), TASK-107 (User entity), TASK-112 (run migration), TASK-113 (best practice), TASK-122 (shared utilities/base patterns).
+**Task gốc**: TASK-106 (schema strategy), TASK-107 (User entity), TASK-112 (run migration), TASK-113 (best practice), TASK-122 (base entity fields).
 
 **Mục tiêu**: bảng `users` trong DB có đủ field `id/email/password/role/createdAt/updatedAt/deletedAt`.
 
@@ -258,7 +256,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 1. Cài `@nestjs/jwt`, `passport`, `passport-jwt`, `bcrypt`, `class-validator`.
 2. Bật `ValidationPipe` global trong `main.ts` (`whitelist`, `forbidNonWhitelisted`).
 3. DTO `RegisterDto` (email, password ≥ 8). Endpoint `POST /auth/register` → hash bcrypt → save.
-4. Endpoint `POST /auth/login` → compare bcrypt → sign JWT 30 phút.
+4. Endpoint `POST /auth/login` → compare bcrypt → sign JWT 15 phút.
 5. `JwtAuthGuard` (đăng ký global `APP_GUARD`) + `@Public()` decorator. `@CurrentUser()` để inject user.
 6. `GET /me` → trả user từ token. Test bằng Postman: không token → 401, sai token → 401.
 
@@ -293,7 +291,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 ### TUẦN 5 — Catalog: Category + Product CRUD
 
-**What you learn**: One-to-many relation, slug, pagination, repository boundary (nếu thực sự cần).
+**What you learn**: One-to-many relation, slug, pagination, repository pattern (optional).
 
 **Task gốc**: TASK-108, 109, 111 (entity), TASK-201, 203.
 
@@ -301,7 +299,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Step-by-step**:
 
-1. Model `Category` (id, name, slug, parentId?), `Product` (id, sku, slug, name, price theo money rule đã khóa trong `CONTEXT.md`, stock, categoryId, deletedAt).
+1. Model `Category` (id, name, slug, parentId?), `Product` (id, sku, slug, name, price BigInt (đồng VND), stock, categoryId, deletedAt).
 2. Migration, seed 5 category + 20 product.
 3. `RolesGuard` + `@Roles(Role.ADMIN)` cho endpoint POST/PATCH/DELETE.
 4. `GET /products` với pagination cursor hoặc offset (chọn 1, đừng cố làm cả hai).
@@ -315,7 +313,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 ### TUẦN 6 — Product Filter + Search + Stock
 
-**What you learn**: query builder, search strategy cho MVP, Prisma transaction.
+**What you learn**: query builder, full-text search Postgres cơ bản, Prisma transaction.
 
 **Task gốc**: TASK-204, 205, 202.
 
@@ -324,7 +322,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 **Step-by-step**:
 
 1. Filter chain trong service (where dynamic).
-2. Search bắt đầu bằng filter + text search đơn giản nhưng đúng hành vi. Nếu đã chạm nhu cầu không dấu/relevance/performance rõ ràng, nâng lên Postgres FTS (`tsvector` + GIN + `unaccent`). Elasticsearch hoãn.
+2. Search dùng **Postgres FTS** (`tsvector` + GIN + `unaccent`) — diacritic-insensitive cho user VN. 1 migration tạo generated column + GIN index, query qua `plainto_tsquery`. Elasticsearch hoãn (chỉ cần khi >1M document).
 3. Category tree query: dùng recursive CTE hoặc materialized path. Chọn cách đơn giản: query parent + 1 cấp con.
 4. Endpoint admin `PATCH /products/:id/stock` dùng `prisma.$transaction` (read stock → update). **Học race condition**.
 
@@ -406,7 +404,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 
 **Task gốc**: TASK-212, 213, 214, 215, 206, 223.
 
-**Mục tiêu**: response chuẩn `{ statusCode, code, message, errors[], requestId }`. Swagger UI ở `/docs`. Upload ảnh product.
+**Mục tiêu**: response chuẩn `{ statusCode, code, message, errors[], requestId }`. Swagger UI ở `/api`. Upload ảnh product.
 
 **Step-by-step**:
 
@@ -431,7 +429,7 @@ Roadmap **chỉ là 1 layer dẫn đường** trỏ vào TASK file có sẵn ở
 **Step-by-step**:
 
 1. Cài Mailtrap (dev) hoặc `nodemailer` + ethereal email.
-2. Bảng `verification_tokens` (userId, tokenHash, type enum, expiresAt, usedAt).
+2. Bảng `verification_tokens` (userId, token, type enum, expiresAt, usedAt).
 3. Endpoint `POST /auth/forgot`, `POST /auth/reset`, `GET /auth/verify-email`.
 4. Token dùng 1 lần, expiry 1h.
 
@@ -516,7 +514,7 @@ Mỗi tuần trong roadmap đã gắn:
 | Quyết định                       | Lý do                                                                                                    |
 | :------------------------------- | :------------------------------------------------------------------------------------------------------- |
 | MVP = tuần 8 (cart + order)      | Đủ demo, đủ học transaction + snapshot — 2 concept đắt giá nhất.                                         |
-| Cắt khối scale từ 29 → 4 task chính | Phần còn lại là systems eng quy mô lớn, không phù hợp self-learn.                                        |
+| Cắt Phase 3 từ 29 → 4 task chính | Phần còn lại là systems eng quy mô lớn, không phù hợp self-learn.                                        |
 | Email verify đẩy xuống tuần 11   | Cần external service (mail provider) → tăng friction cho người mới.                                      |
 | Test viết ở tuần 12 (cuối)       | TDD strict không phù hợp người chưa quen — học test khi đã có code chạy. Sau đó luyện TDD ở project sau. |
 | Giữ Prisma làm ORM               | TypeORM/MikroORM phức tạp hơn. Prisma docs tốt, migration tự sinh.                                       |
@@ -564,7 +562,7 @@ Convention `setup/CONVENTIONS.md` §9 đã định nghĩa AAA pattern + `@goleve
 
 ## 9. Out of Scope (refactor này KHÔNG làm)
 
-- Có thể tối ưu wording/link/canon ở các file spec gốc khi cần để giảm drift, nhưng không biến `ROADMAP.md` thành nơi ôm thay phần việc của `todo/`.
+- **Không sửa nội dung file TASK-xxx**. Spec gốc giữ nguyên.
 - **Không đổi cấu trúc thư mục** `planning/`. Chỉ thêm file mới.
 - **Không quyết định stack thay thế** (vẫn NestJS + Prisma + Postgres).
 - **Không setup CI/CD, Docker production, K8s** — backlog.

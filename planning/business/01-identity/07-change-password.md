@@ -82,4 +82,4 @@
 
 - Password recovery (quên mật khẩu) → TASK-124.
 - Password history (chống reuse N lần gần nhất) → backlog.
-- Centralized audit log infrastructure → giai đoạn scale sau, TASK-312.
+- Centralized audit log infrastructure → Phase 3 TASK-312.

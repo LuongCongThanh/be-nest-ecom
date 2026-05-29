@@ -43,6 +43,3 @@ prisma/migrations/dev.db*
 .cache/
 tmp/
 *.local
-
-.antigravity-awesome-skills/
-/generated/prisma
