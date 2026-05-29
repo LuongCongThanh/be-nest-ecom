@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 09
 **Ưu tiên**: 🔴 BLOCKING (Security architecture — mọi auth logic sau phụ thuộc vào task này)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [02-jwt-auth.md](../../business/01-identity/02-jwt-auth.md)
 
 ---

@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'; // loads .env and exposes ConfigService app-wide
+import { PrismaModule } from '@common/prisma/prisma.module';
+import { RedisModule } from '@common/redis/redis.module';
 import { appConfig, databaseConfig, jwtConfig } from '@config/app.config';
 import { envValidationSchema } from '@config/env.validation';
 import { HealthModule } from '@health/health.module';
-import { PrismaModule } from '@common/prisma/prisma.module';
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config'; // loads .env and exposes ConfigService app-wide
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -16,6 +18,15 @@ import { PrismaModule } from '@common/prisma/prisma.module';
       },
     }),
     PrismaModule,
+    RedisModule,
+    JwtModule.registerAsync({
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: config.get('JWT_EXPIRES_IN') ?? '30m' },
+      }),
+      inject: [ConfigService],
+      global: true,
+    }),
     HealthModule,
   ],
 })
