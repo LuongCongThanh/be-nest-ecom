@@ -306,3 +306,39 @@
 - Redis hiện dùng cho infrastructure plumbing (connect, log) — chưa có business logic. Phase D/E sẽ dùng cho denylist và rate-limit.
 
 ---
+
+## Task 11 — Ghi chú đang làm · 2026-05-30
+
+**Branch:** ThanhLuongCong/feat/phase-b/11-guards-decorators
+
+**Điểm vừa học được:**
+
+- Trong NestJS, `@Controller()` chưa đủ để route hoạt động; controller còn phải được khai báo trong `controllers: [...]` của module.
+- Nếu file controller tồn tại nhưng chưa được module đăng ký, request sẽ trả `404`, không phải `401`, vì route chưa được mount vào runtime.
+- Muốn verify `JwtAuthGuard` theo nguyên tắc default-deny, cần một endpoint có thật và không có `@Public()`.
+
+**Dấu mốc verify hiện tại:**
+
+- AC-1 đã pass: `GET /health` trả `200` không cần token.
+- AC-2 chưa verify xong vì `/api/v1` hiện `404`; nguyên nhân là `AppController` chưa được đăng ký trong `AppModule`.
+
+**Tài liệu liên quan:**
+
+- [Task 11 study note](./phase-b/11-guards-decorators-study-note.md)
+
+**Bổ sung sau verify AC-2:**
+
+- `/health` trả `200` vì route có `@Public()`, nên `JwtAuthGuard` đọc được metadata `isPublic = true` và bypass bước kiểm tra JWT.
+- `/api/v1` trả `401 TOKEN_INVALID` vì route không có `@Public()`, nên guard đi tiếp vào `AuthGuard('jwt')` và fail khi request không có Bearer token.
+- Đây là bằng chứng runtime cho nguyên tắc `default-deny`: mọi route mặc định bị chặn, chỉ route được đánh dấu public mới đi qua không cần token.
+
+**Task 11 — Thắc mắc & Giải đáp:**
+
+- **Tại sao `src/app.controller.ts` có file mà gọi `/api/v1` vẫn ra `404`?** Vì trong NestJS, controller chỉ hoạt động khi được module đăng ký trong `controllers: [...]`. Có file controller nhưng chưa khai báo trong `AppModule` thì route chưa được mount vào runtime, nên router trả `404` trước khi auth guard chạy.
+- **Tại sao thêm `AppController` vào `AppModule` lại bị lỗi `Nest can't resolve dependencies of the AppController (AppService)`?** Vì `AppController` lúc đó còn constructor inject `AppService`, nhưng `AppService` chưa được đăng ký như provider trong `AppModule`. Nest DI không tạo được controller nếu thiếu dependency.
+- **Vì sao ở task 11 nên bỏ `AppService` ra khỏi `AppController` thay vì thêm provider mới?** Vì mục tiêu chỉ là tạo một protected endpoint tối thiểu để verify guard. Bỏ `AppService` giúp giảm nhiễu, không phải wiring thêm dependency không liên quan đến auth flow.
+- **Tại sao `AuthGuard('jwt')` thôi vẫn chưa đủ?** `AuthGuard('jwt')` chỉ yêu cầu Passport dùng strategy tên `jwt`. Muốn nó hoạt động thật, `JwtStrategy` phải được đăng ký như một provider trong module để Passport có strategy thật để gọi ở runtime.
+- **Vì sao lúc chưa đăng ký `JwtStrategy` lại ra `500` thay vì `401`?** Vì request đã đi vào protected route, nhưng Passport chưa có strategy `jwt` hoàn chỉnh để xử lý authentication. Đây là lỗi wiring/runtime của app, không phải lỗi "token không hợp lệ" từ client.
+- **Vì sao `/health` trả `200` còn `/api/v1` trả `401` dù cả hai đều là `GET`?** Vì khác nhau ở metadata auth, không phải ở HTTP method. `/health` có `@Public()` nên bypass JWT check; `/api/v1` không có `@Public()` nên bị áp dụng default-deny và fail ở bước authentication khi không có token.
+
+---
