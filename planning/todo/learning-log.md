@@ -322,9 +322,13 @@
 - AC-1 đã pass: `GET /health` trả `200` không cần token.
 - AC-2 chưa verify xong vì `/api/v1` hiện `404`; nguyên nhân là `AppController` chưa được đăng ký trong `AppModule`.
 
-**Tài liệu liên quan:**
+**Bổ sung từ lúc verify lỗi `404`:**
 
-- [Task 11 study note](./phase-b/11-guards-decorators-study-note.md)
+- Khi gọi `GET /api/v1` mà ra `404 Not Found` thay vì `401 TOKEN_INVALID`, điều đó chưa chứng minh `JwtAuthGuard` sai; nó cho thấy route đó chưa tồn tại thật trong app runtime.
+- Trong NestJS, `@Controller()` chỉ mới định nghĩa class có thể nhận request. Muốn route hoạt động thật, controller còn phải được module biết tới qua `controllers: [...]`.
+- Nếu file controller tồn tại nhưng chưa được đăng ký trong module, request sẽ rơi vào `404`, không phải `401`, vì router chưa mount endpoint đó vào runtime.
+- Với repo hiện tại, cần một protected endpoint có thật và không có `@Public()` thì mới verify được nguyên tắc `default-deny`.
+- Mental model ngắn gọn: `controller` là quầy tiếp nhận request, còn `module` là danh sách quầy mà app mở thật. Có file controller nhưng chưa khai báo trong module thì giống như quầy chưa mở.
 
 **Bổ sung sau verify AC-2:**
 
