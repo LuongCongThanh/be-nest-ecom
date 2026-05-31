@@ -49,6 +49,31 @@ Implement `POST /auth/register` và `POST /auth/login` — **2 luồng quan tr�
 
 ## 🛠️ Các bước thực hiện
 
+### 0. Tạo thư mục và file trước
+
+Repo này đang có sẵn `repositories/`, `services/`, `strategies/` trong `src/modules/identity/`, nhưng chưa có `controllers/`, `dto/`, và `identity.module.ts`.
+
+Nest CLI:
+
+```powershell
+nest g mo modules/identity --flat --no-spec
+nest g co modules/identity/controllers/auth --flat --no-spec
+nest g s modules/identity/services/auth --flat --no-spec
+nest g class modules/identity/dto/register.dto --no-spec
+nest g class modules/identity/dto/login.dto --no-spec
+```
+
+> Nếu `identity.module.ts` đã tồn tại do bạn từng scaffold trước đó, giữ file đó và chỉ thêm wiring cần thiết thay vì generate lại.
+
+**Giải thích:**
+
+- `nest g mo ...` tạo module để gom controller, service và dependency của feature identity.
+- `nest g co ...` tạo controller, tức lớp nhận HTTP request và trả response.
+- `nest g s ...` tạo service, tức nơi đặt business logic của register/login.
+- `nest g class ...dto` tạo DTO class để làm contract input cho request body.
+- `--flat` giúp file được tạo đúng ngay tại path mong muốn, không lồng thêm thư mục con không cần thiết.
+- `--no-spec` bỏ qua file test scaffold ở bước này để task tập trung vào luồng auth trước.
+
 ### 1. Tạo Auth DTOs
 
 Tạo `src/modules/identity/dto/register.dto.ts`:
@@ -80,6 +105,15 @@ export class RegisterDto {
 }
 ```
 
+**Giải thích `RegisterDto`:**
+
+- DTO là lớp mô tả dữ liệu đầu vào mà endpoint chấp nhận.
+- Nhờ Global ValidationPipe của Task 09, request sai format sẽ bị chặn trước khi chạy vào service.
+- `@IsEmail()` kiểm tra email có đúng format cơ bản không.
+- `@MinLength(8)` và `@MaxLength(64)` giữ password trong ngưỡng hợp lý.
+- Regex trong `@Matches(...)` buộc password có chữ thường, chữ hoa và số, để tránh mật khẩu quá yếu.
+- `firstName` và `lastName` cũng được validate từ boundary thay vì để dữ liệu bẩn chui vào DB.
+
 Tạo `src/modules/identity/dto/login.dto.ts`:
 
 ```typescript
@@ -95,6 +129,11 @@ export class LoginDto {
 }
 ```
 
+**Giải thích `LoginDto`:**
+
+- Login không cần kiểm tra password strength như register, vì đây là bước xác thực chứ không phải bước tạo mật khẩu mới.
+- Chỉ cần bảo đảm `email` đúng format và `password` là chuỗi không rỗng.
+
 ### 2. Tạo AuthService
 
 Tạo `src/modules/identity/services/auth.service.ts`:
@@ -102,10 +141,10 @@ Tạo `src/modules/identity/services/auth.service.ts`:
 ```typescript
 import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { PrismaService } from '../../../common/prisma/prisma.service';
-import { TokenService } from './token.service';
-import { RegisterDto } from '../dto/register.dto';
-import { LoginDto } from '../dto/login.dto';
+import { PrismaService } from '@common/prisma/prisma.service';
+import { TokenService } from '@modules/identity/services/token.service';
+import { RegisterDto } from '@modules/identity/dto/register.dto';
+import { LoginDto } from '@modules/identity/dto/login.dto';
 
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync('dummy-password-for-timing-attack-mitigation', 12);
 
@@ -185,12 +224,19 @@ export class AuthService {
     return { user: this.sanitizeUser(user), ...tokens };
   }
 
-  private sanitizeUser(user: any) {
+  private sanitizeUser(user: { password: string } & Record<string, unknown>) {
     const { password, ...safe } = user;
     return safe;
   }
 }
 ```
+
+**Giải thích phần đầu `AuthService`:**
+
+- `@Injectable()` cho Nest biết class này là provider và có thể được inject qua DI container.
+- `PrismaService` dùng để truy cập database.
+- `TokenService` là phần đã có từ Task 10, chịu trách nhiệm cấp access token và refresh token.
+- `DUMMY_PASSWORD_HASH` là kỹ thuật chống timing attack: nếu email không tồn tại mà mình fail ngay, attacker có thể đo thời gian response để đoán email nào có trong hệ thống.
 
 ### 3. Tạo AuthController
 
@@ -198,10 +244,10 @@ Tạo `src/modules/identity/controllers/auth.controller.ts`:
 
 ```typescript
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { Public } from '../../../common/decorators';
-import { AuthService } from '../services/auth.service';
-import { RegisterDto } from '../dto/register.dto';
-import { LoginDto } from '../dto/login.dto';
+import { Public } from '@common/decorators/public/public.decorator';
+import { AuthService } from '@modules/identity/services/auth.service';
+import { RegisterDto } from '@modules/identity/dto/register.dto';
+import { LoginDto } from '@modules/identity/dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -222,6 +268,14 @@ export class AuthController {
 }
 ```
 
+**Giải thích `AuthController`:**
+
+- `@Controller('auth')` tạo route prefix `auth`, khi ghép với global prefix hiện tại sẽ thành `/api/v1/auth/...`.
+- `@Public()` là bắt buộc vì repo đang theo mô hình protected-by-default: route nào không đánh dấu public thì `JwtAuthGuard` global sẽ chặn.
+- `@Body() dto` lấy request body và map vào DTO tương ứng.
+- Controller nên mỏng: chỉ nhận request, gọi service, trả kết quả. Business logic nằm ở service.
+- `@HttpCode(HttpStatus.OK)` đổi status của login về `200`; còn register giữ default `201 Created`.
+
 ### 4. Tạo IdentityModule
 
 Tạo `src/modules/identity/identity.module.ts`:
@@ -229,13 +283,14 @@ Tạo `src/modules/identity/identity.module.ts`:
 ```typescript
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
-import { AuthController } from './controllers/auth.controller';
-import { AuthService } from './services/auth.service';
-import { TokenService } from './services/token.service';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { PrismaModule } from '@common/prisma/prisma.module';
+import { AuthController } from '@modules/identity/controllers/auth.controller';
+import { AuthService } from '@modules/identity/services/auth.service';
+import { TokenService } from '@modules/identity/services/token.service';
+import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'jwt' })],
+  imports: [PrismaModule, PassportModule.register({ defaultStrategy: 'jwt' })],
   controllers: [AuthController],
   providers: [AuthService, TokenService, JwtStrategy],
   exports: [TokenService],
@@ -243,15 +298,32 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 export class IdentityModule {}
 ```
 
+**Giải thích `IdentityModule`:**
+
+- Module là ranh giới feature trong NestJS, giúp gom controller, service và dependency cùng một chỗ.
+- `imports: [PrismaModule, PassportModule.register(...)]` cho phép các provider trong module dùng được `PrismaService` và tích hợp Passport/JWT.
+- `controllers: [AuthController]` đăng ký lớp nhận request của feature auth.
+- `providers: [AuthService, TokenService, JwtStrategy]` đăng ký các provider để Nest inject khi cần.
+- `exports: [TokenService]` chỉ export những gì module khác thực sự cần dùng, đúng với convention encapsulation của repo.
+
 Đăng ký trong `AppModule`:
 ```typescript
-import { IdentityModule } from './modules/identity/identity.module';
+import { IdentityModule } from '@modules/identity/identity.module';
 
 @Module({
-  imports: [..., IdentityModule],
+  imports: [
+    // ...
+    IdentityModule,
+  ],
 })
 export class AppModule {}
 ```
+
+**Giải thích phần wiring vào `AppModule`:**
+
+- Dù đã viết controller và service đúng, nếu không import `IdentityModule` vào `AppModule` thì Nest vẫn không biết feature này tồn tại.
+- Hậu quả thường gặp nhất là route bị `404` vì controller chưa được register vào dependency graph của app.
+- Đây cũng là lý do khi debug auth route, luôn kiểm tra wiring module trước khi nghi ngờ guard hoặc strategy.
 
 ---
 
