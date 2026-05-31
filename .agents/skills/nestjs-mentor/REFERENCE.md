@@ -72,7 +72,12 @@ Never ask a follow-up to the comprehension question. One question, one answer, m
 
 ## Checklist format
 
-Create `planning/todo/checklists/<phase>-<task-id>-checklist.md` at the start of each task.
+Create `planning/todo/checklists/<task-number>-<task-slug>.md` at the start of each task.
+
+Examples:
+
+- `planning/todo/checklists/09-validation-pipe.md`
+- `planning/todo/checklists/10-jwt-redis.md`
 
 ```markdown
 # Checklist — Task <ID>: <Task name>
@@ -101,6 +106,8 @@ Create `planning/todo/checklists/<phase>-<task-id>-checklist.md` at the start of
 Fill steps from `## 🛠️ Các bước thực hiện` and criteria from `## ✅ Tiêu chí nghiệm thu` in the task file.
 
 Update checkboxes (`- [ ]` → `- [x]`) as the user reports each step done.
+
+Use the task file name as the canonical slug. Do not invent a second naming scheme just for the checklist.
 
 ---
 
@@ -221,6 +228,37 @@ chore(prisma): add initial schema and migrate
 fix(guard): handle expired token without 500 error
 test(auth): add e2e tests for login endpoint
 ```
+
+---
+
+## STATUS.md sync rules
+
+When the user completes or blocks a task, mirror that result into `planning/docs/STATUS.md`.
+
+### Conflict rule
+
+If the task file and `planning/docs/STATUS.md` disagree about the same task:
+
+1. Use the task file as the source of truth for that task's exact current state.
+2. Update the matching row in `STATUS.md` to match the task file.
+3. If the mismatch reveals broader tracker drift, tell the user briefly before continuing.
+
+### Minimum sync
+
+1. Update the matching row in the current phase's `Execution tracker` table.
+2. Keep the wording aligned with the task file status:
+   - `✅ Done`
+   - `🔵 In progress`
+   - `⏸ Blocked`
+3. If the task is fully done, append one concise entry to `Daily Audit Log`.
+
+### Audit log format
+
+```text
+[YYYY-MM-DD HH:MM] [Phase B] [task-09] [DONE] Validation pipe + exception filter verified, task file and STATUS synced.
+```
+
+Keep the audit note short and factual. `STATUS.md` is append-only — never delete old entries.
 
 ---
 

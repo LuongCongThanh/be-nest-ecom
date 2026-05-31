@@ -1,20 +1,26 @@
+import { JwtAuthGuard } from '@common/guards/jwt-auth/jwt-auth.guard';
+import { RolesGuard } from '@common/guards/roles/roles.guard';
 import { PrismaModule } from '@common/prisma/prisma.module';
 import { RedisModule } from '@common/redis/redis.module';
 import { appConfig, databaseConfig, jwtConfig } from '@config/app.config';
 import { envValidationSchema } from '@config/env.validation';
 import { HealthModule } from '@health/health.module';
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config'; // loads .env and exposes ConfigService app-wide
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AppController } from './app.controller';
+import { JwtStrategy } from './modules/identity/strategies/jwt.strategy';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // no need to re-import ConfigModule in child modules
+      isGlobal: true,
       load: [appConfig, jwtConfig, databaseConfig],
-      validationSchema: envValidationSchema, // validate .env on startup; missing required vars crash the process
+      validationSchema: envValidationSchema,
       validationOptions: {
-        abortEarly: true, // stop at first invalid var instead of collecting all errors
+        abortEarly: true,
       },
     }),
     PrismaModule,
@@ -28,6 +34,9 @@ import { JwtModule } from '@nestjs/jwt';
       global: true,
     }),
     HealthModule,
+    PassportModule,
   ],
+  controllers: [AppController],
+  providers: [JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
 })
 export class AppModule {}
