@@ -4,7 +4,7 @@
 **Ước lượng**: 3 giờ
 **Phụ thuộc**: Task 12
 **Ưu tiên**: 🔴 BLOCKING (Security — UX không thể dùng nếu thiếu, và thiếu thì có lỗ hổng bảo mật)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: 🔵 In progress (đã có nền `TokenService` + schema `refresh_tokens`, nhưng refresh rotation/replay detection chưa implement)
 **Spec gốc**: [08-refresh-token.md](../../business/01-identity/08-refresh-token.md)
 
 ---
@@ -19,6 +19,26 @@ Implement refresh token rotation với replay detection. Cân bằng giữa UX (
 - **Hash-based storage**: DB chỉ lưu `tokenHash`, còn raw refresh token chỉ tồn tại ở client. Lookup được thực hiện bằng cách hash token nhận vào rồi query theo hash đó.
 - **Revocation triggers**: logout (chỉ token hiện tại), logout-all (toàn bộ token của user), change-password (toàn bộ), admin suspend (toàn bộ).
 - **Access token vẫn hợp lệ đến hết TTL**: khi RT bị revoke, AT còn TTL vẫn pass — đây là trade-off chấp nhận được. Revoke AT tức thì cần blacklist Redis (Phase D).
+
+---
+
+## 📍 Current Repo State
+
+Repo hiện tại mới có **một phần nền tảng** cho Task 13:
+
+- Đã có bảng `refresh_tokens` trong schema/migrations với các field phục vụ rotation như `familyId`, `usedAt`, `revokedAt`, `expiresAt`
+- Đã có `TokenService` tại `src/modules/identity/services/token.service.ts`
+- `TokenService` hiện **mới có**:
+  - `issueTokenPair(userId, email, role)`
+  - `revokeAllUserTokens(userId)`
+- Chưa có `RefreshDto`
+- Chưa có endpoint `POST /api/v1/auth/refresh`
+- Chưa có endpoint `POST /api/v1/auth/logout`
+- Chưa có endpoint `POST /api/v1/auth/logout-all`
+- Chưa có logic replay detection (`usedAt`)
+- Chưa có logic rotate refresh token cùng `familyId`
+
+Vì vậy, phần bên dưới của task này nên được hiểu là **kế hoạch implement từ trạng thái hiện tại**, không phải mô tả code đã tồn tại sẵn.
 
 ---
 
@@ -51,7 +71,7 @@ Implement refresh token rotation với replay detection. Cân bằng giữa UX (
 
 ### 1. Thêm RefreshDto
 
-Tạo `src/modules/identity/dto/refresh.dto.ts`:
+Tạo file mới `src/modules/identity/dto/refresh.dto/refresh.dto.ts` để khớp convention nested DTO path hiện tại của repo:
 
 ```typescript
 import { IsString, IsNotEmpty } from 'class-validator';
@@ -59,13 +79,23 @@ import { IsString, IsNotEmpty } from 'class-validator';
 export class RefreshDto {
   @IsString()
   @IsNotEmpty()
-  refreshToken: string;
+  refreshToken!: string;
 }
 ```
 
 ### 2. Thêm methods vào TokenService
 
-Mở `src/modules/identity/services/token.service.ts`, thêm:
+Mở `src/modules/identity/services/token.service.ts`.
+
+**Code hiện tại đang có:**
+
+```typescript
+async issueTokenPair(userId: string, email: string, role: string) { ... }
+
+async revokeAllUserTokens(userId: string): Promise<void> { ... }
+```
+
+**Cần bổ sung tiếp:**
 
 ```typescript
 async refresh(refreshTokenValue: string) {
@@ -153,11 +183,23 @@ async logoutAll(userId: string): Promise<void> {
 }
 ```
 
+**Gợi ý triển khai từ hiện trạng repo:**
+
+- Giữ lại `hashRefreshToken()` đang có sẵn để lookup theo hash thay vì raw token
+- Tách rõ 4 nhóm check trong `refresh()`:
+  - token không tồn tại
+  - token đã `usedAt`
+  - token đã `revokedAt`
+  - token đã hết hạn
+- Khi replay xảy ra (`usedAt !== null`), revoke toàn bộ token cùng `familyId`
+- Khi rotate thành công, refresh token mới phải dùng lại chính `familyId` cũ thay vì tạo family mới
+- `issueTokenPair()` hiện đang luôn tạo `familyId = randomUUID()`, nên nếu muốn tái sử dụng cho refresh flow thì cần refactor hàm này để nhận `familyId` optional hoặc tạo helper riêng cho issue refresh token kế tiếp trong chain
+
 ### 3. Thêm endpoints vào AuthController
 
 ```typescript
-import { RefreshDto } from '../dto/refresh.dto';
-import { CurrentUser } from '../../../common/decorators';
+import { CurrentUser } from '@common/decorators/current-user/current-user.decorator';
+import { RefreshDto } from '../dto/refresh.dto/refresh.dto';
 
 // Thêm vào AuthController:
 
@@ -180,6 +222,14 @@ async logoutAll(@CurrentUser('id') userId: string) {
   await this.tokenService.logoutAll(userId);
 }
 ```
+
+**Lưu ý quan trọng theo code hiện tại của repo:**
+
+- `AuthController` hiện chỉ inject `AuthService`, chưa inject `TokenService`
+- Vì vậy, để thêm 3 endpoint trên bạn có 2 hướng:
+  - inject thêm `TokenService` trực tiếp vào controller
+  - hoặc giữ controller chỉ nói chuyện với `AuthService`, rồi để `AuthService` gọi `TokenService`
+- Theo style hiện tại của Task 12, controller đang khá mỏng và business logic nằm ở service; vì vậy hướng sạch hơn thường là để `AuthService` expose các method `refresh()`, `logout()`, `logoutAll()` rồi controller tiếp tục gọi qua `authService`
 
 ---
 

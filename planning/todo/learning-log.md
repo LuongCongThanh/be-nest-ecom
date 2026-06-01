@@ -346,3 +346,157 @@
 - **Vì sao `/health` trả `200` còn `/api/v1` trả `401` dù cả hai đều là `GET`?** Vì khác nhau ở metadata auth, không phải ở HTTP method. `/health` có `@Public()` nên bypass JWT check; `/api/v1` không có `@Public()` nên bị áp dụng default-deny và fail ở bước authentication khi không có token.
 
 ---
+
+## Task 12 — Ghi chú học thêm · 2026-06-02
+
+**Branch/Context:** Auth Feature — Register & Login
+
+**Điểm vừa học được:**
+
+- `LoginDto` và `RegisterDto` là DTO dùng để mô tả contract input của request body; chúng không chứa business logic mà chỉ khai báo shape dữ liệu và rule validate ở boundary.
+- Trong DTO của NestJS + TypeScript strict mode, `email!: string` dùng dấu `!` để nói với TypeScript rằng field này chắc chắn sẽ được gán giá trị sau, dù không được khởi tạo ngay trong constructor.
+- Dấu `!` trong DTO không có nghĩa là field optional; ngược lại, nó thường được dùng cho field bắt buộc nhưng được framework map dữ liệu vào ở runtime.
+- `AuthService.register()` xử lý 4 ý chính: kiểm tra email trùng, hash password bằng bcrypt, tạo user, rồi cấp access/refresh token.
+- `AuthService.login()` xử lý 4 ý chính: tìm user theo email, so sánh password, kiểm tra trạng thái `isActive`, rồi cấp token nếu hợp lệ.
+- `DUMMY_PASSWORD_HASH` là kỹ thuật chống timing attack: kể cả email không tồn tại, code vẫn gọi `bcrypt.compare()` với hash giả để thời gian phản hồi gần giống trường hợp email có tồn tại.
+- `sanitizeUser()` tồn tại để đảm bảo dữ liệu trả về từ API không làm lộ field `password`.
+
+**Task 12 — Thắc mắc & Giải đáp:**
+
+- **Vì sao DTO cần class thay vì dùng object type/interface?** Vì NestJS validation pipe làm việc tốt với class và decorator runtime như `@IsEmail()`, `@MinLength()`. Interface chỉ tồn tại ở compile time nên không giữ được metadata validate khi app chạy.
+- **Vì sao `email!: string` lại có dấu `!`?** Đây là `definite assignment assertion`. Nó nói với TypeScript rằng thuộc tính này sẽ được framework gán sau, nên không báo lỗi "Property has no initializer..." trong strict mode.
+- **`email!: string` khác gì `email?: string`?** `!` nghĩa là field được xem như chắc chắn có giá trị kiểu `string` khi dùng; `?` nghĩa là field có thể vắng mặt hoặc `undefined`.
+- **Vì sao `LoginDto` không kiểm tra password mạnh như `RegisterDto`?** Vì login chỉ cần xác thực dữ liệu nhập vào có đúng kiểu hay không; rule về độ mạnh password chỉ cần áp dụng lúc tạo mật khẩu mới.
+- **Vì sao phải hash password trước khi lưu DB?** Vì password là secret một chiều: server chỉ nên lưu bcrypt hash để khi DB bị lộ thì attacker không thấy plaintext thật của người dùng.
+- **Vì sao `register()` phải xóa user nếu bước cấp token lỗi?** Vì nếu đã tạo user nhưng không issue token thành công thì hệ thống rơi vào trạng thái nửa chừng: DB có account mới nhưng client không nhận được phiên đăng nhập tương ứng.
+- **Vì sao `login()` trả cùng `INVALID_CREDENTIALS` cho cả email sai và password sai?** Để không tiết lộ email nào đã tồn tại trong hệ thống, giảm nguy cơ enumeration attack.
+- **Vì sao `sanitizeUser()` phải bỏ `password` khỏi response?** Vì hash password vẫn là dữ liệu nhạy cảm; client không cần nó, và trả nhầm ra API là rò rỉ thông tin không cần thiết.
+
+---
+
+## Task 12 — Chốt bài học & cách học · 2026-06-02
+
+**Branch/Context:** Auth Feature — Register & Login (đã hoàn thành theo tiến độ cá nhân)
+
+**Điểm chốt lại sau khi làm xong Task 12:**
+
+- Đọc file task theo kiểu từ trên xuống rồi copy nguyên code chỉ giúp hiểu khoảng một nửa; cách đó dễ làm xong task nhưng khó tự viết lại từ đầu.
+- Với NestJS, cần tách việc học thành các lớp nhỏ hơn: DTO trước, rồi Controller, rồi Service, rồi Module wiring. Nếu đọc cả flow lớn một lúc thì rất dễ quá tải.
+- Mental model hiệu quả hơn là luôn trả lời 3 câu cho từng file: file này nhận input gì, gọi sang đâu, và trả output gì.
+- Với Task 12, flow cốt lõi cần nhớ là: `client -> AuthController -> AuthService -> Prisma/TokenService -> response`.
+- `AuthController` là lớp HTTP mỏng, `AuthService` mới là nơi chứa business logic chính; nếu chưa phân biệt được hai vai trò này thì rất dễ copy code mà không hiểu vì sao nó phải tách file.
+- Cách học tốt hơn cho các task tiếp theo là tự viết pseudo-code trước, sau đó mới điền NestJS decorator/API cụ thể, thay vì nhìn full code rồi gõ lại theo trí nhớ.
+
+**Task 12 — Cách luyện để bớt phụ thuộc copy code:**
+
+- Sau khi đọc xong một file, đóng file lại và tự nói lại: input, xử lý chính, output.
+- Chỉ copy “khung rỗng” của class/hàm, không copy toàn bộ implementation ngay từ đầu.
+- Nếu bí, mở hint theo từng nấc: ý tưởng -> decorator/API -> khung code -> cuối cùng mới xem full code.
+- Khi hoàn thành một task, nên viết lại 3-5 dòng bằng tiếng Việt về vai trò của từng file; bước này biến kiến thức thụ động thành kiến thức của mình.
+
+---
+
+## Task 12 — Debug 500 trên `/api/v1/auth/register` · 2026-06-02
+
+**Branch/Context:** Auth Feature — Register & Login
+
+### Triệu chứng
+
+`POST /api/v1/auth/register` với body hợp lệ trả về:
+
+```json
+{
+  "success": false,
+  "statusCode": 500,
+  "code": "INTERNAL_SERVER_ERROR",
+  "message": "An unexpected error occurred"
+}
+```
+
+### Quá trình tìm nguyên nhân
+
+**Bước 1 — Đọc code**: controller, service, DTO đều hợp lệ. `GlobalExceptionFilter` trả 500 với message "An unexpected error occurred" khi exception không phải `HttpException` và không phải `Prisma.PrismaClientKnownRequestError` code P2002/P2025.
+
+**Bước 2 — Chạy `prisma migrate status`**: lệnh báo lỗi `P1012 — Argument "url" is missing in data source block "db"`. Đây là dấu hiệu Prisma CLI không chạy được bình thường.
+
+**Bước 3 — Kiểm tra DB**: Tables `users`, `addresses`, `refresh_tokens`, `_prisma_migrations` tồn tại → migration ban đầu đã chạy, kết nối DB hoạt động.
+
+**Bước 4 — Reproduce từng bước**: viết script Node.js chạy từng bước của `AuthService.register()` trực tiếp. Kết quả:
+
+```text
+findFirst OK
+bcrypt hash OK
+user.create OK
+FAILED: The column `refresh_tokens.replacedByTokenId` does not exist — Code P2022
+```
+
+**Root cause xác định**: `prisma/migrations/20260525161724_init/migration.sql` không có cột `replacedByTokenId`. Schema Prisma đã được cập nhật thêm field này và relation `TokenRotation` sau khi migration ban đầu được apply, nhưng migration mới chưa bao giờ được tạo và chạy.
+
+### Chuỗi lỗi hoàn chỉnh
+
+```text
+POST /api/v1/auth/register
+  → AuthService.register()
+    → prisma.user.create()               ← OK
+    → tokenService.issueTokenPair()
+      → prisma.refreshToken.create()     ← throw P2022 (column không tồn tại)
+  → GlobalExceptionFilter catch P2022
+    → P2022 không handle cụ thể (chỉ có P2002/P2025)
+    → fallback: 500 INTERNAL_SERVER_ERROR
+```
+
+### Fix
+
+Tạo migration mới `20260602012551_add_token_rotation_and_address_soft_delete` với nội dung:
+
+```sql
+ALTER TABLE "refresh_tokens" ADD COLUMN "replacedByTokenId" TEXT;
+CREATE UNIQUE INDEX "refresh_tokens_replacedByTokenId_key" ON "refresh_tokens"("replacedByTokenId");
+ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_replacedByTokenId_fkey"
+  FOREIGN KEY ("replacedByTokenId") REFERENCES "refresh_tokens"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "addresses" ADD COLUMN "deletedAt" TIMESTAMP(3);
+CREATE INDEX "addresses_deletedAt_idx" ON "addresses"("deletedAt");
+```
+
+> `addresses.deletedAt` cũng bị thiếu — cùng lý do (schema cập nhật sau migration gốc). Fix cùng lúc.
+
+Apply thủ công bằng `$executeRawUnsafe` + register vào `_prisma_migrations`. Sau fix, register trả đúng user + tokens.
+
+### Nguyên nhân sâu hơn: Prisma CLI bị version mismatch
+
+```text
+prisma (CLI):   6.19.3
+@prisma/client: 7.8.0
+```
+
+`prisma.config.ts` với `datasource: { url: env('DATABASE_URL') }` là tính năng của **Prisma 7**. CLI phiên bản 6 không hiểu cú pháp này → `prisma migrate status` luôn báo "url missing" dù config đã có URL.
+
+Hậu quả: không thể dùng `npm run db:migrate` để tạo/apply migration mới → dev thay đổi schema rồi quên tạo migration → DB và schema bị lệch nhau.
+
+**Fix đúng**: cập nhật `prisma` CLI trong `devDependencies` từ `^6.19.3` lên `^7.8.0`:
+
+```powershell
+npm install --save-dev prisma@^7.8.0
+```
+
+Sau khi fix version, các lệnh migration hoạt động bình thường.
+
+### Cách chạy migration đúng (sau khi fix version)
+
+| Lệnh | Khi nào dùng |
+| --- | --- |
+| `npm run db:migrate` | Sau mỗi lần thay đổi `schema.prisma` — tạo file SQL mới và apply vào DB local |
+| `npm run db:migrate:prod` | Deploy lên môi trường mới — chỉ apply migration đã có, không tạo mới |
+| `npx prisma migrate status` | Kiểm tra migration nào đã chạy, migration nào còn pending |
+
+**Quy tắc vàng**: schema thay đổi → phải có migration tương ứng ngay. Nếu quên, code Prisma sẽ throw `P2022` (column not found) hoặc `P2021` (table not found) lúc runtime — không có warning gì khi app start.
+
+### Điều đã học
+
+- **`GlobalExceptionFilter` cần xử lý rộng hơn**: hiện tại chỉ handle P2002 và P2025. Các error code quan trọng khác như P2022 (column not found), P2021 (table not found) sẽ trả 500 thay vì thông báo có nghĩa hơn.
+- **Schema drift là lỗi thầm lặng**: DB connect thành công, app start bình thường — không có warning nào cho đến khi query thật sự chạy. Cách phòng: sau mỗi thay đổi schema, kiểm tra `prisma migrate status` ngay.
+- **Prisma CLI và `@prisma/client` phải cùng major version**: khác major version tạo ra contradiction — CLI 6.x yêu cầu `url` trong schema, nhưng Prisma 7.x cấm `url` trong schema. Luôn update cả hai package cùng lúc.
+- **`prisma.config.ts` là Prisma 7 feature**: thay thế cho `url = env(...)` trong `datasource` block của `schema.prisma`. CLI 6.x không đọc được file này đúng cách.
+
+---
