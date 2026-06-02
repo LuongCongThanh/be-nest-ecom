@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
@@ -8,65 +8,120 @@ import { PrismaService } from '../../../common/prisma/prisma.service';
 @Injectable()
 export class TokenService {
   constructor(
-    private readonly jwt: JwtService, // dùng để ký và tạo JWT access token
-    private readonly config: ConfigService, // đọc JWT_EXPIRES_IN từ .env
-    private readonly prisma: PrismaService, // DB mặc định khi không có transaction
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
   ) {}
 
-  // Lưu hash thay vì raw token để nếu DB bị lộ, attacker không dùng được refresh token.
-  // SHA-256 là hàm một chiều: từ hash không thể khôi phục lại raw token gốc.
+  // One-way hash: a leaked DB dump cannot be used to forge refresh tokens
   private hashRefreshToken(token: string): string {
     return createHash('sha256').update(token).digest('hex');
   }
 
-  // `db` có thể là PrismaService bình thường hoặc transaction client (Prisma.TransactionClient).
-  // Khi register(), user + token phải được tạo trong cùng 1 transaction → truyền `tx` vào.
-  // Khi login(), không cần transaction → dùng default `this.prisma`.
+  // `db` accepts a transaction client so callers can include token creation in a broader transaction
   async issueTokenPair(userId: string, email: string, role: string, db: Prisma.TransactionClient | PrismaService = this.prisma) {
-    // sub (subject) là convention chuẩn của JWT spec để chứa user id.
     const payload = { sub: userId, email, role };
-
-    // Access token ngắn hạn (30m mặc định): client dùng cái này gọi API.
-    // Không lưu vào DB vì JWT tự xác minh được qua chữ ký — không cần tra DB mỗi request.
     const accessToken = this.jwt.sign(payload, {
       expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m',
     });
 
-    // familyId gom các refresh token cùng "dòng" lại với nhau.
-    // Khi rotate token, token cũ bị revoke nhưng familyId giữ nguyên.
-    // Nếu token cũ trong cùng family được dùng lại → phát hiện reuse → revoke cả family.
+    // familyId groups all tokens rotated from the same login session.
+    // Reusing a consumed token triggers revocation of the entire family.
     const familyId = randomUUID();
-
-    // refreshTokenValue là raw token gửi về client — client lưu và dùng khi access token hết hạn.
     const refreshTokenValue = randomUUID();
-
-    // Chỉ lưu hash vào DB; khi client gửi lại raw token, server hash lại rồi so sánh với DB.
     const refreshTokenHash = this.hashRefreshToken(refreshTokenValue);
-
-    // Refresh token sống 7 ngày: user không cần đăng nhập lại nếu vẫn active trong 7 ngày.
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-    // Lưu bản ghi refresh token để có thể revoke sau (logout, đổi password, reuse detection).
     await db.refreshToken.create({
-      data: {
-        userId,
-        familyId,
-        tokenHash: refreshTokenHash,
-        expiresAt,
-      },
+      data: { userId, familyId, tokenHash: refreshTokenHash, expiresAt },
     });
 
-    // Trả raw token về caller → caller trả về client.
-    // Client nhận refreshToken để dùng khi accessToken hết hạn (Task 13).
     return { accessToken, refreshToken: refreshTokenValue };
   }
 
-  // Thu hồi toàn bộ refresh token còn hiệu lực của user.
-  // Dùng khi: đổi password, logout-all-devices.
-  // updateMany + set revokedAt thay vì delete để giữ audit trail.
+  async refresh(refreshTokenValue: string) {
+    const tokenHash = this.hashRefreshToken(refreshTokenValue);
+
+    return this.prisma.$transaction(async (tx) => {
+      const tokenRecord = await tx.refreshToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+      if (!tokenRecord) {
+        throw new UnauthorizedException({
+          code: 'INVALID_REFRESH_TOKEN',
+          message: 'Refresh token not found',
+        });
+      }
+
+      if (tokenRecord.usedAt !== null) {
+        // Token already consumed: both user and attacker may hold it — kill entire family
+        await tx.refreshToken.updateMany({
+          where: { familyId: tokenRecord.familyId },
+          data: { revokedAt: new Date() },
+        });
+        throw new UnauthorizedException({
+          code: 'REFRESH_TOKEN_REPLAY_DETECTED',
+          message: 'Token reuse detected. All sessions revoked.',
+        });
+      }
+
+      if (tokenRecord.revokedAt !== null) {
+        throw new UnauthorizedException({
+          code: 'REFRESH_TOKEN_REVOKED',
+          message: 'Refresh token has been revoked',
+        });
+      }
+
+      if (tokenRecord.expiresAt < new Date()) {
+        throw new UnauthorizedException({
+          code: 'REFRESH_TOKEN_EXPIRED',
+          message: 'Refresh token has expired',
+        });
+      }
+
+      await tx.refreshToken.update({
+        where: { id: tokenRecord.id },
+        data: { usedAt: new Date() },
+      });
+
+      const { user } = tokenRecord;
+      const newRefreshTokenValue = randomUUID();
+      const newRefreshTokenHash = this.hashRefreshToken(newRefreshTokenValue);
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+      await tx.refreshToken.create({
+        data: {
+          userId: user.id,
+          familyId: tokenRecord.familyId,
+          tokenHash: newRefreshTokenHash,
+          expiresAt,
+        },
+      });
+
+      const accessToken = this.jwt.sign({ sub: user.id, email: user.email, role: user.role }, { expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m' });
+
+      return { accessToken, refreshToken: newRefreshTokenValue };
+    });
+  }
+
+  async logout(userId: string, refreshTokenValue: string): Promise<void> {
+    const tokenHash = this.hashRefreshToken(refreshTokenValue);
+    await this.prisma.refreshToken.updateMany({
+      where: { tokenHash, userId },
+      data: { revokedAt: new Date() },
+    });
+  }
+
+  async logoutAll(userId: string): Promise<void> {
+    await this.revokeAllUserTokens(userId);
+  }
+
+  // updateMany + revokedAt instead of delete to preserve audit trail
   async revokeAllUserTokens(userId: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
-      where: { userId, revokedAt: null }, // chỉ revoke token chưa bị thu hồi trước đó
+      where: { userId, revokedAt: null },
       data: { revokedAt: new Date() },
     });
   }

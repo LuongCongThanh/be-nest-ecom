@@ -5,6 +5,7 @@ import { TokenService } from '@modules/identity/services/token.service';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { RefreshDto } from '../dto/refresh.dto/refresh.dto';
 
 // Hash giả dùng khi email không tồn tại để thời gian xử lý login ổn định hơn,
 // giảm khả năng đoán user tồn tại hay không qua timing attack.
@@ -95,5 +96,17 @@ export class AuthService {
 
     const target = Array.isArray(error.meta?.target) ? error.meta.target : [];
     return target.includes('email');
+  }
+
+  async refresh(dto: RefreshDto) {
+    return this.tokenService.refresh(dto.refreshToken);
+  }
+
+  async logout(userId: string, dto: RefreshDto): Promise<void> {
+    await this.tokenService.logout(userId, dto.refreshToken);
+  }
+
+  async logoutAll(userId: string): Promise<void> {
+    await this.tokenService.logoutAll(userId);
   }
 }
