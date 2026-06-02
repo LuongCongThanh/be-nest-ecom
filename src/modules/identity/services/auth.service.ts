@@ -3,6 +3,7 @@ import { LoginDto } from '@modules/identity/dto/login.dto/login.dto';
 import { RegisterDto } from '@modules/identity/dto/register.dto/register.dto';
 import { TokenService } from '@modules/identity/services/token.service';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 // Hash giả dùng khi email không tồn tại để thời gian xử lý login ổn định hơn,
@@ -18,39 +19,36 @@ export class AuthService {
 
   // Tạo user mới, hash password trước khi lưu và trả về token sau khi đăng ký thành công.
   async register(dto: RegisterDto) {
-    // Kiểm tra email đã tồn tại chưa để chặn đăng ký trùng.
-    const existing = await this.prisma.user.findFirst({
-      where: { email: dto.email.toLowerCase() },
-    });
-
-    if (existing) {
-      throw new ConflictException({
-        code: 'EMAIL_ALREADY_EXISTS',
-        message: 'Email is already registered',
-      });
-    }
-
     // Không bao giờ lưu password thô; bcrypt cost 12 là mức mã hóa hiện tại.
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
-    // Tạo user trước. Nếu bước cấp token lỗi thì xóa user vừa tạo để tránh dữ liệu nửa chừng.
-    const user = await this.prisma.user.create({
-      data: {
-        email: dto.email.toLowerCase(),
-        password: hashedPassword,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-        role: 'USER',
-        emailVerified: false,
-        isActive: true,
-      },
-    });
-
     try {
-      const tokens = await this.tokenService.issueTokenPair(user.id, user.email, user.role);
-      return { user: this.sanitizeUser(user), ...tokens };
+      return await this.prisma.$transaction(async (tx) => {
+        const normalizedEmail = dto.email.toLowerCase();
+
+        const user = await tx.user.create({
+          data: {
+            email: normalizedEmail,
+            password: hashedPassword,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            role: 'USER',
+            emailVerified: false,
+            isActive: true,
+          },
+        });
+
+        const tokens = await this.tokenService.issueTokenPair(user.id, user.email, user.role, tx);
+        return { user: this.sanitizeUser(user), ...tokens };
+      });
     } catch (error) {
-      await this.prisma.user.delete({ where: { id: user.id } });
+      if (this.isDuplicateEmailError(error)) {
+        throw new ConflictException({
+          code: 'EMAIL_ALREADY_EXISTS',
+          message: 'Email is already registered',
+        });
+      }
+
       throw error;
     }
   }
@@ -88,5 +86,14 @@ export class AuthService {
   // Loại bỏ password trước khi trả dữ liệu user ra ngoài API response.
   private sanitizeUser<T extends { password: string } & Record<string, unknown>>(user: T): Omit<T, 'password'> {
     return Object.fromEntries(Object.entries(user).filter(([key]) => key !== 'password')) as Omit<T, 'password'>;
+  }
+
+  private isDuplicateEmailError(error: unknown): boolean {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== 'P2002') {
+      return false;
+    }
+
+    const target = Array.isArray(error.meta?.target) ? error.meta.target : [];
+    return target.includes('email');
   }
 }
