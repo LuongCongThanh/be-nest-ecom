@@ -121,8 +121,8 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `09-validation-pipe.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — GlobalValidationPipe + GlobalExceptionFilter (PR #9 merged) |
 | `10-jwt-redis.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — JwtStrategy, RedisModule, TokenService |
 | `11-guards-decorators.md` | 🔴 BLOCKING | ⏳ Not started | — |
-| `12-auth-feature.md` | 🔴 BLOCKING | ⏳ Not started | — |
-| `13-refresh-token.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `12-auth-feature.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — register/login flow hoàn thành; log học tập đã append |
+| `13-refresh-token.md` | 🔴 BLOCKING | 🔵 In progress | 2026-06-02 — bắt đầu sync task doc với nền TokenService hiện tại |
 | `14-users-crud.md` | 🟡 SHOULD | ⏳ Not started | — |
 | `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ⏳ Not started | — |
 
@@ -271,6 +271,8 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 
 [2026-05-29 00:00] [Phase B] [task-09]            [DONE] ValidationPipe + GlobalExceptionFilter — commit 9aa8df3, PR #9 merged.
 [2026-05-29 00:00] [Phase B] [task-10]            [DONE] JwtStrategy + RedisModule + TokenService — commit f6da002.
+[2026-06-02 00:00] [Phase B] [task-12]            [DONE] Auth Feature hoàn thành; bổ sung learning log về DTO, AuthService, và cách học bớt phụ thuộc copy code.
+[2026-06-02 00:10] [Phase B] [task-13]            [OPEN] Bắt đầu cập nhật task doc theo code thật: TokenService mới có issue/revokeAll, refresh rotation chưa implement.
 
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
@@ -278,9 +280,9 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Task 11 — Guards + Decorators** — JwtAuthGuard, RolesGuard, @CurrentUser(), @Roles() decorator.
-2. **Task 12 — Auth Feature** — register/login endpoints dùng JWT + bcrypt.
-3. **Task 13 — Refresh Token** — rotate token, detect reuse → kill family.
+1. **Task 13 — Refresh Token** — hoàn thiện refresh rotation, replay detection, logout/logout-all.
+2. **Task 14 — Users CRUD** — `/me`, đổi password, revoke token family khi cần.
+3. **Phase B Exit Gate** — gom evidence verify cho auth + token flows.
 
 ---
 

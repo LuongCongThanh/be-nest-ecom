@@ -2,6 +2,20 @@
 
 ---
 
+## Phương pháp học NestJS (áp dụng mọi task)
+
+> Đúc kết sau Task 12 — áp dụng từ Task 13 trở đi.
+
+- Tách việc học thành các lớp nhỏ: DTO trước, rồi Controller, rồi Service, rồi Module wiring. Đọc cả flow lớn một lúc rất dễ quá tải.
+- Với mỗi file, luôn trả lời 3 câu: **nhận input gì → gọi sang đâu → trả output gì**.
+- Tự viết pseudo-code trước, sau đó mới điền NestJS decorator/API cụ thể — thay vì nhìn full code rồi gõ lại theo trí nhớ.
+- Sau khi đọc xong một file, đóng lại và tự nói lại bằng tiếng Việt: input, xử lý chính, output.
+- Chỉ copy "khung rỗng" của class/hàm trước, không copy toàn bộ implementation ngay.
+- Nếu bí, mở hint theo từng nấc: ý tưởng → decorator/API → khung code → cuối cùng mới xem full code.
+- Khi hoàn thành một task, viết lại 3–5 dòng về vai trò của từng file — bước này biến kiến thức thụ động thành kiến thức của mình.
+
+---
+
 ## Task 00 — Cài đặt Tools
 
 **Date:** 2026-05-22
@@ -344,5 +358,152 @@
 - **Tại sao `AuthGuard('jwt')` thôi vẫn chưa đủ?** `AuthGuard('jwt')` chỉ yêu cầu Passport dùng strategy tên `jwt`. Muốn nó hoạt động thật, `JwtStrategy` phải được đăng ký như một provider trong module để Passport có strategy thật để gọi ở runtime.
 - **Vì sao lúc chưa đăng ký `JwtStrategy` lại ra `500` thay vì `401`?** Vì request đã đi vào protected route, nhưng Passport chưa có strategy `jwt` hoàn chỉnh để xử lý authentication. Đây là lỗi wiring/runtime của app, không phải lỗi "token không hợp lệ" từ client.
 - **Vì sao `/health` trả `200` còn `/api/v1` trả `401` dù cả hai đều là `GET`?** Vì khác nhau ở metadata auth, không phải ở HTTP method. `/health` có `@Public()` nên bypass JWT check; `/api/v1` không có `@Public()` nên bị áp dụng default-deny và fail ở bước authentication khi không có token.
+
+---
+
+## Task 12 — Auth Feature: Kiến thức kỹ thuật · 2026-06-02
+
+**Date:** 2026-06-02 · **Phase:** B — Foundation
+
+### DTO
+
+- DTO là class mô tả contract input của request body — chỉ khai báo shape dữ liệu và rule validate ở boundary, không chứa business logic.
+- **Vì sao dùng class thay vì interface?** Validation pipe dùng decorator runtime (`@IsEmail()`, `@MinLength()`). Interface chỉ tồn tại ở compile time — không giữ được metadata khi app chạy.
+- **`email!: string` — dấu `!` là gì?** `definite assignment assertion`: báo TypeScript field này sẽ được framework gán sau, không báo lỗi "Property has no initializer" trong strict mode. Khác `?`: dấu `!` là bắt buộc có giá trị, dấu `?` là có thể `undefined`.
+- **Vì sao `LoginDto` không kiểm tra password mạnh như `RegisterDto`?** Login chỉ xác thực kiểu dữ liệu — rule độ mạnh password chỉ áp dụng lúc tạo mật khẩu mới.
+
+### AuthService — flow & security
+
+- `register()`: kiểm tra email trùng → hash password (bcrypt 12) → tạo user → issue token. Nếu issue token lỗi → rollback user (transaction) tránh orphan account.
+- `login()`: tìm user → `bcrypt.compare` → kiểm tra `isActive` → issue token.
+- **`DUMMY_PASSWORD_HASH` — chống timing attack**: dù email không tồn tại vẫn chạy `bcrypt.compare` với hash giả — response time tương đương, attacker không đo được email nào có trong hệ thống.
+- **`INVALID_CREDENTIALS` cho cả email sai và password sai** — không tiết lộ email nào đã đăng ký (chống enumeration attack).
+- **`sanitizeUser()` bỏ `password` khỏi response** — bcrypt hash vẫn là dữ liệu nhạy cảm; client không cần và không được biết.
+
+### TokenService
+
+- **Vì sao hash refresh token (SHA-256)?** Nếu DB bị lộ, attacker không dùng được hash để giả mạo phiên. SHA-256 là hàm một chiều — không thể khôi phục raw token từ hash.
+- **`familyId`** gom các refresh token cùng "dòng". Khi rotation (Task 13): token cũ revoke, token mới cấp — cùng `familyId`. Nếu token cũ bị dùng lại → reuse detection → revoke cả family → chống session hijacking.
+- **Transaction vs không transaction:**
+
+| Caller | Truyền `tx` | Lý do |
+| --- | --- | --- |
+| `register()` | ✅ Có | Tạo user + issue token phải atomic — lỗi ở bước 2 thì rollback user, tránh orphan account |
+| `login()` | ❌ Không | User đã tồn tại, không có write nào cần rollback nếu issue token lỗi |
+
+> Công thức: transaction khi **nhiều write phải atomic**. Chỉ 1 write hoặc toàn read → không cần.
+
+### Swagger decorators
+
+- 3 lớp: `@ApiProperty` (DTO field) · `@ApiOperation`/`@ApiTags` (controller) · `@ApiResponse` (response schema).
+- **Thêm ngay khi viết API**: `@ApiProperty` và `@ApiOperation`/`@ApiTags` — chi phí thấp, Swagger UI hiểu ngay.
+- **`@ApiResponse` defer đến Phase D** — response shape còn thay đổi khi refactor `GlobalExceptionFilter`.
+- **`example` phải nhất quán giữa các DTO cùng flow**: `RegisterDto` và `LoginDto` cùng dùng `"Abc@12345"` — developer copy từ bước này sang bước kia không bị lỗi misleading.
+- **`example` phải pass được validate của chính DTO đó**: `"password123"` không có chữ hoa → sẽ bị `422` ngay khi submit từ Swagger UI.
+
+---
+
+## Task 12 — Debug 500 trên `/api/v1/auth/register` · 2026-06-02
+
+**Branch/Context:** Auth Feature — Register & Login
+
+### Triệu chứng
+
+`POST /api/v1/auth/register` với body hợp lệ trả về:
+
+```json
+{
+  "success": false,
+  "statusCode": 500,
+  "code": "INTERNAL_SERVER_ERROR",
+  "message": "An unexpected error occurred"
+}
+```
+
+### Quá trình tìm nguyên nhân
+
+**Bước 1 — Đọc code**: controller, service, DTO đều hợp lệ. `GlobalExceptionFilter` trả 500 với message "An unexpected error occurred" khi exception không phải `HttpException` và không phải `Prisma.PrismaClientKnownRequestError` code P2002/P2025.
+
+**Bước 2 — Chạy `prisma migrate status`**: lệnh báo lỗi `P1012 — Argument "url" is missing in data source block "db"`. Đây là dấu hiệu Prisma CLI không chạy được bình thường.
+
+**Bước 3 — Kiểm tra DB**: Tables `users`, `addresses`, `refresh_tokens`, `_prisma_migrations` tồn tại → migration ban đầu đã chạy, kết nối DB hoạt động.
+
+**Bước 4 — Reproduce từng bước**: viết script Node.js chạy từng bước của `AuthService.register()` trực tiếp. Kết quả:
+
+```text
+findFirst OK
+bcrypt hash OK
+user.create OK
+FAILED: The column `refresh_tokens.replacedByTokenId` does not exist — Code P2022
+```
+
+**Root cause xác định**: `prisma/migrations/20260525161724_init/migration.sql` không có cột `replacedByTokenId`. Schema Prisma đã được cập nhật thêm field này và relation `TokenRotation` sau khi migration ban đầu được apply, nhưng migration mới chưa bao giờ được tạo và chạy.
+
+### Chuỗi lỗi hoàn chỉnh
+
+```text
+POST /api/v1/auth/register
+  → AuthService.register()
+    → prisma.user.create()               ← OK
+    → tokenService.issueTokenPair()
+      → prisma.refreshToken.create()     ← throw P2022 (column không tồn tại)
+  → GlobalExceptionFilter catch P2022
+    → P2022 không handle cụ thể (chỉ có P2002/P2025)
+    → fallback: 500 INTERNAL_SERVER_ERROR
+```
+
+### Fix
+
+Tạo migration mới `20260602012551_add_token_rotation_and_address_soft_delete` với nội dung:
+
+```sql
+ALTER TABLE "refresh_tokens" ADD COLUMN "replacedByTokenId" TEXT;
+CREATE UNIQUE INDEX "refresh_tokens_replacedByTokenId_key" ON "refresh_tokens"("replacedByTokenId");
+ALTER TABLE "refresh_tokens" ADD CONSTRAINT "refresh_tokens_replacedByTokenId_fkey"
+  FOREIGN KEY ("replacedByTokenId") REFERENCES "refresh_tokens"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+ALTER TABLE "addresses" ADD COLUMN "deletedAt" TIMESTAMP(3);
+CREATE INDEX "addresses_deletedAt_idx" ON "addresses"("deletedAt");
+```
+
+> `addresses.deletedAt` cũng bị thiếu — cùng lý do (schema cập nhật sau migration gốc). Fix cùng lúc.
+
+Apply thủ công bằng `$executeRawUnsafe` + register vào `_prisma_migrations`. Sau fix, register trả đúng user + tokens.
+
+### Nguyên nhân sâu hơn: Prisma CLI bị version mismatch
+
+```text
+prisma (CLI):   6.19.3
+@prisma/client: 7.8.0
+```
+
+`prisma.config.ts` với `datasource: { url: env('DATABASE_URL') }` là tính năng của **Prisma 7**. CLI phiên bản 6 không hiểu cú pháp này → `prisma migrate status` luôn báo "url missing" dù config đã có URL.
+
+Hậu quả: không thể dùng `npm run db:migrate` để tạo/apply migration mới → dev thay đổi schema rồi quên tạo migration → DB và schema bị lệch nhau.
+
+**Fix đúng**: cập nhật `prisma` CLI trong `devDependencies` từ `^6.19.3` lên `^7.8.0`:
+
+```powershell
+npm install --save-dev prisma@^7.8.0
+```
+
+Sau khi fix version, các lệnh migration hoạt động bình thường.
+
+### Cách chạy migration đúng (sau khi fix version)
+
+| Lệnh | Khi nào dùng |
+| --- | --- |
+| `npm run db:migrate` | Sau mỗi lần thay đổi `schema.prisma` — tạo file SQL mới và apply vào DB local |
+| `npm run db:migrate:prod` | Deploy lên môi trường mới — chỉ apply migration đã có, không tạo mới |
+| `npx prisma migrate status` | Kiểm tra migration nào đã chạy, migration nào còn pending |
+
+**Quy tắc vàng**: schema thay đổi → phải có migration tương ứng ngay. Nếu quên, code Prisma sẽ throw `P2022` (column not found) hoặc `P2021` (table not found) lúc runtime — không có warning gì khi app start.
+
+### Điều đã học
+
+- **`GlobalExceptionFilter` cần xử lý rộng hơn**: hiện tại chỉ handle P2002 và P2025. Các error code quan trọng khác như P2022 (column not found), P2021 (table not found) sẽ trả 500 thay vì thông báo có nghĩa hơn.
+- **Schema drift là lỗi thầm lặng**: DB connect thành công, app start bình thường — không có warning nào cho đến khi query thật sự chạy. Cách phòng: sau mỗi thay đổi schema, kiểm tra `prisma migrate status` ngay.
+- **Prisma CLI và `@prisma/client` phải cùng major version**: khác major version tạo ra contradiction — CLI 6.x yêu cầu `url` trong schema, nhưng Prisma 7.x cấm `url` trong schema. Luôn update cả hai package cùng lúc.
+- **`prisma.config.ts` là Prisma 7 feature**: thay thế cho `url = env(...)` trong `datasource` block của `schema.prisma`. CLI 6.x không đọc được file này đúng cách.
 
 ---

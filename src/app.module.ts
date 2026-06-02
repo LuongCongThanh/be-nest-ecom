@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { JwtStrategy } from './modules/identity/strategies/jwt.strategy';
+import { IdentityModule } from './modules/identity.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { JwtStrategy } from './modules/identity/strategies/jwt.strategy';
     }),
     HealthModule,
     PassportModule,
+    IdentityModule,
   ],
   controllers: [AppController],
   providers: [JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
