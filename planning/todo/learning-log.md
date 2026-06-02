@@ -2,6 +2,20 @@
 
 ---
 
+## Phương pháp học NestJS (áp dụng mọi task)
+
+> Đúc kết sau Task 12 — áp dụng từ Task 13 trở đi.
+
+- Tách việc học thành các lớp nhỏ: DTO trước, rồi Controller, rồi Service, rồi Module wiring. Đọc cả flow lớn một lúc rất dễ quá tải.
+- Với mỗi file, luôn trả lời 3 câu: **nhận input gì → gọi sang đâu → trả output gì**.
+- Tự viết pseudo-code trước, sau đó mới điền NestJS decorator/API cụ thể — thay vì nhìn full code rồi gõ lại theo trí nhớ.
+- Sau khi đọc xong một file, đóng lại và tự nói lại bằng tiếng Việt: input, xử lý chính, output.
+- Chỉ copy "khung rỗng" của class/hàm trước, không copy toàn bộ implementation ngay.
+- Nếu bí, mở hint theo từng nấc: ý tưởng → decorator/API → khung code → cuối cùng mới xem full code.
+- Khi hoàn thành một task, viết lại 3–5 dòng về vai trò của từng file — bước này biến kiến thức thụ động thành kiến thức của mình.
+
+---
+
 ## Task 00 — Cài đặt Tools
 
 **Date:** 2026-05-22
@@ -347,52 +361,45 @@
 
 ---
 
-## Task 12 — Ghi chú học thêm · 2026-06-02
+## Task 12 — Auth Feature: Kiến thức kỹ thuật · 2026-06-02
 
-**Branch/Context:** Auth Feature — Register & Login
+**Date:** 2026-06-02 · **Phase:** B — Foundation
 
-**Điểm vừa học được:**
+### DTO
 
-- `LoginDto` và `RegisterDto` là DTO dùng để mô tả contract input của request body; chúng không chứa business logic mà chỉ khai báo shape dữ liệu và rule validate ở boundary.
-- Trong DTO của NestJS + TypeScript strict mode, `email!: string` dùng dấu `!` để nói với TypeScript rằng field này chắc chắn sẽ được gán giá trị sau, dù không được khởi tạo ngay trong constructor.
-- Dấu `!` trong DTO không có nghĩa là field optional; ngược lại, nó thường được dùng cho field bắt buộc nhưng được framework map dữ liệu vào ở runtime.
-- `AuthService.register()` xử lý 4 ý chính: kiểm tra email trùng, hash password bằng bcrypt, tạo user, rồi cấp access/refresh token.
-- `AuthService.login()` xử lý 4 ý chính: tìm user theo email, so sánh password, kiểm tra trạng thái `isActive`, rồi cấp token nếu hợp lệ.
-- `DUMMY_PASSWORD_HASH` là kỹ thuật chống timing attack: kể cả email không tồn tại, code vẫn gọi `bcrypt.compare()` với hash giả để thời gian phản hồi gần giống trường hợp email có tồn tại.
-- `sanitizeUser()` tồn tại để đảm bảo dữ liệu trả về từ API không làm lộ field `password`.
+- DTO là class mô tả contract input của request body — chỉ khai báo shape dữ liệu và rule validate ở boundary, không chứa business logic.
+- **Vì sao dùng class thay vì interface?** Validation pipe dùng decorator runtime (`@IsEmail()`, `@MinLength()`). Interface chỉ tồn tại ở compile time — không giữ được metadata khi app chạy.
+- **`email!: string` — dấu `!` là gì?** `definite assignment assertion`: báo TypeScript field này sẽ được framework gán sau, không báo lỗi "Property has no initializer" trong strict mode. Khác `?`: dấu `!` là bắt buộc có giá trị, dấu `?` là có thể `undefined`.
+- **Vì sao `LoginDto` không kiểm tra password mạnh như `RegisterDto`?** Login chỉ xác thực kiểu dữ liệu — rule độ mạnh password chỉ áp dụng lúc tạo mật khẩu mới.
 
-**Task 12 — Thắc mắc & Giải đáp:**
+### AuthService — flow & security
 
-- **Vì sao DTO cần class thay vì dùng object type/interface?** Vì NestJS validation pipe làm việc tốt với class và decorator runtime như `@IsEmail()`, `@MinLength()`. Interface chỉ tồn tại ở compile time nên không giữ được metadata validate khi app chạy.
-- **Vì sao `email!: string` lại có dấu `!`?** Đây là `definite assignment assertion`. Nó nói với TypeScript rằng thuộc tính này sẽ được framework gán sau, nên không báo lỗi "Property has no initializer..." trong strict mode.
-- **`email!: string` khác gì `email?: string`?** `!` nghĩa là field được xem như chắc chắn có giá trị kiểu `string` khi dùng; `?` nghĩa là field có thể vắng mặt hoặc `undefined`.
-- **Vì sao `LoginDto` không kiểm tra password mạnh như `RegisterDto`?** Vì login chỉ cần xác thực dữ liệu nhập vào có đúng kiểu hay không; rule về độ mạnh password chỉ cần áp dụng lúc tạo mật khẩu mới.
-- **Vì sao phải hash password trước khi lưu DB?** Vì password là secret một chiều: server chỉ nên lưu bcrypt hash để khi DB bị lộ thì attacker không thấy plaintext thật của người dùng.
-- **Vì sao `register()` phải xóa user nếu bước cấp token lỗi?** Vì nếu đã tạo user nhưng không issue token thành công thì hệ thống rơi vào trạng thái nửa chừng: DB có account mới nhưng client không nhận được phiên đăng nhập tương ứng.
-- **Vì sao `login()` trả cùng `INVALID_CREDENTIALS` cho cả email sai và password sai?** Để không tiết lộ email nào đã tồn tại trong hệ thống, giảm nguy cơ enumeration attack.
-- **Vì sao `sanitizeUser()` phải bỏ `password` khỏi response?** Vì hash password vẫn là dữ liệu nhạy cảm; client không cần nó, và trả nhầm ra API là rò rỉ thông tin không cần thiết.
+- `register()`: kiểm tra email trùng → hash password (bcrypt 12) → tạo user → issue token. Nếu issue token lỗi → rollback user (transaction) tránh orphan account.
+- `login()`: tìm user → `bcrypt.compare` → kiểm tra `isActive` → issue token.
+- **`DUMMY_PASSWORD_HASH` — chống timing attack**: dù email không tồn tại vẫn chạy `bcrypt.compare` với hash giả — response time tương đương, attacker không đo được email nào có trong hệ thống.
+- **`INVALID_CREDENTIALS` cho cả email sai và password sai** — không tiết lộ email nào đã đăng ký (chống enumeration attack).
+- **`sanitizeUser()` bỏ `password` khỏi response** — bcrypt hash vẫn là dữ liệu nhạy cảm; client không cần và không được biết.
 
----
+### TokenService
 
-## Task 12 — Chốt bài học & cách học · 2026-06-02
+- **Vì sao hash refresh token (SHA-256)?** Nếu DB bị lộ, attacker không dùng được hash để giả mạo phiên. SHA-256 là hàm một chiều — không thể khôi phục raw token từ hash.
+- **`familyId`** gom các refresh token cùng "dòng". Khi rotation (Task 13): token cũ revoke, token mới cấp — cùng `familyId`. Nếu token cũ bị dùng lại → reuse detection → revoke cả family → chống session hijacking.
+- **Transaction vs không transaction:**
 
-**Branch/Context:** Auth Feature — Register & Login (đã hoàn thành theo tiến độ cá nhân)
+| Caller | Truyền `tx` | Lý do |
+| --- | --- | --- |
+| `register()` | ✅ Có | Tạo user + issue token phải atomic — lỗi ở bước 2 thì rollback user, tránh orphan account |
+| `login()` | ❌ Không | User đã tồn tại, không có write nào cần rollback nếu issue token lỗi |
 
-**Điểm chốt lại sau khi làm xong Task 12:**
+> Công thức: transaction khi **nhiều write phải atomic**. Chỉ 1 write hoặc toàn read → không cần.
 
-- Đọc file task theo kiểu từ trên xuống rồi copy nguyên code chỉ giúp hiểu khoảng một nửa; cách đó dễ làm xong task nhưng khó tự viết lại từ đầu.
-- Với NestJS, cần tách việc học thành các lớp nhỏ hơn: DTO trước, rồi Controller, rồi Service, rồi Module wiring. Nếu đọc cả flow lớn một lúc thì rất dễ quá tải.
-- Mental model hiệu quả hơn là luôn trả lời 3 câu cho từng file: file này nhận input gì, gọi sang đâu, và trả output gì.
-- Với Task 12, flow cốt lõi cần nhớ là: `client -> AuthController -> AuthService -> Prisma/TokenService -> response`.
-- `AuthController` là lớp HTTP mỏng, `AuthService` mới là nơi chứa business logic chính; nếu chưa phân biệt được hai vai trò này thì rất dễ copy code mà không hiểu vì sao nó phải tách file.
-- Cách học tốt hơn cho các task tiếp theo là tự viết pseudo-code trước, sau đó mới điền NestJS decorator/API cụ thể, thay vì nhìn full code rồi gõ lại theo trí nhớ.
+### Swagger decorators
 
-**Task 12 — Cách luyện để bớt phụ thuộc copy code:**
-
-- Sau khi đọc xong một file, đóng file lại và tự nói lại: input, xử lý chính, output.
-- Chỉ copy “khung rỗng” của class/hàm, không copy toàn bộ implementation ngay từ đầu.
-- Nếu bí, mở hint theo từng nấc: ý tưởng -> decorator/API -> khung code -> cuối cùng mới xem full code.
-- Khi hoàn thành một task, nên viết lại 3-5 dòng bằng tiếng Việt về vai trò của từng file; bước này biến kiến thức thụ động thành kiến thức của mình.
+- 3 lớp: `@ApiProperty` (DTO field) · `@ApiOperation`/`@ApiTags` (controller) · `@ApiResponse` (response schema).
+- **Thêm ngay khi viết API**: `@ApiProperty` và `@ApiOperation`/`@ApiTags` — chi phí thấp, Swagger UI hiểu ngay.
+- **`@ApiResponse` defer đến Phase D** — response shape còn thay đổi khi refactor `GlobalExceptionFilter`.
+- **`example` phải nhất quán giữa các DTO cùng flow**: `RegisterDto` và `LoginDto` cùng dùng `"Abc@12345"` — developer copy từ bước này sang bước kia không bị lỗi misleading.
+- **`example` phải pass được validate của chính DTO đó**: `"password123"` không có chữ hoa → sẽ bị `422` ngay khi submit từ Swagger UI.
 
 ---
 
