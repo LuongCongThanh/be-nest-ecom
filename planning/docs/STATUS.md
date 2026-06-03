@@ -122,7 +122,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `10-jwt-redis.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — JwtStrategy, RedisModule, TokenService |
 | `11-guards-decorators.md` | 🔴 BLOCKING | ⏳ Not started | — |
 | `12-auth-feature.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — register/login flow hoàn thành; log học tập đã append |
-| `13-refresh-token.md` | 🔴 BLOCKING | 🔵 In progress | 2026-06-02 — bắt đầu sync task doc với nền TokenService hiện tại |
+| `13-refresh-token.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — refresh rotation + replay detection + PR #15 merged |
 | `14-users-crud.md` | 🟡 SHOULD | ⏳ Not started | — |
 | `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ⏳ Not started | — |
 
@@ -272,7 +272,8 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 [2026-05-29 00:00] [Phase B] [task-09]            [DONE] ValidationPipe + GlobalExceptionFilter — commit 9aa8df3, PR #9 merged.
 [2026-05-29 00:00] [Phase B] [task-10]            [DONE] JwtStrategy + RedisModule + TokenService — commit f6da002.
 [2026-06-02 00:00] [Phase B] [task-12]            [DONE] Auth Feature hoàn thành; bổ sung learning log về DTO, AuthService, và cách học bớt phụ thuộc copy code.
-[2026-06-02 00:10] [Phase B] [task-13]            [OPEN] Bắt đầu cập nhật task doc theo code thật: TokenService mới có issue/revokeAll, refresh rotation chưa implement.
+[2026-06-02 00:10] [Phase B] [task-13]            [DONE] Refresh token rotation + replay detection hoàn thành. PR #15 merged.
+[2026-06-03 00:00] [Phase B] [task-14]            [OPEN] Bắt đầu Users CRUD & Profile — self-service + admin governance.
 
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
