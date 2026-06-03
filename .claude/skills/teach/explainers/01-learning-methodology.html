@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phương pháp học Back-end cho Front-end Developer</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3347;
+      --accent: #7c6af7;
+      --accent2: #4ade80;
+      --accent3: #f472b6;
+      --accent4: #fb923c;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .hero {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+      background: linear-gradient(135deg, #1a1d27 0%, #12151e 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -80px; left: 50%; transform: translateX(-50%);
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(124,106,247,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(124,106,247,0.15);
+      border: 1px solid rgba(124,106,247,0.3);
+      color: #a78bfa;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .hero h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.8rem;
+      background: linear-gradient(135deg, #e2e8f0, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* Section */
+    .section {
+      margin-bottom: 2rem;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .section-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+    .section-sub {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    /* The 3 pillars */
+    .pillars {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    @media (max-width: 600px) { .pillars { grid-template-columns: 1fr; } }
+    .pillar {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.4rem;
+      text-align: center;
+    }
+    .pillar-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .pillar-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; }
+    .pillar-desc { font-size: 0.84rem; color: var(--text-muted); }
+
+    /* Roadmap steps */
+    .roadmap {
+      position: relative;
+    }
+    .step {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .step-num {
+      width: 42px; height: 42px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+      border: 2px solid;
+      flex-shrink: 0;
+    }
+    .step-line {
+      width: 2px;
+      flex: 1;
+      min-height: 20px;
+      margin-top: 6px;
+    }
+    .step-body {
+      flex: 1;
+      padding-bottom: 0.5rem;
+    }
+    .step-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.3rem;
+    }
+    .step-label {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.15rem 0.55rem;
+      border-radius: 999px;
+      margin-bottom: 0.5rem;
+    }
+    .step-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.7rem; }
+    .step-items { list-style: none; }
+    .step-items li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      padding: 0.2rem 0;
+      padding-left: 1.2rem;
+      position: relative;
+    }
+    .step-items li::before {
+      content: '→';
+      position: absolute; left: 0;
+      color: var(--text-dim);
+    }
+
+    /* Colors per step */
+    .s1 .step-num { color: #7c6af7; border-color: #7c6af7; background: rgba(124,106,247,0.1); }
+    .s1 .step-line { background: linear-gradient(180deg, rgba(124,106,247,0.4), transparent); }
+    .s1 .step-label { background: rgba(124,106,247,0.15); color: #a78bfa; }
+
+    .s2 .step-num { color: #4ade80; border-color: #4ade80; background: rgba(74,222,128,0.1); }
+    .s2 .step-line { background: linear-gradient(180deg, rgba(74,222,128,0.4), transparent); }
+    .s2 .step-label { background: rgba(74,222,128,0.15); color: #86efac; }
+
+    .s3 .step-num { color: #fb923c; border-color: #fb923c; background: rgba(251,146,60,0.1); }
+    .s3 .step-line { background: linear-gradient(180deg, rgba(251,146,60,0.4), transparent); }
+    .s3 .step-label { background: rgba(251,146,60,0.15); color: #fdba74; }
+
+    .s4 .step-num { color: #f472b6; border-color: #f472b6; background: rgba(244,114,182,0.1); }
+    .s4 .step-line { background: linear-gradient(180deg, rgba(244,114,182,0.4), transparent); }
+    .s4 .step-label { background: rgba(244,114,182,0.15); color: #f9a8d4; }
+
+    .s5 .step-num { color: #38bdf8; border-color: #38bdf8; background: rgba(56,189,248,0.1); }
+    .s5 .step-label { background: rgba(56,189,248,0.15); color: #7dd3fc; }
+
+    /* Method box */
+    .method-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 600px) { .method-grid { grid-template-columns: 1fr; } }
+    .method-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem;
+    }
+    .method-card h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .method-card p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    /* Callout */
+    .callout {
+      border-radius: 10px;
+      padding: 1.1rem 1.3rem;
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 0.05rem; }
+    .callout-body { flex: 1; }
+    .callout-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.2rem; }
+    .callout-text { font-size: 0.85rem; color: var(--text-muted); }
+    .callout.purple { background: rgba(124,106,247,0.08); border: 1px solid rgba(124,106,247,0.25); }
+    .callout.green  { background: rgba(74,222,128,0.08);  border: 1px solid rgba(74,222,128,0.25);  }
+    .callout.orange { background: rgba(251,146,60,0.08);  border: 1px solid rgba(251,146,60,0.25);  }
+
+    /* Weekly schedule */
+    .week-table { width: 100%; border-collapse: collapse; }
+    .week-table th, .week-table td {
+      padding: 0.7rem 1rem;
+      text-align: left;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .week-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .week-table td:first-child { color: var(--text-muted); width: 100px; }
+    .tag-sm {
+      display: inline-block;
+      font-size: 0.72rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .tag-learn  { background: rgba(124,106,247,0.15); color: #a78bfa; }
+    .tag-build  { background: rgba(74,222,128,0.15);  color: #86efac; }
+    .tag-review { background: rgba(251,146,60,0.15);  color: #fdba74; }
+    .tag-rest   { background: rgba(100,116,139,0.15); color: #94a3b8; }
+
+    /* Advantage box */
+    .advantage {
+      background: linear-gradient(135deg, rgba(124,106,247,0.1), rgba(74,222,128,0.06));
+      border: 1px solid rgba(124,106,247,0.3);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+    .advantage h3 { font-size: 1rem; font-weight: 700; margin-bottom: 1rem; color: #a78bfa; }
+    .adv-list { list-style: none; }
+    .adv-list li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      padding: 0.4rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .adv-list li:last-child { border-bottom: none; }
+    .adv-list li::before {
+      content: '✦';
+      position: absolute; left: 0;
+      color: #7c6af7;
+      font-size: 0.7rem;
+      top: 0.55rem;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-tag">Learning Methodology</div>
+    <h1>Front-end → Full-stack<br>Phương pháp học Back-end</h1>
+    <p>Bạn đã có lợi thế lớn. Đây là lộ trình và phương pháp được thiết kế riêng cho Front-end Developer chuyển sang NestJS.</p>
+  </div>
+
+  <!-- 3 Pillars -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,106,247,0.15)">🏛️</div>
+      <div>
+        <div class="section-title">3 trụ cột của việc học thật sự</div>
+        <div class="section-sub">Thiếu bất kỳ trụ nào, kiến thức sẽ không bền</div>
+      </div>
+    </div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon">📖</div>
+        <div class="pillar-title">Knowledge</div>
+        <div class="pillar-desc">Hiểu <em>tại sao</em> — từ docs chính thức, không từ tutorial lan man</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🔨</div>
+        <div class="pillar-title">Skills</div>
+        <div class="pillar-desc">Làm được — thực hành trực tiếp trên codebase thật, không code sandbox</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🌐</div>
+        <div class="pillar-title">Wisdom</div>
+        <div class="pillar-desc">Phán đoán được — từ cộng đồng, từ review code người khác</div>
+      </div>
+    </div>
+
+    <div class="callout purple">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <div class="callout-title">Rule #1: Docs trước, tutorial sau</div>
+        <div class="callout-text">Đừng bắt đầu bằng YouTube. Đọc NestJS Docs → thực hành trong project → khi bí thì mới xem tutorial. Bạn sẽ hiểu sâu hơn 3x so với học theo video từ đầu.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lợi thế FE Developer -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(74,222,128,0.15)">⚡</div>
+      <div>
+        <div class="section-title">Lợi thế của bạn so với người mới học</div>
+        <div class="section-sub">Front-end background là vũ khí, không phải điểm yếu</div>
+      </div>
+    </div>
+    <div class="advantage">
+      <h3>Bạn đã biết những thứ mà người mới mất hàng tháng để học:</h3>
+      <ul class="adv-list">
+        <li><strong>TypeScript</strong> — NestJS xây hoàn toàn trên TypeScript. Bạn đã quen syntax, type system, async/await</li>
+        <li><strong>HTTP & API</strong> — Bạn đã gọi API hàng ngày từ phía client. Giờ chỉ cần lật ngược góc nhìn sang server</li>
+        <li><strong>Component thinking</strong> — Module trong NestJS giống hệt Component trong React: đóng gói, có dependency, có lifecycle</li>
+        <li><strong>JSON & Data structures</strong> — Request/Response body, DTO đều là JSON bạn đã quen xử lý</li>
+        <li><strong>Git & tooling</strong> — Dev workflow, PR, code review không cần học lại</li>
+        <li><strong>Debug mindset</strong> — Kỹ năng debug từ front-end áp dụng trực tiếp: đọc error message, trace stack, isolate vấn đề</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Roadmap -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(251,146,60,0.15)">🗺️</div>
+      <div>
+        <div class="section-title">Lộ trình 5 giai đoạn</div>
+        <div class="section-sub">Dựa trên project be-nest-ecom bạn đang làm</div>
+      </div>
+    </div>
+
+    <div class="callout green">
+      <div class="callout-icon">✅</div>
+      <div class="callout-body">
+        <div class="callout-title">Bạn đã ở đâu?</div>
+        <div class="callout-text">Dựa trên git history, bạn đã hoàn thành Phase A + Phase B (đến Task 13). Bạn đã vượt qua Giai đoạn 1 và đang ở giữa Giai đoạn 2. Không phải người mới!</div>
+      </div>
+    </div>
+
+    <div class="roadmap">
+      <!-- Step 1 -->
+      <div class="step s1">
+        <div class="step-left">
+          <div class="step-num">1</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <span class="step-label">✅ Đã qua — Foundation</span>
+          <div class="step-title">NestJS Core Concepts</div>
+          <div class="step-desc">Nền tảng kiến trúc NestJS: Module, Controller, Service, DI, Decorator</div>
+          <ul class="step-items">
+            <li>Cấu trúc module và cách inject dependency</li>
+            <li>Request lifecycle: Middleware → Guard → Interceptor → Pipe → Handler</li>
+            <li>Validation với class-validator + DTO</li>
+            <li>Exception handling và custom filters</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step s2">
+        <div class="step-left">
+          <div class="step-num">2</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <span class="step-label">🔄 Đang làm — Auth & Security</span>
+          <div class="step-title">Authentication, Authorization & Database</div>
+          <div class="step-desc">JWT, Refresh Token, Guards, Prisma ORM</div>
+          <ul class="step-items">
+            <li>JWT Access Token + Refresh Token (đã implement)</li>
+            <li>Refresh Token Rotation + Replay Detection (vừa xong)</li>
+            <li>Prisma schema design, migrations, relations</li>
+            <li>Role-based access control (RBAC)</li>
+            <li>Prisma transactions và error handling</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step s3">
+        <div class="step-left">
+          <div class="step-num">3</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <span class="step-label">⏳ Tiếp theo — Business Logic</span>
+          <div class="step-title">Domain Logic & API Design</div>
+          <div class="step-desc">Xây dựng các module nghiệp vụ (User, Product, Cart, Order)</div>
+          <ul class="step-items">
+            <li>REST API design: naming, versioning, status codes</li>
+            <li>Repository pattern với Prisma</li>
+            <li>Pagination, filtering, sorting</li>
+            <li>File upload với Multer + Media module</li>
+            <li>Background jobs với Bull/BullMQ</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step s4">
+        <div class="step-left">
+          <div class="step-num">4</div>
+          <div class="step-line"></div>
+        </div>
+        <div class="step-body">
+          <span class="step-label">📅 Sau đó — Quality</span>
+          <div class="step-title">Testing & Code Quality</div>
+          <div class="step-desc">Viết test là kỹ năng phân biệt junior và senior back-end</div>
+          <ul class="step-items">
+            <li>Unit test với Jest: test Service + Guard</li>
+            <li>Integration test: test với database thật</li>
+            <li>E2E test với Supertest</li>
+            <li>Test coverage và CI integration</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div class="step s5">
+        <div class="step-left">
+          <div class="step-num">5</div>
+        </div>
+        <div class="step-body">
+          <span class="step-label">🎯 Đích đến — Full-stack</span>
+          <div class="step-title">Connect Front-end ↔ Back-end</div>
+          <div class="step-desc">Tự build full-stack feature từ đầu đến cuối</div>
+          <ul class="step-items">
+            <li>CORS, Auth flow từ FE gọi vào BE</li>
+            <li>Real-time với WebSocket / SSE</li>
+            <li>API documentation với Swagger/OpenAPI</li>
+            <li>Deploy API lên server (Docker + Railway/Render)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Methods -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(244,114,182,0.15)">⚙️</div>
+      <div>
+        <div class="section-title">4 phương pháp học hiệu quả nhất</div>
+        <div class="section-sub">Dùng song song, không chỉ dùng một</div>
+      </div>
+    </div>
+    <div class="method-grid">
+      <div class="method-card">
+        <h4>📚 Read → Build loop</h4>
+        <p>Đọc 1 section trong NestJS Docs → implement ngay trong project → lặp lại. Đừng đọc hết docs rồi mới code.</p>
+      </div>
+      <div class="method-card">
+        <h4>🔍 Reverse Engineer</h4>
+        <p>Khi gặp code mình viết rồi nhưng không hiểu rõ: đọc lại, xoá đi, tự viết lại từ memory. Nếu làm được → đã học thật.</p>
+      </div>
+      <div class="method-card">
+        <h4>❓ Teach back</h4>
+        <p>Sau khi học xong 1 concept, thử giải thích cho tôi nghe bằng lời của bạn. Điểm nào giải thích không được = điểm cần học thêm.</p>
+      </div>
+      <div class="method-card">
+        <h4>🐛 Debug intentionally</h4>
+        <p>Khi code lỗi, đừng chỉ fix. Hỏi: "Tại sao lỗi này xảy ra?" Hiểu root cause là học tốt nhất.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Plan -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(56,189,248,0.15)">📅</div>
+      <div>
+        <div class="section-title">Lịch học gợi ý (10+ giờ/tuần)</div>
+        <div class="section-sub">Phân bổ hợp lý để không bị burnout</div>
+      </div>
+    </div>
+    <div class="card" style="padding:0; overflow:hidden;">
+      <table class="week-table">
+        <thead>
+          <tr>
+            <th>Ngày</th>
+            <th>Hoạt động</th>
+            <th>Thời gian</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Thứ 2</td>
+            <td><span class="tag-sm tag-learn">Learn</span> Đọc docs 1 concept mới + ghi note</td>
+            <td>1.5h</td>
+          </tr>
+          <tr>
+            <td>Thứ 3</td>
+            <td><span class="tag-sm tag-build">Build</span> Implement concept vào project (task thực tế)</td>
+            <td>2h</td>
+          </tr>
+          <tr>
+            <td>Thứ 4</td>
+            <td><span class="tag-sm tag-build">Build</span> Tiếp tục task hoặc refactor code cũ</td>
+            <td>2h</td>
+          </tr>
+          <tr>
+            <td>Thứ 5</td>
+            <td><span class="tag-sm tag-learn">Learn</span> Đọc source code hoặc bài viết chuyên sâu</td>
+            <td>1.5h</td>
+          </tr>
+          <tr>
+            <td>Thứ 6</td>
+            <td><span class="tag-sm tag-build">Build</span> Viết test cho feature vừa làm</td>
+            <td>2h</td>
+          </tr>
+          <tr>
+            <td>Thứ 7</td>
+            <td><span class="tag-sm tag-review">Review</span> Teach back — giải thích concept đã học cho tôi</td>
+            <td>1h</td>
+          </tr>
+          <tr>
+            <td>CN</td>
+            <td><span class="tag-sm tag-rest">Rest</span> Nghỉ ngơi hoặc đọc nhẹ</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout orange">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <div class="callout-title">Bẫy phổ biến nhất: Tutorial hell</div>
+        <div class="callout-text">Xem 10 video YouTube rồi cảm thấy "đã hiểu" nhưng tự code không được. Giải pháp: 20% xem/đọc, 80% tự làm. Nếu bạn đang xem nhiều hơn làm — đó là dấu hiệu cần điều chỉnh.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Next action -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon" style="background:rgba(124,106,247,0.15)">🚀</div>
+      <div>
+        <div class="section-title">Bước tiếp theo ngay hôm nay</div>
+        <div class="section-sub">Cụ thể, có thể làm ngay</div>
+      </div>
+    </div>
+    <div class="card">
+      <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:1rem;">
+        Bạn vừa hoàn thành Refresh Token Rotation — đây là feature khá phức tạp. Câu hỏi bây giờ là: bạn có thể giải thích lại cơ chế đó không?
+      </p>
+      <p style="font-size:0.9rem; color:var(--text);">
+        <strong>Thử ngay:</strong> Nói cho tôi nghe — <em>"Tại sao Refresh Token cần rotation? Nếu không có rotation thì gì xảy ra?"</em> — bằng lời của bạn.
+        Đây vừa là cách kiểm tra kiến thức, vừa là bước đầu xây dựng skill "explain to others" — kỹ năng cốt lõi của senior developer.
+      </p>
+    </div>
+  </div>
+
+  <footer>
+    Teaching workspace: <code>be-nest-ecom/.claude/skills/teach/</code> · Cập nhật theo mỗi session học
+  </footer>
+
+</div>
+</body>
+</html>

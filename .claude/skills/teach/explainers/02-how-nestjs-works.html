@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cách NestJS hoạt động — từ code thật của be-nest-ecom</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --s1: #161b22;
+      --s2: #21262d;
+      --border: #30363d;
+      --accent: #7c3aed;
+      --green: #3fb950;
+      --blue: #58a6ff;
+      --orange: #d29922;
+      --pink: #f778ba;
+      --red: #f85149;
+      --teal: #39d353;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --dim: #484f58;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', -apple-system, sans-serif;
+      line-height: 1.6;
+      padding: 2rem 1rem 4rem;
+    }
+    .page { max-width: 900px; margin: 0 auto; }
+
+    /* ─── Typography ─── */
+    h1 { font-size: 1.9rem; font-weight: 700; line-height: 1.2; }
+    h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; }
+    h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    p  { color: var(--muted); font-size: 0.9rem; }
+
+    /* ─── Hero ─── */
+    .hero {
+      padding: 2.5rem 2rem 2rem;
+      background: linear-gradient(135deg, #161b22 0%, #0d1117 100%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(124,58,237,0.18), transparent 70%);
+      pointer-events: none;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(124,58,237,0.18);
+      border: 1px solid rgba(124,58,237,0.4);
+      color: #a78bfa;
+      font-size: 0.72rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 0.2rem 0.7rem; border-radius: 999px;
+      margin-bottom: 0.9rem;
+    }
+    .hero h1 { margin-bottom: 0.6rem; }
+    .hero p  { font-size: 0.95rem; max-width: 580px; }
+
+    /* ─── Section ─── */
+    .section { margin-bottom: 2.5rem; }
+    .section-label {
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 1.2rem;
+    }
+    .section-label .num {
+      width: 28px; height: 28px; border-radius: 6px;
+      background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.4);
+      color: #a78bfa; font-size: 0.78rem; font-weight: 800;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .section-label h2 { margin-bottom: 0; }
+
+    /* ─── Code blocks ─── */
+    pre {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.1rem 1.3rem;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+    code { font-family: inherit; }
+    .kw  { color: #ff7b72; }   /* keyword: import, const, class, return */
+    .dec { color: #79c0ff; }   /* decorator: @Module, @Controller */
+    .str { color: #a5d6ff; }   /* string */
+    .fn  { color: #d2a8ff; }   /* function name */
+    .cm  { color: var(--dim); font-style: italic; } /* comment */
+    .hl  { background: rgba(124,58,237,0.15); border-left: 2px solid #7c3aed; display: block; margin: 0 -1.3rem; padding: 0 1.3rem; } /* highlight */
+    .cls { color: #ffa657; }   /* class name */
+    .num-lit { color: #79c0ff; }
+
+    /* ─── Flow diagram ─── */
+    .flow {
+      display: flex; flex-direction: column;
+      gap: 0; margin: 1rem 0;
+    }
+    .flow-row {
+      display: flex; align-items: stretch; gap: 0;
+    }
+    .flow-box {
+      flex: 1;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--s1);
+      margin: 0 0.3rem;
+      position: relative;
+    }
+    .flow-box .fb-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.3rem; }
+    .flow-box .fb-sub   { font-size: 0.75rem; color: var(--muted); }
+    .flow-box .fb-file  {
+      font-size: 0.7rem; font-family: monospace;
+      background: var(--s2); border: 1px solid var(--border);
+      padding: 0.15rem 0.4rem; border-radius: 4px;
+      color: #79c0ff; margin-top: 0.4rem; display: inline-block;
+    }
+    .arrow-down {
+      text-align: center; color: var(--dim); font-size: 1.2rem;
+      line-height: 1; padding: 0.2rem 0;
+    }
+    .flow-box.c-purple { border-color: rgba(124,58,237,0.5); background: rgba(124,58,237,0.05); }
+    .flow-box.c-blue   { border-color: rgba(88,166,255,0.4); background: rgba(88,166,255,0.04); }
+    .flow-box.c-green  { border-color: rgba(63,185,80,0.4);  background: rgba(63,185,80,0.04);  }
+    .flow-box.c-orange { border-color: rgba(210,153,34,0.4); background: rgba(210,153,34,0.04); }
+    .flow-box.c-pink   { border-color: rgba(247,120,186,0.4);background: rgba(247,120,186,0.04);}
+
+    /* ─── Grid 2 ─── */
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width:600px) { .grid2 { grid-template-columns: 1fr; } }
+
+    /* ─── Card ─── */
+    .card {
+      background: var(--s1); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.2rem;
+    }
+    .card + .card { margin-top: 1rem; }
+
+    /* ─── Callout ─── */
+    .tip {
+      border-radius: 8px; padding: 0.9rem 1.1rem;
+      display: flex; gap: 0.7rem; align-items: flex-start;
+      margin: 1rem 0;
+    }
+    .tip.blue   { background: rgba(88,166,255,0.08);  border: 1px solid rgba(88,166,255,0.2);  }
+    .tip.green  { background: rgba(63,185,80,0.08);   border: 1px solid rgba(63,185,80,0.2);   }
+    .tip.purple { background: rgba(124,58,237,0.08);  border: 1px solid rgba(124,58,237,0.2);  }
+    .tip .icon { font-size: 1rem; flex-shrink:0; margin-top:2px; }
+    .tip .body { flex:1; }
+    .tip .body strong { font-size: 0.88rem; display: block; margin-bottom: 0.15rem; }
+    .tip .body span { font-size: 0.82rem; color: var(--muted); }
+
+    /* ─── DI Visual ─── */
+    .di-box {
+      border: 1px dashed var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; margin: 0.5rem 0;
+      position: relative;
+    }
+    .di-label {
+      position: absolute; top: -10px; left: 12px;
+      background: var(--bg); padding: 0 6px;
+      font-size: 0.7rem; font-weight: 600; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* ─── Lifecycle table ─── */
+    table { width:100%; border-collapse: collapse; font-size:0.85rem; }
+    th { text-align:left; padding: 0.6rem 0.8rem; color:var(--muted); font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; border-bottom:1px solid var(--border); }
+    td { padding: 0.7rem 0.8rem; border-bottom: 1px solid rgba(48,54,61,0.5); vertical-align:top; }
+    td:first-child { font-family:monospace; color:#79c0ff; font-size:0.82rem; white-space:nowrap; }
+    td:nth-child(2) { font-weight:600; font-size:0.85rem; }
+    td:last-child { color:var(--muted); font-size:0.82rem; }
+    tr:last-child td { border-bottom: none; }
+    .dot { display:inline-block; width:8px;height:8px; border-radius:50%; margin-right:5px; }
+    .dot-g { background:var(--green); }
+    .dot-b { background:var(--blue); }
+    .dot-o { background:var(--orange); }
+    .dot-p { background:#a78bfa; }
+    .dot-r { background:var(--red); }
+
+    footer { text-align:center; margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); color:var(--dim); font-size:0.78rem; }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="badge">NestJS Deep Dive</div>
+    <h1>NestJS hoạt động như thế nào?</h1>
+    <p style="margin-top:0.5rem">Giải thích từ code thật trong <code style="color:#58a6ff">be-nest-ecom</code> — không phải ví dụ trừu tượng. Mỗi concept đều có file thật để bạn mở ra xem.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 1: BOOTSTRAP
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">1</div>
+      <h2>App khởi động như thế nào? (Bootstrap)</h2>
+    </div>
+
+    <p style="margin-bottom:1rem">Mọi thứ bắt đầu từ một file duy nhất: <code style="color:#79c0ff">src/main.ts</code></p>
+
+    <pre><code><span class="kw">import</span> { <span class="cls">NestFactory</span> } <span class="kw">from</span> <span class="str">'@nestjs/core'</span>;
+<span class="kw">import</span> { <span class="cls">AppModule</span> } <span class="kw">from</span> <span class="str">'./app.module'</span>;
+
+<span class="kw">async function</span> <span class="fn">bootstrap</span>() {
+  <span class="kw">const</span> app = <span class="kw">await</span> <span class="cls">NestFactory</span>.<span class="fn">create</span>(<span class="cls">AppModule</span>);
+
+<span class="hl">  app.<span class="fn">setGlobalPrefix</span>(<span class="str">'api/v1'</span>, { exclude: [<span class="str">'health'</span>] });
+</span>
+  <span class="kw">await</span> app.<span class="fn">listen</span>(<span class="num-lit">3000</span>);
+}
+<span class="fn">bootstrap</span>();</code></pre>
+
+    <div class="tip blue">
+      <div class="icon">💡</div>
+      <div class="body">
+        <strong>Tại sao <code>exclude: ['health']</code>?</strong>
+        <span>Route <code>/health</code> cho load balancer check — không cần prefix <code>/api/v1/</code>. Load balancer không biết version API, nó chỉ cần biết server còn sống không.</span>
+      </div>
+    </div>
+
+    <p style="margin-bottom:1rem">Khi <code>NestFactory.create(AppModule)</code> chạy, NestJS đọc <code>AppModule</code> và xây dựng toàn bộ cấu trúc app. Đây là quá trình "boot":</p>
+
+    <div class="flow">
+      <div class="flow-row">
+        <div class="flow-box c-purple">
+          <div class="fb-title">① main.ts</div>
+          <div class="fb-sub">Entry point. Gọi <code>NestFactory.create(AppModule)</code></div>
+          <div class="fb-file">src/main.ts</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="flow-row">
+        <div class="flow-box c-blue">
+          <div class="fb-title">② AppModule đọc imports</div>
+          <div class="fb-sub">NestJS đọc decorator <code>@Module({})</code>, tìm tất cả modules cần load</div>
+          <div class="fb-file">src/app.module.ts</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="flow-row">
+        <div class="flow-box c-green">
+          <div class="fb-title">③ IdentityModule, PrismaModule, ... được khởi tạo</div>
+          <div class="fb-sub">Mỗi module khai báo providers của mình — NestJS instantiate (new) tất cả providers</div>
+          <div class="fb-file">src/modules/identity.module.ts</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+      <div class="flow-row">
+        <div class="flow-box c-orange">
+          <div class="fb-title">④ App lắng nghe trên port 3000</div>
+          <div class="fb-sub">Từ đây HTTP requests có thể đến</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 2: MODULE
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">2</div>
+      <h2>Module là gì? Đọc IdentityModule của bạn</h2>
+    </div>
+
+    <p style="margin-bottom:1rem">Module là đơn vị tổ chức code. Mở file này và nhìn vào 4 key:</p>
+
+    <pre><code><span class="cm">// src/modules/identity.module.ts — code THẬT của bạn</span>
+
+<span class="dec">@Module</span>({
+<span class="hl">  imports:     [<span class="cls">PrismaModule</span>, <span class="cls">PassportModule</span>.<span class="fn">register</span>({ defaultStrategy: <span class="str">'jwt'</span> })],
+</span><span class="hl">  controllers: [<span class="cls">AuthController</span>],
+</span><span class="hl">  providers:   [<span class="cls">AuthService</span>, <span class="cls">TokenService</span>, <span class="cls">JwtStrategy</span>],
+</span><span class="hl">  exports:     [<span class="cls">TokenService</span>],
+</span>})
+<span class="kw">export class</span> <span class="cls">IdentityModule</span> {}</code></pre>
+
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card">
+        <h3 style="color:#58a6ff">imports: [...]</h3>
+        <p>Module này cần dùng gì từ module khác. <code>PrismaModule</code> → để AuthService có thể gọi database. Không có đây, <code>PrismaService</code> sẽ không được inject.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:#3fb950">controllers: [...]</h3>
+        <p>Các class xử lý HTTP request. <code>AuthController</code> nhận POST <code>/auth/login</code>, <code>/auth/register</code>... NestJS biết route nào thuộc controller nào qua đây.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:#d29922">providers: [...]</h3>
+        <p>Các class được NestJS quản lý và có thể inject vào nhau. <code>AuthService</code>, <code>TokenService</code>, <code>JwtStrategy</code> — tất cả đều là providers.</p>
+      </div>
+      <div class="card">
+        <h3 style="color:#f778ba">exports: [...]</h3>
+        <p>Provider nào cho phép module khác dùng. <code>TokenService</code> được export vì module khác (ví dụ UserModule sau này) cần verify token.</p>
+      </div>
+    </div>
+
+    <div class="tip purple" style="margin-top:1rem">
+      <div class="icon">🔑</div>
+      <div class="body">
+        <strong>Mental model: Module = hộp kín</strong>
+        <span>Mọi thứ trong module mặc định là private. Module khác KHÔNG thể dùng <code>AuthService</code> của bạn trừ khi bạn <code>exports</code> nó. <code>imports</code> là cách mở khóa dependencies từ module khác vào.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 3: REQUEST LIFECYCLE
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">3</div>
+      <h2>Request đi từ đâu đến đâu?</h2>
+    </div>
+
+    <p style="margin-bottom:1rem">Khi client gọi <code>POST /api/v1/auth/login</code>, request đi qua các lớp sau theo thứ tự:</p>
+
+    <div class="card" style="padding:0; overflow:hidden; margin-bottom:1rem;">
+      <table>
+        <thead>
+          <tr>
+            <th>Lớp</th>
+            <th>Tên</th>
+            <th>Việc làm trong be-nest-ecom</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td><span class="dot dot-b"></span>Middleware</td>
+            <td>CORS, logging (chạy trước mọi thứ, không biết route là gì)</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td><span class="dot dot-p"></span>Guard</td>
+            <td><code>JwtAuthGuard</code> kiểm tra token. Nếu route có <code>@Public()</code> → bỏ qua</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td><span class="dot dot-o"></span>Interceptor</td>
+            <td>Logging request/response time, transform response (nếu có)</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td><span class="dot dot-g"></span>Pipe</td>
+            <td><code>ValidationPipe</code> validate body DTO (class-validator). Sai → reject ngay</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td><span class="dot dot-r"></span>Handler</td>
+            <td>Method trong Controller chạy. Gọi <code>authService.login(dto)</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-bottom:0.8rem">Ví dụ cụ thể với <code>POST /auth/login</code>:</p>
+
+    <pre><code><span class="cm">// 1. Guard đọc decorator @Public() → login là public → cho qua</span>
+<span class="cm">// 2. Pipe: validate LoginDto { email, password } → đúng format → cho qua</span>
+<span class="cm">// 3. Handler chạy:</span>
+
+<span class="dec">@Public</span>()                    <span class="cm">← Guard thấy cái này, bỏ qua JWT check</span>
+<span class="dec">@Post</span>(<span class="str">'login'</span>)
+<span class="dec">@HttpCode</span>(<span class="cls">HttpStatus</span>.OK)
+<span class="kw">async</span> <span class="fn">login</span>(<span class="dec">@Body</span>() dto: <span class="cls">LoginDto</span>) {   <span class="cm">← Pipe validate dto trước khi vào đây</span>
+  <span class="kw">return</span> <span class="kw">this</span>.authService.<span class="fn">login</span>(dto);  <span class="cm">← Gọi service</span>
+}</code></pre>
+
+    <div class="tip green">
+      <div class="icon">⚡</div>
+      <div class="body">
+        <strong>Tại sao <code>@HttpCode(HttpStatus.OK)</code>?</strong>
+        <span>NestJS mặc định trả <code>201 Created</code> cho POST. Login không tạo resource mới — nó chỉ xác thực. Nên phải override về <code>200 OK</code> bằng decorator này.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 4: DEPENDENCY INJECTION
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">4</div>
+      <h2>Dependency Injection — NestJS new() hộ bạn</h2>
+    </div>
+
+    <p style="margin-bottom:1rem">DI là cơ chế NestJS tự tạo và truyền instance vào class. Bạn không phải tự <code>new AuthService()</code>.</p>
+
+    <p style="margin-bottom:1rem">Nhìn vào <code>AuthController</code> của bạn:</p>
+
+    <pre><code><span class="kw">export class</span> <span class="cls">AuthController</span> {
+<span class="hl">  <span class="fn">constructor</span>(<span class="kw">private readonly</span> authService: <span class="cls">AuthService</span>) {}
+</span>
+  <span class="kw">async</span> <span class="fn">login</span>(<span class="dec">@Body</span>() dto: <span class="cls">LoginDto</span>) {
+    <span class="kw">return</span> <span class="kw">this</span>.authService.<span class="fn">login</span>(dto);  <span class="cm">← dùng được ngay</span>
+  }
+}</code></pre>
+
+    <p style="margin-bottom:0.8rem">NestJS thấy <code>AuthController</code> cần <code>AuthService</code> → tự tìm trong <code>providers</code> của module → tự khởi tạo và truyền vào. Bạn chỉ cần khai báo trong constructor.</p>
+
+    <p style="margin-bottom:1rem">Chuỗi dependency trong project của bạn:</p>
+
+    <div class="di-box">
+      <span class="di-label">IdentityModule</span>
+      <div style="display:flex; flex-direction:column; gap:0.5rem; padding-top:0.3rem">
+        <div class="card" style="background:rgba(124,58,237,0.08); border-color:rgba(124,58,237,0.3)">
+          <strong style="font-size:0.85rem; color:#a78bfa">AuthController</strong>
+          <span style="font-size:0.78rem; color:var(--muted); display:block; margin-top:0.2rem">cần → AuthService</span>
+        </div>
+        <div style="text-align:center; color:var(--dim)">↓ inject</div>
+        <div class="card" style="background:rgba(88,166,255,0.06); border-color:rgba(88,166,255,0.3)">
+          <strong style="font-size:0.85rem; color:#58a6ff">AuthService</strong>
+          <span style="font-size:0.78rem; color:var(--muted); display:block; margin-top:0.2rem">cần → TokenService, PrismaService, UserRepository</span>
+        </div>
+        <div style="text-align:center; color:var(--dim)">↓ inject</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem">
+          <div class="card" style="background:rgba(63,185,80,0.06); border-color:rgba(63,185,80,0.3)">
+            <strong style="font-size:0.82rem; color:#3fb950">TokenService</strong>
+            <span style="font-size:0.75rem; color:var(--muted); display:block">sign/verify JWT</span>
+          </div>
+          <div class="card" style="background:rgba(210,153,34,0.06); border-color:rgba(210,153,34,0.3)">
+            <strong style="font-size:0.82rem; color:#d29922">PrismaService</strong>
+            <span style="font-size:0.75rem; color:var(--muted); display:block">query database (từ PrismaModule)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip blue" style="margin-top:1rem">
+      <div class="icon">🧩</div>
+      <div class="body">
+        <strong>So sánh với React để dễ hiểu hơn</strong>
+        <span>Trong React, bạn dùng <code>useContext()</code> để lấy global state mà không cần pass props qua nhiều lớp. DI trong NestJS tương tự — class nói "tôi cần cái này" và NestJS cung cấp, không cần manual wiring.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 5: DECORATORS
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">5</div>
+      <h2>Decorators — metadata gắn lên code</h2>
+    </div>
+
+    <p style="margin-bottom:1rem">Decorator là hàm bắt đầu bằng <code>@</code> — chúng gắn thêm thông tin (metadata) lên class, method, hay parameter. NestJS đọc metadata này lúc runtime để biết phải làm gì.</p>
+
+    <p style="margin-bottom:1rem">Phân tích một handler trong <code>AuthController</code> của bạn:</p>
+
+    <pre><code><span class="dec">@Post</span>(<span class="str">'logout'</span>)            <span class="cm">← "route này là POST /auth/logout"</span>
+<span class="dec">@HttpCode</span>(<span class="cls">HttpStatus</span>.NO_CONTENT) <span class="cm">← "trả 204 thay vì 200"</span>
+<span class="dec">@ApiBearerAuth</span>()          <span class="cm">← "Swagger: route này cần Bearer token"</span>
+<span class="kw">async</span> <span class="fn">logout</span>(
+  <span class="dec">@CurrentUser</span>(<span class="str">'id'</span>) userId: <span class="kw">string</span>,  <span class="cm">← "lấy user.id từ request.user đã verify"</span>
+  <span class="dec">@Body</span>() dto: <span class="cls">RefreshDto</span>              <span class="cm">← "parse body thành RefreshDto"</span>
+) {
+  <span class="kw">await</span> <span class="kw">this</span>.authService.<span class="fn">logout</span>(userId, dto);
+}</code></pre>
+
+    <div class="grid2" style="margin-top:1rem">
+      <div class="card">
+        <h3>Class decorators</h3>
+        <p style="font-size:0.82rem; margin-top:0.3rem"><code style="color:#79c0ff">@Controller('auth')</code> — tất cả route trong class này có prefix <code>/auth</code><br><br><code style="color:#79c0ff">@Module({})</code> — khai báo đây là một NestJS Module</p>
+      </div>
+      <div class="card">
+        <h3>Method decorators</h3>
+        <p style="font-size:0.82rem; margin-top:0.3rem"><code style="color:#79c0ff">@Get()</code>, <code>@Post()</code>, <code>@Delete()</code> — HTTP verb và path<br><br><code style="color:#79c0ff">@Public()</code> — custom decorator bạn tự tạo, Guard đọc nó</p>
+      </div>
+      <div class="card">
+        <h3>Parameter decorators</h3>
+        <p style="font-size:0.82rem; margin-top:0.3rem"><code style="color:#79c0ff">@Body()</code> — parse request body<br><code style="color:#79c0ff">@Param('id')</code> — lấy route param<br><code style="color:#79c0ff">@CurrentUser('id')</code> — custom decorator của bạn</p>
+      </div>
+      <div class="card">
+        <h3>Injectable decorator</h3>
+        <p style="font-size:0.82rem; margin-top:0.3rem"><code style="color:#79c0ff">@Injectable()</code> — đánh dấu class này là Provider, NestJS DI có thể quản lý và inject nó vào nơi khác</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       SECTION 6: THE BIG PICTURE
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">6</div>
+      <h2>Bức tranh toàn cảnh — mọi thứ kết nối</h2>
+    </div>
+
+    <pre style="font-size:0.8rem; line-height:1.8"><code><span class="cm">── REQUEST: POST /api/v1/auth/login ──────────────────────────────────────</span>
+
+HTTP Request
+    │
+    ▼
+<span style="color:#30363d">[ Middleware ]</span>  CORS check, Request logging
+    │
+    ▼
+<span style="color:#a78bfa">[ JwtAuthGuard ]</span>  Thấy @Public() trên handler → <span style="color:#3fb950">cho qua</span>
+    │
+    ▼
+<span style="color:#58a6ff">[ ValidationPipe ]</span>  Parse body → <span style="color:#3fb950">LoginDto { email: "a@b.com", password: "..." }</span>
+    │                              Sai format → trả 400 ngay
+    ▼
+<span style="color:#f778ba">[ AuthController.login() ]</span>     ← handler chạy
+    │   <code>return this.authService.login(dto)</code>
+    ▼
+<span style="color:#d29922">[ AuthService.login() ]</span>
+    │   validate user, check password
+    │   gọi tokenService.generateTokenPair()
+    ▼
+<span style="color:#3fb950">[ TokenService ]</span>  sign JWT access token + refresh token
+    │
+    ▼
+<span style="color:#d29922">[ UserRepository ]</span>  lưu refresh token hash vào DB qua Prisma
+    │
+    ▼
+Response: <span style="color:#3fb950">200 { accessToken, refreshToken }</span>
+
+<span class="cm">──────────────────────────────────────────────────────────────────────────</span></code></pre>
+
+    <div class="tip green" style="margin-top:1rem">
+      <div class="icon">✅</div>
+      <div class="body">
+        <strong>Bạn đã build đúng pattern này trong Task 12-13</strong>
+        <span>Code bạn đã viết hoàn toàn theo đúng flow này. Explainer chỉ đặt tên cho những thứ bạn đã làm. Đây là NestJS — không phải magic, chỉ là các lớp có tên rõ ràng.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       NEXT STEPS
+  ═══════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-label">
+      <div class="num">7</div>
+      <h2>Đọc thêm trong chính codebase của bạn</h2>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3>Mở và đọc ngay</h3>
+        <p style="font-size:0.82rem; margin-top:0.5rem; line-height:2">
+          <code style="color:#79c0ff">src/modules/identity.module.ts</code><br>
+          <code style="color:#79c0ff">src/modules/identity/controllers/auth.controller.ts</code><br>
+          <code style="color:#79c0ff">src/modules/identity/services/auth.service.ts</code><br>
+          <code style="color:#79c0ff">src/modules/identity/services/token.service.ts</code>
+        </p>
+      </div>
+      <div class="card">
+        <h3>Câu hỏi tự kiểm tra</h3>
+        <p style="font-size:0.82rem; margin-top:0.5rem; line-height:2">
+          1. Tại sao <code>PrismaModule</code> phải có trong <code>imports</code>?<br>
+          2. <code>@Public()</code> được đọc ở đâu trong pipeline?<br>
+          3. Nếu xoá <code>TokenService</code> khỏi <code>providers</code> thì sao?<br>
+          4. Tại sao <code>exports: [TokenService]</code> chứ không export <code>AuthService</code>?
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Explainer 02 · be-nest-ecom teaching workspace · Dựa trên code thật của project
+  </footer>
+
+</div>
+</body>
+</html>

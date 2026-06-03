@@ -361,6 +361,40 @@
 
 ---
 
+## Task 13 — Grill session trước khi code · 2026-06-02
+
+**Phase:** B — Foundation
+
+### 5 câu hỏi cốt lõi về Refresh Token Rotation
+
+**Q1: Tại sao `/refresh` cần `@Public()` nhưng `/logout` thì không?**
+
+- `/refresh`: AT đã hết hạn — đó là lý do cần gọi endpoint này. Nếu guard JWT bảo vệ nó, sẽ block luôn vì AT expired. Server nhận dạng user qua `refreshToken` trong body → DB lookup.
+- `/logout`: user vẫn còn AT hợp lệ khi logout. Guard JWT xác thực AT, `@CurrentUser('id')` lấy userId từ payload để biết revoke token của ai. Thiếu guard → bất kỳ ai gọi `/logout` với refresh token bất kỳ → xóa token của người khác.
+
+**Q2: `familyId` khi rotate — lấy cũ hay tạo mới?**
+
+Phải dùng lại `tokenRecord.familyId` cũ. Lý do: replay detection chỉ hoạt động khi toàn bộ chain rotate có cùng `familyId`. Nếu mỗi lần rotate tạo `familyId` mới → attacker replay token cũ → chỉ kill token đó, không kill chain → session vẫn sống. Với `familyId` giữ nguyên → replay → kill toàn bộ chain → user buộc re-login.
+
+**Q3: Tại sao "mark usedAt" và "tạo token mới" phải trong cùng transaction?**
+
+Không có transaction → partial success có thể xảy ra:
+
+- Crash sau khi mark `usedAt` nhưng trước khi tạo token mới → token cũ vô hiệu, không có token mới → user bị khóa tài khoản.
+- Client retry với token cũ → server thấy `usedAt != null` → REPLAY_DETECTED → kill toàn family → user bị logout oan.
+
+Transaction đảm bảo atomic: cả hai bước cùng thành công hoặc cùng roll back. Nếu crash → roll back → token cũ vẫn nguyên → client retry được.
+
+**Q4: Tại sao `include: { user: true }` khi lookup refreshToken?**
+
+Bảng `refresh_tokens` chỉ lưu `userId`, không có `email` hay `role`. Ký access token mới cần `{ sub: user.id, email: user.email, role: user.role }`. Nếu không include → phải query thêm `prisma.user.findUnique()` → 2 roundtrip. `include` gộp thành 1 query, Prisma tự JOIN.
+
+**Q5: Tại sao `refresh()` không gọi `issueTokenPair()` cho bước tạo token mới?**
+
+`issueTokenPair()` hardcode `familyId = randomUUID()` mỗi lần. Gọi nó trong `refresh()` sẽ tạo `familyId` mới → phá chain → replay detection thất bại (Q2). Phải tạo token mới inline với `familyId = tokenRecord.familyId`. Nếu muốn tái dùng `issueTokenPair()`, cần refactor nó nhận `familyId` optional — nhưng Task 13 không yêu cầu.
+
+---
+
 ## Task 12 — Auth Feature: Kiến thức kỹ thuật · 2026-06-02
 
 **Date:** 2026-06-02 · **Phase:** B — Foundation
@@ -505,5 +539,118 @@ Sau khi fix version, các lệnh migration hoạt động bình thường.
 - **Schema drift là lỗi thầm lặng**: DB connect thành công, app start bình thường — không có warning nào cho đến khi query thật sự chạy. Cách phòng: sau mỗi thay đổi schema, kiểm tra `prisma migrate status` ngay.
 - **Prisma CLI và `@prisma/client` phải cùng major version**: khác major version tạo ra contradiction — CLI 6.x yêu cầu `url` trong schema, nhưng Prisma 7.x cấm `url` trong schema. Luôn update cả hai package cùng lúc.
 - **`prisma.config.ts` là Prisma 7 feature**: thay thế cho `url = env(...)` trong `datasource` block của `schema.prisma`. CLI 6.x không đọc được file này đúng cách.
+
+---
+
+## Task 13 — Refresh Token Rotation: Kiến thức kỹ thuật · 2026-06-03
+
+**Date:** 2026-06-03 · **Phase:** B — Foundation
+
+---
+
+### Kiến trúc 3 lớp: Controller → AuthService → TokenService
+
+- `AuthController` chỉ biết `AuthService`. Không inject `TokenService` trực tiếp.
+- `AuthService` là **entry point duy nhất** cho authentication logic — thin wrapper, không chứa business logic, chỉ unwrap DTO rồi gọi xuống `TokenService`.
+- `TokenService` là **primitive** — biết cách làm việc với token, không biết gì về HTTP hay DTO.
+
+**Tại sao cần lớp bridge `AuthService`?**
+
+Nếu Controller gọi thẳng `TokenService`, Controller sẽ phải inject cả `AuthService` lẫn `TokenService` → biết quá nhiều về implementation. Khi sau này cần thêm logic (audit log, gửi email cảnh báo khi có replay), chỉ sửa `AuthService` — Controller không đổi gì.
+
+> Hình dung: `TokenService` = máy xay thịt. `AuthService` = đầu bếp. `AuthController` = bồi bàn.
+
+---
+
+### Comment trong code: WHY vs WHAT
+
+- **Không comment WHAT** — tên hàm/biến đã nói rõ rồi. Comment "Thu hồi refresh token của user" trên `logout()` không có giá trị.
+- **Chỉ comment WHY** — điều không hiển nhiên từ code: tại sao phải dùng `familyId` cũ, tại sao phải transaction, tại sao có `DUMMY_PASSWORD_HASH`.
+- **Comment trong service không được nhắc tới HTTP** — service không biết mình được gọi từ HTTP, gRPC hay job nền. Comment kiểu `// POST /auth/logout — cần JWT guard` là coupling sai chỗ.
+- **`[học]` prefix** — comment chỉ dùng để học, cần xóa trước khi tạo PR.
+
+---
+
+### `@Public()` — khi nào cần, khi nào không
+
+| Endpoint | `@Public()`? | Lý do |
+| --- | --- | --- |
+| `/auth/refresh` | ✅ Có | Client gọi khi AT đã hết hạn — không còn AT hợp lệ để gửi lên. Nếu guard bảo vệ, request bị block trước khi vào controller. |
+| `/auth/logout` | ❌ Không | Cần JWT guard để biết `userId` từ AT. Thiếu guard → bất kỳ ai cũng có thể revoke token của người khác. |
+| `/auth/logout-all` | ❌ Không | Tương tự — cần biết user là ai qua AT. |
+
+---
+
+### `@CurrentUser` — cách dùng đúng
+
+`@CurrentUser` là **parameter decorator**, phải đặt trước tham số của hàm:
+
+```typescript
+// ✅ Đúng
+async logout(@CurrentUser('id') userId: string, @Body() dto: RefreshDto) { ... }
+
+// ❌ Sai — truyền decorator function như một argument bình thường
+await this.authService.logout(CurrentUser, dto);
+```
+
+`'id'` là key trong JWT payload để lấy ra — tương ứng với field `sub` sau khi `JwtStrategy.validate()` xử lý.
+
+---
+
+### Status code: 200 vs 204
+
+- **200 OK** — response có body (trả data cho client).
+- **204 No Content** — action thực hiện thành công nhưng không có body trả về. Dùng cho `logout` và `logout-all`.
+
+Sai status code không gây lỗi runtime, nhưng FE sẽ cố parse body từ 200 → nhận `undefined` → có thể gây bug khó tìm.
+
+---
+
+### `findUnique` vs `findFirst`
+
+Khi field có `@unique` trong schema (ví dụ `tokenHash @unique`), dùng `findUnique` thay `findFirst`:
+
+- `findUnique` tận dụng unique index — DB scan O(log n).
+- `findFirst` là full scan có filter — chậm hơn, semantics không chính xác.
+
+---
+
+### `include: { user: true }` khi lookup RefreshToken
+
+Bảng `refresh_tokens` chỉ lưu `userId`. Ký access token mới cần `email` và `role` từ bảng `users`. Nếu không `include`:
+
+- Phải query thêm `prisma.user.findUnique()` riêng → 2 roundtrip DB.
+- `include` trong cùng query → Prisma JOIN 1 lần → nhanh hơn và gọn hơn.
+
+---
+
+### Transaction trong `refresh()` — tại sao cần
+
+Bước "mark `usedAt`" và bước "tạo token mới" phải atomic:
+
+- **Không có transaction**: crash sau mark `usedAt` nhưng trước khi tạo token mới → token cũ vô hiệu, token mới không có → user bị khóa. Client retry với token cũ → server thấy `usedAt != null` → `REPLAY_DETECTED` → kill toàn family → user bị logout oan.
+- **Có transaction**: crash → rollback → token cũ nguyên vẹn → client retry được, không mất gì.
+
+---
+
+### Swagger decorators đủ bộ cho auth endpoints
+
+| Decorator | Đặt ở đâu | Mục đích |
+| --- | --- | --- |
+| `@ApiProperty({ example: '...' })` | DTO field | Swagger UI hiểu được request body |
+| `@ApiOperation({ summary: '...' })` | Controller method | Mô tả ngắn endpoint |
+| `@ApiTags('auth')` | Controller class | Nhóm endpoint trong Swagger UI |
+| `@ApiBearerAuth()` | Endpoint cần JWT | Hiện ổ khóa trong Swagger UI, nhắc dev gửi Authorization header |
+| `@ApiResponse({ status, description })` | Controller method | Document các status code và error có thể trả về |
+
+`@ApiBearerAuth()` chỉ thêm visual hint — không tự add JWT vào request. Dev vẫn phải copy token vào "Authorize" trong Swagger UI.
+
+---
+
+### Không cần migrate DB cho Task 13
+
+Bảng `refresh_tokens` với đầy đủ `usedAt`, `familyId`, `tokenHash`, `revokedAt`, `expiresAt` đã có từ init migration. Không cần thêm migration mới khi implement refresh token rotation.
+
+Quy tắc kiểm tra: chạy `npx prisma migrate status` — nếu output `Database schema is up to date` thì không cần migrate.
 
 ---
