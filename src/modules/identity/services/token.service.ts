@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service';
+import { JwtPayload } from '../auth.types';
 
 @Injectable()
 export class TokenService {
@@ -20,7 +21,7 @@ export class TokenService {
 
   // `db` accepts a transaction client so callers can include token creation in a broader transaction
   async issueTokenPair(userId: string, email: string, role: string, db: Prisma.TransactionClient | PrismaService = this.prisma) {
-    const payload = { sub: userId, email, role };
+    const payload: Omit<JwtPayload, 'iat' | 'exp'> = { sub: userId, email, role };
     const accessToken = this.jwt.sign(payload, {
       expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m',
     });
@@ -100,7 +101,8 @@ export class TokenService {
         },
       });
 
-      const accessToken = this.jwt.sign({ sub: user.id, email: user.email, role: user.role }, { expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m' });
+      const refreshPayload: Omit<JwtPayload, 'iat' | 'exp'> = { sub: user.id, email: user.email, role: user.role };
+      const accessToken = this.jwt.sign(refreshPayload, { expiresIn: this.config.get('JWT_EXPIRES_IN') ?? '30m' });
 
       return { accessToken, refreshToken: newRefreshTokenValue };
     });
