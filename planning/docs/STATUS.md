@@ -120,10 +120,10 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `08-seed-data.md` | 🟡 SHOULD | ✅ Done | 2026-05-28 — seed admin + user accounts |
 | `09-validation-pipe.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — GlobalValidationPipe + GlobalExceptionFilter (PR #9 merged) |
 | `10-jwt-redis.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — JwtStrategy, RedisModule, TokenService |
-| `11-guards-decorators.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `11-guards-decorators.md` | 🔴 BLOCKING | ✅ Done | 2026-06-15 — JwtAuthGuard, RolesGuard, @Public, @Roles, @CurrentUser (backfilled) |
 | `12-auth-feature.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — register/login flow hoàn thành; log học tập đã append |
 | `13-refresh-token.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — refresh rotation + replay detection + PR #15 merged |
-| `14-users-crud.md` | 🟡 SHOULD | ⏳ Not started | — |
+| `14-users-crud.md` | 🟡 SHOULD | ✅ Done | 2026-06-15 — GET/PATCH /users/me, change-password, admin list/delete. PR #16 merged |
 | `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ⏳ Not started | — |
 
 **Tổng ước**: ~32 giờ ≈ 4 tuần × 8h.
@@ -274,6 +274,8 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 [2026-06-02 00:00] [Phase B] [task-12]            [DONE] Auth Feature hoàn thành; bổ sung learning log về DTO, AuthService, và cách học bớt phụ thuộc copy code.
 [2026-06-02 00:10] [Phase B] [task-13]            [DONE] Refresh token rotation + replay detection hoàn thành. PR #15 merged.
 [2026-06-03 00:00] [Phase B] [task-14]            [OPEN] Bắt đầu Users CRUD & Profile — self-service + admin governance.
+[2026-06-15 00:00] [Phase B] [task-11]            [DONE] Guards & Decorators backfilled — JwtAuthGuard, RolesGuard, @Public, @Roles, @CurrentUser đã có từ task 12; STATUS sync lại.
+[2026-06-15 00:00] [Phase B] [task-14]            [DONE] Users CRUD & Profile hoàn thành. PR #16 merged. STATUS sync lại.
 
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
@@ -281,9 +283,7 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Task 13 — Refresh Token** — hoàn thiện refresh rotation, replay detection, logout/logout-all.
-2. **Task 14 — Users CRUD** — `/me`, đổi password, revoke token family khi cần.
-3. **Phase B Exit Gate** — gom evidence verify cho auth + token flows.
+1. **Task 15 — Phase B Exit Gate** — verify toàn bộ exit gate criteria, chốt Phase B.
 
 ---
 
