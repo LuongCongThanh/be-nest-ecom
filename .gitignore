@@ -46,3 +46,9 @@ tmp/
 
 .antigravity-awesome-skills/
 /generated/prisma
+
+# Graphify
+graphify-out/
+src/graphify-out/
+.graphify_*.json
+.tmp_*.py
