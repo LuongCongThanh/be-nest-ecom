@@ -15,7 +15,7 @@ Dự án chia **6 phase tuần tự**. Phase trước phải đạt **Exit Gate*
 ```mermaid
 graph LR
     A[Phase A<br/>Requirements & Design<br/>✅ DONE]:::done
-    B[Phase B<br/>Foundation Impl<br/>Tuần 1-4]:::current
+    B[Phase B<br/>Foundation Impl<br/>Tuần 1-4]:::done
     C[Phase C<br/>Core Impl<br/>Tuần 5-9 🎯 MVP]:::pending
     D[Phase D<br/>Polish Impl<br/>Tuần 10-11]:::pending
     E[Phase E<br/>Verification<br/>Tuần 12 🚀 SHIP]:::pending
@@ -35,8 +35,8 @@ graph LR
 
 ```text
 Phase A — Requirements & Design        [████████████████████] 100%  ✅ Đóng
-Phase B — Foundation Impl  (W1-4)      [██████████████░░░░░░]  70%  🔵 Đang làm
-Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa (chờ B)
+Phase B — Foundation Impl  (W1-4)      [████████████████████] 100%  ✅ Đóng
+Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  🟢 Mở (Phase B đóng)
 Phase D — Polish Impl     (W10-11)    [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase E — Verification    (W12)       [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase F — Maintenance     (post-MVP)  [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Backlog
@@ -77,7 +77,11 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 ---
 
-## ⏳ Phase B — Foundation Implementation (HIỆN TẠI)
+## ✅ Phase B — Foundation Implementation (ĐÓNG)
+
+---
+
+## ✅ Phase B — Foundation Implementation (ĐÓNG 2026-06-22)
 
 **Mục tiêu**: build nền tảng kỹ thuật (NestJS + DB + Auth). Hết Phase B → có thể đăng ký + đăng nhập user.
 
@@ -124,7 +128,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `12-auth-feature.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — register/login flow hoàn thành; log học tập đã append |
 | `13-refresh-token.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — refresh rotation + replay detection + PR #15 merged |
 | `14-users-crud.md` | 🟡 SHOULD | ✅ Done | 2026-06-15 — GET/PATCH /users/me, change-password, admin list/delete. PR #16 merged |
-| `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ⏳ Not started | — |
+| `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ✅ Done | 2026-06-22 — Phase B Exit Gate passed |
 
 **Tổng ước**: ~32 giờ ≈ 4 tuần × 8h.
 
@@ -135,7 +139,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 ---
 
-## ⏸ Phase C — Core Implementation (KHÓA — chờ Phase B)
+## 🔵 Phase C — Core Implementation (HIỆN TẠI)
 
 **Mục tiêu**: build core revenue flow. **Hết Phase C = MVP demo-able**.
 
@@ -143,7 +147,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 ### Entry Gate
 
-- [ ] Phase B đóng (tất cả exit gate ✅)
+- [x] Phase B đóng (tất cả exit gate ✅) — 2026-06-22
 
 ### Exit Gate
 
@@ -277,13 +281,23 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 [2026-06-15 00:00] [Phase B] [task-11]            [DONE] Guards & Decorators backfilled — JwtAuthGuard, RolesGuard, @Public, @Roles, @CurrentUser đã có từ task 12; STATUS sync lại.
 [2026-06-15 00:00] [Phase B] [task-14]            [DONE] Users CRUD & Profile hoàn thành. PR #16 merged. STATUS sync lại.
 
+[2026-06-22 01:20] [Phase B] [task-14-backfill]  [DONE] Implement UserService + UsersController (task 14 bị thiếu). GET/PATCH /users/me, change-password (204 + RT revoke), admin list/delete, RBAC 403.
+[2026-06-22 01:20] [Phase B] [EXIT GATE PASSED]
+
+- ✅ Infrastructure: /health 200, /health/ready 200 (DB connected), Docker healthy, migrations applied, seed done
+- ✅ Auth: register 201, email-conflict 409, validation 422, login 200, wrong-pwd 401, refresh rotation, replay detection + family revoke, logout 204 + RT invalid
+- ✅ Users: GET /users/me no password, PATCH /users/me OK, change-password 204 + old RT revoked, admin list no password, user→403, admin soft delete 204, CANNOT_DELETE_SELF 403
+- ✅ Security: 404 JSON (not HTML), same error for enumeration, JWT payload = {sub,email,role,iat,exp} only, refresh_tokens stores hash not raw token
+- ✅ Build: lint 0 errors, tsc --noEmit pass, nest build pass
+
+Signed-off: self · Next: Phase C open.
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Task 15 — Phase B Exit Gate** — verify toàn bộ exit gate criteria, chốt Phase B.
+1. **Phase C — Task 01** — bắt đầu Catalog Schema (`todo/phase-c/01-catalog-schema.md`).
 
 ---
 
