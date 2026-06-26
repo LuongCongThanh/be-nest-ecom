@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 08
 **Ưu tiên**: 🔴 BLOCKING (API contract — tất cả endpoint sau cần validation và error format nhất quán)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [03-validation-error.md](../../setup/03-conventions/03-validation-error.md)
 
 ---
