@@ -1,11 +1,9 @@
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "library"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -73,4 +71,54 @@ enum Role {
   USER
   STAFF
   ADMIN
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  image       String?
+  parentId    String?
+  isActive    Boolean    @default(true)
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  parent      Category?  @relation("CategoryTree", fields: [parentId], references: [id])
+  children    Category[] @relation("CategoryTree")
+  products    Product[]
+
+  @@index([parentId])
+  @@index([slug])
+  @@index([deletedAt])
+  @@map("categories")
+}
+
+model Product {
+  id                String    @id @default(uuid())
+  sku               String    @unique
+  name              String
+  slug              String    @unique
+  description       String?
+  price             BigInt
+  comparePrice      BigInt?
+  stockQuantity     Int       @default(0)
+  lowStockThreshold Int       @default(5)
+  isActive          Boolean   @default(true)
+  isFeatured        Boolean   @default(false)
+  metadata          Json?
+  categoryId        String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  category          Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([sku])
+  @@index([isActive, deletedAt])
+  @@map("products")
 }
