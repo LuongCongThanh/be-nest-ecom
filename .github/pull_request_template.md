@@ -50,6 +50,17 @@ Error case:  ...
 
 ---
 
+## Screenshots / Demo
+
+<!-- Kéo thả ảnh hoặc video vào đây để mô tả thay đổi (không bắt buộc) -->
+<!-- Ví dụ: screenshot Postman, terminal output, screen recording demo flow -->
+
+| Before | After |
+|--------|-------|
+| <!-- ảnh/mô tả trước --> | <!-- ảnh/mô tả sau --> |
+
+---
+
 ## Breaking Changes
 
 <!-- Remove this section if no breaking changes -->

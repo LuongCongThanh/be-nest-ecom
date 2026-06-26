@@ -13,7 +13,7 @@ main
                       ↓ commit
                       ↓ push
                       ↓ tạo PR → main
-                      ↓ squash merge
+                      ↓ merge commit (khi được yêu cầu)
                  main (cập nhật)
 ```
 
@@ -25,14 +25,14 @@ Mỗi task là một branch riêng. Checkout từ `main`:
 
 ```powershell
 git checkout main
-git pull origin main
+git pull --rebase origin main
 git checkout -b feat/<phase>/<task-slug>
 ```
 
 **Ví dụ:**
 
 ```powershell
-git checkout -b feat/phase-b/09-validation-pipe
+git checkout -b feat/phase-c/01-catalog-schema
 ```
 
 **Convention đặt tên branch:** `feat/<phase>/<task-slug>`
@@ -50,15 +50,22 @@ Implement theo task file trong `planning/todo/<phase>/<task>.md`.
 ### Format commit message
 
 ```
-<type>(<phase>/<task-number>): <short description>
+<type>(<scope>): <short description>
+```
+
+**Scope** phải là domain của file thay đổi, chọn một trong:
+
+```
+auth | user | catalog | cart | order | payment | media | common | config | db
 ```
 
 **Ví dụ:**
 
 ```
-feat(phase-b/09): add global validation pipe with class-validator
-fix(phase-b/08): remove url from prisma datasource block
-docs(phase-b/08): update learning log and mark task done
+feat(catalog): add product and category prisma schema
+fix(db): add DATABASE_URL to prisma datasource config
+docs(common): sync phase-c todo status to done
+refactor(auth): extract shared types to auth.types.ts
 ```
 
 ### Các type hợp lệ
@@ -77,8 +84,10 @@ docs(phase-b/08): update learning log and mark task done
 
 ```powershell
 git add <files>
-git commit -m "feat(phase-b/09): add global validation pipe with class-validator"
+git commit -m "feat(catalog): add product and category prisma schema"
 ```
+
+> ⚠️ Không thêm `Co-Authored-By: Claude` vào commit message.
 
 ---
 
@@ -93,21 +102,35 @@ git push -u origin feat/<phase>/<task-slug>
 ## Bước 5 — Tạo PR vào `main`
 
 ```powershell
-gh pr create --base main --title "feat(phase-b/09): add global validation pipe"
+gh pr create --base main --title "feat(catalog): ..." --body "..."
 ```
 
-Điền PR template: summary, type of change, changes made, pre-merge checklist.
+Claude sẽ tự điền body theo đúng `.github/pull_request_template.md`: summary, type of change, changes made, testing scenarios, screenshots/demo, pre-merge checklist.
+
+> ⚠️ Chờ review và yêu cầu merge tường minh — KHÔNG tự merge.
 
 ---
 
-## Bước 6 — Self-review và merge
+## Bước 6 — Merge (khi được yêu cầu)
 
 1. Mở PR trên GitHub, xem diff một lần
 2. Tick đủ Pre-Merge Checklist trong PR template
-3. Merge bằng **Squash and merge** — toàn bộ commits gộp thành 1 commit trên `main`
+3. Merge bằng **merge commit** bình thường
 
 ```powershell
-gh pr merge --squash --delete-branch
+gh pr merge --merge --delete-branch
+```
+
+---
+
+## Bước 7 — Cleanup local
+
+Sau khi merge:
+
+```powershell
+git checkout main
+git pull --rebase origin main
+git branch -d feat/<phase>/<task-slug>
 ```
 
 ---
@@ -115,13 +138,16 @@ gh pr merge --squash --delete-branch
 ## Checklist nhanh
 
 ```
-[ ] git checkout main && git pull
-[ ] git checkout -b feat/<phase>/<task>
+[ ] git checkout main
+[ ] git pull --rebase origin main
+[ ] git checkout -b feat/<phase>/<task-slug>
 [ ] ... làm task ...
 [ ] git add <files>
-[ ] git commit -m "feat(<phase>/<task-number>): <description>"
-[ ] git push -u origin <branch>
-[ ] gh pr create --base main
-[ ] self-review diff trên GitHub
-[ ] squash merge → delete branch
+[ ] git commit -m "<type>(<scope>): <description>"
+[ ] git push -u origin feat/<phase>/<task-slug>
+[ ] gh pr create --base main --title "..." --web --title "..."
+[ ] chờ review + yêu cầu merge
+[ ] gh pr merge --merge --delete-branch
+[ ] git checkout main && git pull --rebase origin main
+[ ] git branch -d feat/<phase>/<task-slug>
 ```
