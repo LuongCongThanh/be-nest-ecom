@@ -49,12 +49,12 @@ HTTP response
 1. **Error response schema đóng băng** (xem `CONVENTIONS.md §14`). FE parse theo `code` (UPPER_SNAKE), không parse `message`.
 2. **Mọi request có `requestId`** trong log + response header `x-request-id`. Dùng để truy vết.
 3. **Response wrap `{ data, meta }`** trừ healthcheck (return raw OK). Đảm bảo client parser thống nhất.
-4. **Swagger publish ở `/api`** chỉ trong môi trường non-production. Production hide.
+4. **Swagger publish ở `/docs`** trong môi trường local/dev; production chỉ mở khi có chủ đích và kiểm soát truy cập.
 5. **File upload qua adapter pattern**: local disk dev, S3 production. Service không biết storage backend.
 
 ## ✅ Definition of Done cho nhóm
 
 - Test gọi sai DTO → response đúng schema, có `errors[]`, `code`, `requestId`.
 - Throw `NotFoundException` từ service → filter catch, format đúng.
-- `curl /api` thấy Swagger UI list mọi endpoint với DTO + response example.
+- `curl /docs` thấy Swagger UI list mọi endpoint với DTO + response example.
 - Upload file 5MB ảnh → trả URL, file tồn tại trên storage.

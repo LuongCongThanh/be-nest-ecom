@@ -17,7 +17,7 @@ Order là **tài liệu pháp lý** ràng buộc khách hàng và nhà bán. B�
 
 - **Immutable sau create**: mọi field "động" (giá, tên, địa chỉ) phải snapshot. Thay đổi nguồn KHÔNG ảnh hưởng Order cũ.
 - **State machine nghiêm ngặt**: chỉ transition theo sơ đồ ở `CONTEXT.md`. Sai → `400 INVALID_TRANSITION`.
-- **`orderNumber` là contract giao tiếp**: format `ORD-YYYYMMDD-XXXXX` (5 ký tự uppercase alphanumeric).
+- **`orderNumber` là contract giao tiếp**: format `ORD-{YYYY}-{6 chữ số}` (vd `ORD-2026-000123`), sinh bằng Postgres sequence `order_number_seq`.
 
 ---
 
@@ -28,15 +28,15 @@ Order là **tài liệu pháp lý** ràng buộc khách hàng và nhà bán. B�
 | Trường | Ràng buộc |
 | :--- | :--- |
 | `id` | UUID v4 |
-| `orderNumber` | String unique, format `ORD-\d{8}-[A-Z0-9]{5}` |
-| `userId` | FK User (nullable nếu guest checkout — Phase 3) |
+| `orderNumber` | String unique, format `ORD-\d{4}-\d{6}` (vd `ORD-2026-000123`) |
+| `userId` | FK User (nullable nếu guest checkout — giai đoạn scale sau) |
 | `customerEmailSnapshot` | Snapshot — bảo toàn khi User đổi email |
 | `status` | Enum: `PENDING`, `PAID`, `SHIPPING`, `DELIVERED`, `CANCELLED`, `REFUNDED` |
-| `subtotal` | Decimal — tổng `unitPrice * qty` của OrderItem |
-| `shippingFee` | Decimal |
-| `discount` | Decimal — từ coupon (TASK-224) |
-| `tax` | Decimal — VAT |
-| `totalAmount` | Decimal — `subtotal + shippingFee + tax - discount` |
+| `subtotal` | BigInt (đồng VND) — tổng `unitPrice * qty` của OrderItem |
+| `shippingFee` | BigInt (đồng VND) |
+| `discountAmount` | BigInt (đồng VND) — từ coupon (TASK-224), cap = subtotal |
+| `vatTotal` | BigInt (đồng VND) — MVP = 0 |
+| `grandTotal` | BigInt (đồng VND) — `max(0, subtotal - discountAmount) + shippingFee` |
 | `shippingAddressSnapshot` | JSONB: `{ recipient, phone, line1, line2, ward, district, province, postcode }` |
 | `shippingMethod` | String key (xem TASK-225) |
 | `paymentStatus` | Enum: `UNPAID`, `PAID`, `REFUNDED` |
@@ -54,9 +54,9 @@ Order là **tài liệu pháp lý** ràng buộc khách hàng và nhà bán. B�
 | `productId` | FK Product (soft link, RESTRICT delete) |
 | `variantId` | FK Variant, optional |
 | `productSnapshot` | JSONB: `{ name, sku, image, attributes }` |
-| `unitPrice` | Decimal — snapshot |
+| `unitPrice` | BigInt (đồng VND) — snapshot giá tại thời điểm checkout |
 | `quantity` | Integer ≥ 1 |
-| `lineTotal` | Decimal = `unitPrice × quantity` |
+| `lineTotal` | BigInt (đồng VND) = `unitPrice × quantity` |
 
 ### Order State Transitions hợp lệ
 
@@ -86,17 +86,18 @@ REFUNDED  → (terminal)
 **AC-3: orderNumber format & unique**
 - **Given** tạo 1000 Order liên tiếp
 - **When** kiểm tra
-- **Then** mọi `orderNumber` match regex `ORD-\d{8}-[A-Z0-9]{5}` và không trùng
+- **Then** mọi `orderNumber` match regex `ORD-\d{4}-\d{6}` (vd `ORD-2026-000001`) và không trùng; sinh bằng Postgres sequence, không có retry
 
 **AC-4: User chỉ thấy Order của chính mình**
 - **Given** User A có 3 Order; User B có 2 Order
 - **When** User A gọi `GET /orders`
 - **Then** chỉ trả về 3 Order của A; gọi `GET /orders/<B_order_id>` → `403 FORBIDDEN`
 
-**AC-5: totalAmount tính đúng**
-- **Given** subtotal=1000, shippingFee=50, tax=100, discount=200
+**AC-5: grandTotal tính đúng theo Order Math Formula**
+- **Given** subtotal=1_000_000, shippingFee=50_000, discountAmount=200_000, vatRate=0 (MVP)
 - **When** tạo Order
-- **Then** `totalAmount = 950`
+- **Then** `afterDiscount = 800_000`, `vatTotal = 0`, `grandTotal = 850_000`
+- **Note**: công thức = `max(0, subtotal - discountAmount) + shippingFee` — KHÔNG cộng VAT trực tiếp vào grandTotal (tax-inclusive model)
 
 **AC-6: DELIVERED → REFUNDED chỉ trong 7 ngày**
 - **Given** Order `DELIVERED` cách đây 10 ngày

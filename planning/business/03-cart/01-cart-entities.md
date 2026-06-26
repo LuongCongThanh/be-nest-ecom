@@ -3,7 +3,7 @@
 ## 📋 Metadata
 
 - **Task ID**: TASK-110
-- **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Customer Experience)
+- **Độ ưu tiên**: 🔴 CHÍ TRỌNG (User Experience)
 - **Phụ thuộc**: TASK-109 (Product), TASK-218 (Variants)
 - **Trạng thái**: ⏳ Not started
 

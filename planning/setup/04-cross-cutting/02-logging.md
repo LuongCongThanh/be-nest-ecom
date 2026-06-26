@@ -1,6 +1,6 @@
 # TASK-213: Khả năng Quan sát: Ghi log Yêu cầu & Truy vết Kiểm toán (Observability: Request Logging & Audit Trails)
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
+> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
 > **Intent:** Request logging + correlation ID middleware.
 > **Single Source of Truth:** ../CONVENTIONS.md (§7 Observability)
 > **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)

@@ -39,7 +39,7 @@ Tích hợp **provider thanh toán bên ngoài** (VNPay, Stripe, MoMo...) và đ
 6. **Payment FAILED** sau khi Order PENDING → KHÔNG tự hoàn stock. Đợi cleanup job 15 phút timeout (xem `PENDING Order Timeout` ở CONTEXT.md) hoặc user cancel thủ công.
 7. **Không bao giờ log thông tin nhạy cảm** (số thẻ, CVV). Provider gửi `rawCallback` → lưu JSONB nhưng phải có redact filter (xem `CONVENTIONS.md §7.5`).
 8. **Replay attack**: webhook đến với timestamp cũ quá ngưỡng (5 phút) → reject `403`.
-9. **Refund flow tách**: MVP **manual** — chỉ set state REFUNDED + log "Manual VNPay refund needed for txId XXX". Admin xử lý refund qua VNPay portal. Phase 3 mới auto-call refund API.
+9. **Refund flow tách**: MVP **manual** — chỉ set state `REFUNDED` + log "Manual VNPay refund needed for txId XXX". Admin xử lý refund qua VNPay portal. Giai đoạn scale sau mới auto-call refund API.
 10. **Money type**: `amount` lưu `BigInt` đơn vị đồng VND (xem [`CONTEXT.md`](../../docs/CONTEXT.md) — Money Type). Không bao giờ float.
 
 ---

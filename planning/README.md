@@ -9,19 +9,23 @@ Chào bạn. Repo này có **~100 tài liệu**. Đừng hoảng — bạn khôn
 Đọc tuần tự **6 bước này**, tổng khoảng **80–90 phút**. Sau bước 6 bạn sẽ biết phải gõ phím gì đầu tiên.
 
 ### Bước 1 — Đọc `README.md` (file này) ⏱ 5 phút
+
 Bạn đang ở đây. Mục tiêu: biết repo chia 3 nhánh (`docs/`, `setup/`, `business/`) và lộ trình đọc.
 
 ### Bước 2 — Hướng dẫn dùng `docs/` ⏱ 3 phút
+
 → Mở [`docs/README.md`](./docs/README.md)
 
 Biết 5 file trong `docs/` dùng vào việc gì. Có bảng "tôi muốn X → mở file Y".
 
 ### Bước 3 — Hiểu dự án này bán cái gì ⏱ 10 phút
+
 → Mở [`docs/REQUIREMENTS.md`](./docs/REQUIREMENTS.md)
 
 Yêu cầu nghiệp vụ: ai dùng, mua gì, flow đặt hàng. Đọc lướt cũng được, **không cần thuộc**.
 
 ### Bước 4 — Học vocabulary domain ⏱ 20 phút
+
 → Mở [`docs/CONTEXT.md`](./docs/CONTEXT.md) — **file quan trọng nhất**
 
 Đọc lướt 1 lượt để **biết có những thuật ngữ gì**: `Snapshot`, `Money Type (BigInt)`, `Idempotency Key`, `Order State Machine`, `Refresh Token Family`, `Soft-delete Cascade`, ...
@@ -29,12 +33,14 @@ Yêu cầu nghiệp vụ: ai dùng, mua gì, flow đặt hàng. Đọc lướt c
 **Không cần thuộc lòng** — chỉ cần biết "có file này, khi cần tra ở đây". Đọc xong bạn sẽ hiểu vì sao project rule có những điểm nghiêm ngặt.
 
 ### Bước 5 — Hiểu lộ trình 12 tuần ⏱ 30 phút
+
 → Mở [`docs/ROADMAP.md`](./docs/ROADMAP.md) — **lộ trình self-learn chính**
 
 - Đọc **kỹ** phần **Tuần 0** (pre-flight: cài tool) + **Tuần 1** (hello NestJS).
 - Đọc **lướt** Tuần 2–12 để biết mình sẽ đi đâu.
 
 ### Bước 6 — Đọc cấu trúc thư mục + quy ước ⏱ 15 phút
+
 → Mở [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md) — **đọc kỹ trước khi code Tuần 1**
 
 Layout `src/{common, config, shared, modules, infrastructure, jobs}/` + module folder template + path aliases + file suffix table + naming rules. Tạo đúng từ đầu, KHÔNG refactor sau.
@@ -54,6 +60,11 @@ Bây giờ bạn:
    - Tuần 1 → [`setup/01-project/README.md`](./setup/01-project/README.md) → tasks `01-bootstrap-nestjs.md`, `02-env-config.md`
    - Tuần 2 → [`setup/02-database/README.md`](./setup/02-database/README.md) + [`business/01-identity/CHARTER.md`](./business/01-identity/CHARTER.md)
    - Tuần 3+ → tiếp tục theo ROADMAP
+
+Nếu bạn muốn **đi theo execution plan đã phase hóa sẵn**, mở [`todo/README.md`](./todo/README.md) ngay từ đây.
+
+- `planning/` = canon về glossary, invariant, rule, source material
+- `todo/` = canon về thứ tự thực thi
 
 ---
 
@@ -99,17 +110,17 @@ planning/
 
 ## 🔎 Tra cứu nhanh (khi đã quen repo)
 
-| "Tôi muốn..."                                       | Mở file                                                          |
-|-----------------------------------------------------|------------------------------------------------------------------|
-| Tra thuật ngữ (Money, Snapshot, Idempotency, ...) | [`docs/CONTEXT.md`](./docs/CONTEXT.md)                           |
-| Biết tuần này code gì                              | [`docs/ROADMAP.md`](./docs/ROADMAP.md) + [`docs/STATUS.md`](./docs/STATUS.md) |
-| Tra task ID cụ thể                                  | [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)                     |
-| **Cấu trúc thư mục project** (src/, module layout, path aliases) | [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md) |
-| Quy ước code (naming, validation, pagination, ...) | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md)                 |
-| Lệnh `prisma migrate dev/deploy/...`                | [`setup/COMMANDS.md`](./setup/COMMANDS.md)                       |
-| Schema ER diagram                                   | [`setup/DATABASE_SCHEMA.md`](./setup/DATABASE_SCHEMA.md)         |
-| Cài PostgreSQL                                      | [`setup/DATABASE_SETUP.md`](./setup/DATABASE_SETUP.md)           |
-| Yêu cầu nghiệp vụ                                   | [`docs/REQUIREMENTS.md`](./docs/REQUIREMENTS.md)                 |
+| "Tôi muốn..."                                                    | Mở file                                                                     |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Tra thuật ngữ (Money, Snapshot, Idempotency, ...)                | [`docs/CONTEXT.md`](./docs/CONTEXT.md)                                      |
+| Biết nên làm phase/checkpoint nào tiếp theo                      | [`todo/README.md`](./todo/README.md) + [`docs/STATUS.md`](./docs/STATUS.md) |
+| Tra task ID cụ thể                                               | [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)                                |
+| **Cấu trúc thư mục project** (src/, module layout, path aliases) | [`setup/PROJECT_STRUCTURE.md`](./setup/PROJECT_STRUCTURE.md)                |
+| Quy ước code (naming, validation, pagination, ...)               | [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md)                            |
+| Lệnh `prisma migrate dev/deploy/...`                             | [`setup/COMMANDS.md`](./setup/COMMANDS.md)                                  |
+| Schema ER diagram                                                | [`setup/DATABASE_SCHEMA.md`](./setup/DATABASE_SCHEMA.md)                    |
+| Cài PostgreSQL                                                   | [`setup/DATABASE_SETUP.md`](./setup/DATABASE_SETUP.md)                      |
+| Yêu cầu nghiệp vụ                                                | [`docs/REQUIREMENTS.md`](./docs/REQUIREMENTS.md)                            |
 
 ---
 
@@ -120,15 +131,16 @@ planning/
    - `setup/` = **làm thế nào** (infra, convention)
    - `business/` = **làm cái gì** (domain feature)
 2. **Bounded context**: `business/<context>/` mỗi thư mục là 1 domain độc lập.
-3. **Source of truth**: rule chính ở `docs/CONTEXT.md` + `setup/CONVENTIONS.md` + `setup/DATABASE_*.md`. Task file chỉ giữ intent + acceptance + link canonical.
+3. **Source of truth**: rule chính ở `docs/CONTEXT.md` + `setup/CONVENTIONS.md` + `setup/DATABASE_*.md`. Task/spec file chỉ giữ intent + acceptance + link canonical.
 4. **Glossary first**: thuật ngữ mới → cập nhật `docs/CONTEXT.md` TRƯỚC, code sau.
+5. **Execution second**: khi cần bắt tay làm theo phase, dùng `todo/`; nếu `todo/` lệch canonical rule thì sửa `planning/` trước hoặc sửa cả hai cùng lúc.
 
 ---
 
 ## 🛠️ Cách dùng task file (mỗi lần code)
 
-1. Vào [`docs/STATUS.md`](./docs/STATUS.md) → chọn task tiếp theo.
-2. Mở task file (đường dẫn ở [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md)).
+1. Vào [`todo/README.md`](./todo/README.md) hoặc phase tương ứng → chọn checkpoint tiếp theo.
+2. Nếu cần spec gốc, mở task file qua [`docs/TASK_INDEX.md`](./docs/TASK_INDEX.md).
 3. Đọc README của subdir chứa task đó (vd `business/04-order/README.md`) để hiểu context + invariants.
 4. Implement theo acceptance criteria.
 5. Update [`docs/STATUS.md`](./docs/STATUS.md) sau khi xong.

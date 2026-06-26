@@ -79,5 +79,5 @@ Category là **xương sống điều hướng** của Catalog. Quyết định 
 ## 🚫 Out of Scope
 
 - Slug redirect history (đổi slug cũ → mới) → backlog.
-- Multi-language category name → Phase 3 TASK-325.
-- Auto-suggest category cho Product → Phase 3 (ML).
+- Multi-language category name → giai đoạn scale sau, TASK-325.
+- Auto-suggest category cho Product → giai đoạn scale sau (ML).

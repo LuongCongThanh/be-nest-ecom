@@ -1,0 +1,268 @@
+# Task C-05 — VNPay Payment Integration
+
+**Phase**: C — Core MVP
+**Ước lượng**: 5 giờ
+**Phụ thuộc**: Task C-04
+**Ưu tiên**: 🟡 SHOULD (cần trước Phase C exit gate, nhưng có thể dùng mock VNPay để demo trước)
+**Trạng thái**: ⏳ Not started
+**Spec gốc**: [01-payment.md](../../business/05-payment/01-payment.md)
+
+---
+
+## 🎯 Mục tiêu & Ý nghĩa
+
+Integrate VNPay: tạo payment URL, xử lý IPN/return callback (verify HMAC, idempotent), chuyển order PENDING → PAID atomic.
+
+- **HMAC-SHA512 signature verification**: VNPay gửi callback với chữ ký — phải verify trước khi xử lý. Bỏ qua bước này thì attacker có thể giả mạo callback để mark order là đã thanh toán mà không thực sự trả tiền.
+- **Idempotent IPN handler**: VNPay có thể gửi IPN callback nhiều lần (retry). Handler phải check `providerTxId` đã xử lý chưa — không để 1 payment xử lý 2 lần.
+- **Atomic order status update**: khi IPN success, cập nhật `Order.status = PAID` và tạo `Payment` record trong cùng 1 transaction.
+- **Mock-first approach**: Phase C có thể bắt đầu với mock VNPay (trả success ngay) để demo flow. Integrate VNPay sandbox thật sau khi flow đã ổn định.
+
+> 🟡 **Có thể dùng mock**: Nếu chưa có VNPay sandbox credentials, implement `MockPaymentService` trả `success` ngay — đủ để demo Phase C exit gate. VNPay thật integrate khi cần test payment flow đầy đủ.
+
+---
+
+## Các bước thực hiện
+
+### 1. Thêm Payment model vào schema.prisma
+
+```prisma
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  orderId        String        @unique
+  provider       String        @default("VNPAY")
+  amount         BigInt
+  status         PaymentStatus @default(PENDING)
+  providerTxId   String?       @unique
+  providerData   Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  order          Order         @relation(fields: [orderId], references: [id])
+  @@map("payments")
+}
+```
+
+```bash
+npx prisma migrate dev --name add-payments
+```
+
+### 2. Cài packages VNPay
+
+```bash
+npm install qs
+npm install --save-dev @types/qs
+```
+
+### 3. Tạo VNPayService
+
+Tạo `src/modules/payment/services/vnpay.service.ts`:
+
+```typescript
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
+import * as qs from 'qs';
+import { PrismaService } from '../../../common/prisma/prisma.service';
+import { OrderService } from '../../order/services/order.service';
+
+@Injectable()
+export class VNPayService {
+  private readonly tmnCode: string;
+  private readonly secretKey: string;
+  private readonly vnpUrl: string;
+  private readonly returnUrl: string;
+
+  constructor(
+    private readonly config: ConfigService,
+    private readonly prisma: PrismaService,
+    private readonly orderService: OrderService,
+  ) {
+    this.tmnCode = config.get('VNPAY_TMN_CODE') ?? 'DEMO';
+    this.secretKey = config.get('VNPAY_SECRET_KEY') ?? 'DEMOSECRET';
+    this.vnpUrl = config.get('VNPAY_URL') ?? 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html';
+    this.returnUrl = config.get('VNPAY_RETURN_URL') ?? 'http://localhost:3000/api/v1/payments/vnpay/return';
+  }
+
+  async createPaymentUrl(orderId: string, userId: string): Promise<string> {
+    const order = await this.prisma.order.findFirst({
+      where: { id: orderId, userId },
+    });
+
+    if (!order) throw new BadRequestException({ code: 'ORDER_NOT_FOUND', message: 'Order not found' });
+    if (order.status !== 'PENDING') {
+      throw new BadRequestException({ code: 'ORDER_NOT_PENDING', message: 'Order is not pending' });
+    }
+
+    // Tạo Payment record
+    await this.prisma.payment.upsert({
+      where: { orderId },
+      create: { orderId, amount: order.total, status: 'PENDING' },
+      update: {},
+    });
+
+    const date = new Date();
+    const createDate = this.formatDate(date);
+    const txnRef = order.id;
+
+    const params: Record<string, string> = {
+      vnp_Version: '2.1.0',
+      vnp_Command: 'pay',
+      vnp_TmnCode: this.tmnCode,
+      vnp_Locale: 'vn',
+      vnp_CurrCode: 'VND',
+      vnp_TxnRef: txnRef,
+      vnp_OrderInfo: `Thanh toan don hang ${order.orderNumber}`,
+      vnp_OrderType: 'other',
+      vnp_Amount: String(order.grandTotal * 100n), // VNPay nhận VND * 100; grandTotal là BigInt đơn vị đồng
+      vnp_ReturnUrl: this.returnUrl,
+      vnp_IpAddr: '127.0.0.1',
+      vnp_CreateDate: createDate,
+    };
+
+    const sortedParams = Object.fromEntries(Object.entries(params).sort());
+    const signData = qs.stringify(sortedParams, { encode: false });
+    const hmac = crypto.createHmac('sha512', this.secretKey);
+    const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
+    sortedParams['vnp_SecureHash'] = signed;
+
+    return `${this.vnpUrl}?${qs.stringify(sortedParams, { encode: false })}`;
+  }
+
+  async handleIpn(query: Record<string, string>): Promise<{ code: string; message: string }> {
+    const { vnp_SecureHash, vnp_TransactionNo, vnp_TxnRef, vnp_ResponseCode, ...rest } = query;
+
+    // Verify HMAC
+    const signData = qs.stringify(
+      Object.fromEntries(Object.entries(rest).sort()),
+      { encode: false },
+    );
+    const hmac = crypto.createHmac('sha512', this.secretKey);
+    const expectedHash = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
+    if (expectedHash !== vnp_SecureHash) {
+      return { code: '97', message: 'Invalid signature' };
+    }
+
+    // Idempotent — check providerTxId đã xử lý chưa
+    const existingPayment = await this.prisma.payment.findFirst({
+      where: { providerTxId: vnp_TransactionNo },
+    });
+    if (existingPayment) {
+      return { code: '00', message: 'Already processed' };
+    }
+
+    // Lấy order từ txnRef
+    const order = await this.prisma.order.findFirst({
+      where: { id: vnp_TxnRef },
+      include: { payment: true },
+    });
+
+    if (!order) return { code: '01', message: 'Order not found' };
+    if (order.status !== 'PENDING' && vnp_ResponseCode === '00') {
+      return { code: '00', message: 'Order already finalized' };
+    }
+
+    if (vnp_ResponseCode === '00') {
+      // Payment SUCCESS → PENDING → PAID atomic
+      await this.prisma.$transaction([
+        this.prisma.payment.update({
+          where: { orderId: order.id },
+          data: { status: 'SUCCESS', providerTxId: vnp_TransactionNo, providerData: query as any },
+        }),
+        this.prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'PAID' },
+        }),
+        this.prisma.orderStatusLog.create({
+          data: { orderId: order.id, fromStatus: 'PENDING', toStatus: 'PAID', reason: 'VNPay payment success' },
+        }),
+      ]);
+    } else {
+      await this.prisma.payment.update({
+        where: { orderId: order.id },
+        data: { status: 'FAILED', providerTxId: vnp_TransactionNo, providerData: query as any },
+      });
+    }
+
+    return { code: '00', message: 'Success' };
+  }
+
+  async handleReturn(query: Record<string, string>) {
+    return this.handleIpn(query);
+  }
+
+  private formatDate(date: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`;
+  }
+}
+```
+
+### 4. Thêm vào .env
+
+```
+VNPAY_TMN_CODE=DEMO_TMN_CODE
+VNPAY_SECRET_KEY=DEMO_SECRET_KEY
+VNPAY_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNPAY_RETURN_URL=http://localhost:3000/api/v1/payments/vnpay/return
+```
+
+### 5. PaymentController
+
+```typescript
+@Controller('payments')
+export class PaymentController {
+  @Post('vnpay/create')
+  createPaymentUrl(
+    @Body() body: { orderId: string },
+    @CurrentUser('id') userId: string,
+  ) {
+    return this.vnpayService.createPaymentUrl(body.orderId, userId).then(url => ({ url }));
+  }
+
+  @Public()
+  @Get('vnpay/return')
+  handleReturn(@Query() query: Record<string, string>) {
+    return this.vnpayService.handleReturn(query);
+  }
+
+  @Public()
+  @Get('vnpay/ipn')
+  handleIpn(@Query() query: Record<string, string>) {
+    return this.vnpayService.handleIpn(query);
+  }
+}
+```
+
+> Nếu muốn giữ browser return và server-to-server IPN khác nhau, nên để `return` chỉ làm UX redirect/summary, còn `ipn` mới là nguồn chân lý để cập nhật payment state.
+
+---
+
+## Verify hoàn thành
+
+Dùng VNPay sandbox để test:
+1. Tạo order → lấy `orderId`
+2. Gọi `POST /payments/vnpay/create` → nhận payment URL
+3. Mở payment URL trong browser → dùng thẻ test sandbox
+4. VNPay redirect về return URL → order chuyển sang `PAID`
+
+**Thẻ test VNPay sandbox:**
+- Số thẻ: 9704198526191432198
+- Tên: NGUYEN VAN A
+- Ngày phát hành: 07/15
+- OTP: 123456
+
+---
+
+## Xong thì làm gì?
+
+→ [06-phase-c-exit-gate.md](./06-phase-c-exit-gate.md)

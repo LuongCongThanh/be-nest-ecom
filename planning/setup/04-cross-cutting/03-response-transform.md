@@ -1,6 +1,6 @@
 # TASK-214: Tầng Nhất quán: Thống nhất Hợp đồng Phản hồi API (Consistency Layer: Unifying API Response Contracts)
 
-> 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
+> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
 > **Intent:** Response envelope wrapper + pagination metadata.
 > **Single Source of Truth:** ../CONVENTIONS.md (§4, §5)
 > **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)

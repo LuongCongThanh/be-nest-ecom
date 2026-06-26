@@ -15,7 +15,7 @@
 
 API public để storefront query Product theo nhiều tiêu chí. Mục tiêu < 500ms response cho search cơ bản trên 10K Product.
 
-- **Phase 2 dùng PostgreSQL full-text** (tsvector + GIN index). Elasticsearch là Phase 3 (TASK-316).
+- **MVP bắt đầu bằng filter + text search đơn giản**. Khi đã chạm nhu cầu rõ ràng về relevance/không dấu/performance, nâng lên PostgreSQL full-text (`tsvector` + GIN + `unaccent`). Elasticsearch để sau (TASK-316).
 - **Category filter include descendants**: search "Electronics" trả về cả Product trong "Phones", "Laptops" (sub-categories).
 - **Faceted facets count**: cho mỗi filter group, trả về số lượng Product khớp — UI hiển thị `(123)` cạnh option.
 
@@ -29,7 +29,7 @@ API public để storefront query Product theo nhiều tiêu chí. Mục tiêu <
 
 | Param                  | Type    | Mô tả                                                                 |
 | :--------------------- | :------ | :-------------------------------------------------------------------- |
-| `q`                    | string  | Full-text trên `name + description + sku`                             |
+| `q`                    | string  | Text search trên `name + description + sku`                           |
 | `categorySlug`         | string  | Filter theo slug (include descendants)                                |
 | `minPrice`, `maxPrice` | number  | Khoảng giá                                                            |
 | `inStock`              | boolean | Chỉ Product có `stockQuantity > 0`                                    |
@@ -101,7 +101,7 @@ API public để storefront query Product theo nhiều tiêu chí. Mục tiêu <
 
 ## 🚫 Out of Scope
 
-- Elasticsearch / advanced relevance scoring → Phase 3 TASK-316.
-- Recommendation / "Similar products" → Phase 3 TASK-305, 328.
-- Search analytics (zero-result tracking) → Phase 3 TASK-329.
-- Multi-language search → Phase 3 TASK-325.
+- Elasticsearch / advanced relevance scoring → giai đoạn scale sau, TASK-316.
+- Recommendation / "Similar products" → giai đoạn scale sau, TASK-305, 328.
+- Search analytics (zero-result tracking) → giai đoạn scale sau, TASK-329.
+- Multi-language search → giai đoạn scale sau, TASK-325.
