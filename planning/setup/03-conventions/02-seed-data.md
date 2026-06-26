@@ -1,6 +1,6 @@
 # TASK-125: Sẵn sàng Dữ liệu: Seed Data & Chế độ Demo (Data Readiness: Seed Data & Demo Environment)
 
-> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
+> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** Seed data & demo mode tooling.
 > **Single Source of Truth:** ../DATABASE_SETUP.md (Step 3) + ../COMMANDS.md (
 pm run seed)

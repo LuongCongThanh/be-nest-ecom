@@ -42,10 +42,8 @@ Cân bằng UX (không bắt user re-login mỗi 30 phút) và bảo mật (acce
 
 ### 3. Replay detection
 
-- Nếu RT đã có `usedAt != null` được dùng lại:
-  - **Trong vòng 5 giây** kể từ `usedAt` → **5s Tolerance Window**: coi là retry do mạng mobile flaky. Server tra `replacedByTokenId` của RT cũ để tìm RT mới, trả lại cặp token mới đó. KHÔNG kill family.
-  - **Sau 5 giây** → coi là attacker đã chiếm RT → **kill toàn bộ family** (revoke mọi RT cùng `familyId`). Buộc user re-login.
-- `replacedByTokenId`: explicit pointer từ RT cũ → RT kế tiếp sau rotation. Dùng để tra cứu trong tolerance window.
+- Nếu một RT đã có `usedAt != null` được dùng lại → **kill toàn bộ family** (revoke mọi RT cùng `familyId`).
+- Coi như attacker đã chiếm RT — buộc user re-login.
 
 ### 4. Revocation triggers
 
@@ -90,12 +88,12 @@ Cân bằng UX (không bắt user re-login mỗi 30 phút) và bảo mật (acce
 - **When** gọi API bảo vệ bằng AT đó
 - **Then** request vẫn pass (chấp nhận trade-off vì AT stateless). Sau khi AT hết hạn, không refresh được → user phải re-login.
 
-> Ghi chú AC-5: nếu muốn revoke AT tức thì → cần introspection endpoint hoặc token blacklist Redis (giai đoạn scale sau — TASK-307).
+> Ghi chú AC-5: nếu muốn revoke AT tức thì → cần introspection endpoint hoặc token blacklist Redis (Phase 3 — TASK-307).
 
 ---
 
 ## 🚫 Out of Scope
 
-- Access token revocation tức thì (blacklist) → giai đoạn scale sau.
+- Access token revocation tức thì (blacklist) → Phase 3.
 - Device fingerprinting / device list UI → backlog.
 - Session sharing across multiple browser tabs (SSO) → ngoài phạm vi.

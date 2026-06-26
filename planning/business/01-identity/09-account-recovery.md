@@ -8,7 +8,7 @@
 - **Trạng thái**: ⏳ Not started
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
-> 🛠️ SMTP/config: [`../../setup/CONVENTIONS.md §6`](../../setup/CONVENTIONS.md) · [`TASK-102`](../../setup/01-project/02-env-config.md)
+> 🛠️ SMTP config: [`engineering §6`](../../setup/CONVENTIONS.md) ([`TASK-102`](../../setup/01-project/02-env-config.md))
 
 ---
 
@@ -97,6 +97,6 @@ Nguyên tắc bất biến:
 ## 🚫 Out of Scope
 
 - Email template design / branding → backlog / marketing.
-- SMS-based recovery → giai đoạn scale sau, TASK-319 (2FA).
-- Centralized email service (queue + retry infrastructure) → post-MVP notification infrastructure.
-- Captcha trên forgot-password → giai đoạn scale sau, TASK-313.
+- SMS-based recovery → Phase 3 TASK-319 (2FA).
+- Centralized email service (queue + retry infrastructure) → Phase 2 TASK-226 (Notifications).
+- Captcha trên forgot-password → Phase 3 TASK-313.

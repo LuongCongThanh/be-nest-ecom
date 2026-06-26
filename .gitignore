@@ -43,12 +43,3 @@ prisma/migrations/dev.db*
 .cache/
 tmp/
 *.local
-
-.antigravity-awesome-skills/
-/generated/prisma
-
-# Graphify
-graphify-out/
-src/graphify-out/
-.graphify_*.json
-.tmp_*.py

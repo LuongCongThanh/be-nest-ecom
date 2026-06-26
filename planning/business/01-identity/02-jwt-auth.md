@@ -28,7 +28,7 @@ Task này chốt **chính sách nghiệp vụ** cho cơ chế xác thực không
 
 | Mục               | Quyết định                       | Ghi chú                                                                 |
 | :---------------- | :------------------------------- | :---------------------------------------------------------------------- |
-| Thuật toán ký     | **HS256**                        | Baseline đơn dịch vụ. Nếu sau này tách microservices, migrate sang RS256 |
+| Thuật toán ký     | **HS256**                        | Phase 1 đơn dịch vụ. Nếu sau này tách microservices, migrate sang RS256 |
 | Access Token TTL  | **30 phút**                      |                                                                         |
 | Refresh Token TTL | **7 ngày**                       | Chi tiết rotation: TASK-123                                             |
 | Payload chuẩn     | `{ sub, email, role, iat, exp }` | Cấm thêm bất kỳ field nào không nằm trong danh sách                     |
@@ -74,5 +74,5 @@ Task này chốt **chính sách nghiệp vụ** cho cơ chế xác thực không
 
 - Cấu hình guards/decorators concrete → [`engineering §12`](../../setup/CONVENTIONS.md) + TASK-117.
 - Refresh token rotation logic → TASK-123.
-- Social login / OAuth → giai đoạn scale sau, TASK-327.
-- 2FA → giai đoạn scale sau, TASK-319.
+- Social login / OAuth → Phase 3 TASK-327.
+- 2FA → Phase 3 TASK-319.

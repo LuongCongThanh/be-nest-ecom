@@ -21,7 +21,7 @@
 1. **Fail-by-default Auth**: mọi route require JWT trừ khi `@Public()` đánh dấu rõ.
 2. **DTO bắt buộc** ở mọi endpoint nhận input. `whitelist: true`, `forbidNonWhitelisted: true`.
 3. **No `any`**: type explicit, dùng `Pick<T>`, `Partial<T>`, hoặc interface riêng.
-4. **No `process.env` trực tiếp**: dùng `ConfigService`, trừ lớp `src/config/**` chuyên bootstrap config.
+4. **No `process.env` trực tiếp**: dùng `ConfigService`.
 5. **No `console.log`**: dùng `Logger` từ `@nestjs/common` kèm correlation ID.
 6. **BaseEntity bắt buộc**: mọi entity domain có `id (UUID) / createdAt / updatedAt / deletedAt`.
 
@@ -29,6 +29,6 @@
 
 - Global ValidationPipe đăng ký ở `main.ts` (xem template trong CONVENTIONS §14).
 - Global AuthGuard ở `APP_GUARD`. `@Public()`, `@CurrentUser()`, `@Roles()` chạy đúng.
-- Shared utilities/repository boundary được chuẩn hóa; không bắt buộc generic `BaseRepository<T>` nếu abstraction đó làm giảm type-safety.
-- `slugify()` + `formatCurrency()` + `generateOrderId(sequence)` ở `src/shared/utils/`.
+- `BaseRepository<T>` có sẵn `findById`, `findMany`, `create`, `update`, `softDelete`.
+- `slugify()` + `formatCurrency()` + `generateId(prefix)` ở `src/shared/utils/`.
 - Seed script tạo 1 admin + 5 category + 20 product, idempotent.

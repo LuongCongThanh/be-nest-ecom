@@ -1,6 +1,6 @@
 # TASK-223: Hạ tầng Nội dung: Quản trị Tài sản & Lưu trữ Đám mây (Content Infrastructure: Asset Management & Cloud Storage)
 
-> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
+> 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
 > **Intent:** Storage adapter (local/S3) + image processing pipeline.
 > **Single Source of Truth:** (Chưa có canonical doc — file này là chuẩn cho asset infrastructure)
 > **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)

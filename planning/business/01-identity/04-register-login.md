@@ -13,7 +13,7 @@
 
 ## 🎯 Business Intent
 
-Đây là **2 luồng quan trọng nhất của identity baseline**: chúng định nghĩa thế nào là "user hợp lệ" cho toàn hệ thống.
+Đây là **2 luồng quan trọng nhất Phase 1**: chúng định nghĩa thế nào là "user hợp lệ" cho toàn hệ thống.
 
 - **Password = one-way hash**, không bao giờ là plaintext sau khi rời tay client.
 - **Login error message phải mơ hồ**: không tiết lộ email có tồn tại hay không — chống enumeration attack.
@@ -84,5 +84,5 @@
 
 - Email verification token generation → TASK-124.
 - Refresh token rotation → TASK-123.
-- Rate limiting on auth endpoints → giai đoạn scale sau, TASK-313.
-- OAuth/social login → giai đoạn scale sau, TASK-327.
+- Rate limiting on auth endpoints → Phase 3 TASK-313.
+- OAuth/social login → Phase 3 TASK-327.

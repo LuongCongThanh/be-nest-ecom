@@ -4,7 +4,7 @@
 
 - **Task ID**: TASK-302
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (System Reliability)
-- **Phụ thuộc**: TASK-301 (Unit Tests), core features MVP
+- **Phụ thuộc**: TASK-301 (Unit Tests), Phase 1 + Phase 2 Core Features
 - **Trạng thái**: ⏳ Not started
 
 ---
@@ -70,4 +70,4 @@ Hệ thống ưu tiên tự động hóa các hành trình "kiếm tiền" (Happ
 | :-------------------- | :----------------------------------------------------------------------------------------- |
 | **New Buyer Journey** | Đăng ký -> Login -> Mua món hàng đầu tiên -> Kiểm tra Order Status là `PENDING`.           |
 | **Stock Out Journey** | Mua sản phẩm cuối cùng -> Thử mua lại lần nữa -> Hệ thống phải chặn ngay tại API Checkout. |
-| **Admin Fulfillment** | Admin login -> Xem danh sách đơn mới -> Chuyển trạng thái sang `SHIPPING` -> Kiểm tra Log.  |
+| **Admin Fulfillment** | Admin login -> Xem danh sách đơn mới -> Chuyển trạng thái sang `SHIPPED` -> Kiểm tra Log.  |
