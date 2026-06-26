@@ -4,7 +4,7 @@
 **Ước lượng**: 3 giờ
 **Phụ thuộc**: Task 13
 **Ưu tiên**: 🟡 SHOULD (Operations + UX — cần cho admin quản lý và user tự quản lý profile)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [05-users-crud.md](../../business/01-identity/05-users-crud.md) · [06-user-profile.md](../../business/01-identity/06-user-profile.md) · [07-change-password.md](../../business/01-identity/07-change-password.md)
 
 ---

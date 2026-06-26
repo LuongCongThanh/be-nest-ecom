@@ -11,8 +11,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
-import { JwtStrategy } from './modules/identity/strategies/jwt.strategy';
-import { IdentityModule } from './modules/identity.module';
+import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
+import { IdentityModule } from '@modules/identity.module';
 
 @Module({
   imports: [

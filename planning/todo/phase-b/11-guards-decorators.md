@@ -4,7 +4,7 @@
 **Ước lượng**: 2 giờ
 **Phụ thuộc**: Task 10
 **Ưu tiên**: 🔴 BLOCKING (Security — default-deny, mọi endpoint sau đây cần guards này)
-**Trạng thái**: ⏳ Not started
+**Trạng thái**: ✅ Done
 **Spec gốc**: [04-guards-decorators.md](../../setup/03-conventions/04-guards-decorators.md)
 
 ---
