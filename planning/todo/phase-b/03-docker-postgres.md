@@ -4,7 +4,7 @@
 **Ước lượng**: 1 giờ
 **Phụ thuộc**: Task 02
 **Ưu tiên**: 🟡 TRUNG BÌNH (Infrastructure — thiếu thì không có DB, nhưng dễ sửa)
-**Trạng thái**: 🔵 In progress
+**Trạng thái**: ✅ Done
 **Spec gốc**: [01-postgres-setup.md](../../setup/02-database/01-postgres-setup.md)
 
 > **Repo snapshot 2026-05-21:** `.env` đã chuẩn bị `DATABASE_URL` và `REDIS_URL`, nhưng repo chưa có `docker-compose.yml`.

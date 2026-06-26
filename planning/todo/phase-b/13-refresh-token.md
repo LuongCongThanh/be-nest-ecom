@@ -4,7 +4,7 @@
 **Ước lượng**: 3 giờ
 **Phụ thuộc**: Task 12
 **Ưu tiên**: 🔴 BLOCKING (Security — UX không thể dùng nếu thiếu, và thiếu thì có lỗ hổng bảo mật)
-**Trạng thái**: 🔵 In progress (đã có nền `TokenService` + schema `refresh_tokens`, nhưng refresh rotation/replay detection chưa implement)
+**Trạng thái**: ✅ Done
 **Spec gốc**: [08-refresh-token.md](../../business/01-identity/08-refresh-token.md)
 
 ---
