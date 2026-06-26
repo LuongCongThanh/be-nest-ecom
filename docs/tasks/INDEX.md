@@ -1,11 +1,11 @@
 # 📑 Master Task Index
 
-> 📜 Glossary: [`CONTEXT.md`](./CONTEXT.md) · Convention: [`setup/CONVENTIONS.md`](../setup/CONVENTIONS.md) · Roadmap self-learn: [`ROADMAP.md`](./ROADMAP.md)
+> 📜 Glossary: [`/CONTEXT.md`](../../CONTEXT.md) · Convention: [`setup/CONVENTIONS.md`](./setup/CONVENTIONS.md) · Roadmap self-learn: [`../ROADMAP.md`](../ROADMAP.md)
 
-File này dùng để **tra task/spec gốc** trong `planning/`.
+File này dùng để **tra task/spec gốc** trong `docs/tasks/`.
 
 - Muốn **tra cứu theo domain / task ID / tài liệu gốc** → dùng file này
-- Muốn **làm việc theo phase thực thi** → mở [`../todo/README.md`](../todo/README.md)
+- Muốn **biết task nào tiếp theo** → mở [`../STATUS.md`](../STATUS.md)
 
 Tài liệu chia 2 nhánh:
 
