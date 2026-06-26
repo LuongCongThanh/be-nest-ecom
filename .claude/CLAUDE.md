@@ -1,6 +1,6 @@
 # Git Workflow
 
-Mỗi task phải theo đúng quy trình sau. Xem chi tiết tại `docs/git-workflow.md`.
+Mỗi task phải theo đúng quy trình sau. Xem chi tiết tại `docs/conventions/git-workflow.md`.
 
 ## Bắt đầu task mới
 
