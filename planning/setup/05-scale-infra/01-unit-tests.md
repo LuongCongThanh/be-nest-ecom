@@ -4,7 +4,7 @@
 
 - **Task ID**: TASK-301
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (Quality)
-- **Phụ thuộc**: core logic MVP đã ổn định
+- **Phụ thuộc**: Phase 1 + Phase 2 Core Logic
 - **Trạng thái**: ⏳ Not started
 
 ---

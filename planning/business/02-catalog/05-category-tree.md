@@ -13,7 +13,7 @@
 
 ## 🎯 Business Intent
 
-Public API cho mega-menu / sidebar / breadcrumb của storefront. **Read-heavy**, tần suất thay đổi thấp → ứng viên cache hàng đầu ở giai đoạn scale sau.
+Public API cho mega-menu / sidebar / breadcrumb của storefront. **Read-heavy**, tần suất thay đổi thấp → ứng viên cache hàng đầu (Phase 3).
 
 - **One-call tree**: 1 request lấy được toàn bộ cây — tránh waterfall N+1 ở FE.
 - **Active-only mặc định**: public chỉ thấy `isActive=true`; admin có thể opt-in xem hết qua `?includeInactive=true`.
@@ -73,6 +73,6 @@ Public API cho mega-menu / sidebar / breadcrumb của storefront. **Read-heavy**
 
 ## 🚫 Out of Scope
 
-- Caching strategy → giai đoạn scale sau, TASK-306.
+- Caching strategy → Phase 3 TASK-306.
 - Per-category SEO metadata API → backlog.
 - Search inside category → TASK-204.

@@ -47,7 +47,7 @@ Catalog là **read-heavy**: API list/search được gọi nhiều nhất hệ t
 4. `stockQuantity ≥ 0`. Trừ kho qua `prisma.$transaction` + **row-level lock** (`update where stockQty >= qty` hoặc `SELECT FOR UPDATE`). Chống oversell ở checkout song song.
 5. Xóa Category đang chứa Product → set `categoryId = NULL` (SET NULL theo TASK-106).
 6. Xóa Product có OrderItem → **RESTRICT** (không cho phép xóa).
-7. Search ở **MVP** có thể bắt đầu bằng filter + text search đơn giản miễn hành vi đúng và dễ bảo trì. **Postgres FTS** (`tsvector` + GIN + `unaccent`) là hướng nâng cấp tốt khi cần relevance/không dấu/performance rõ ràng. Không nhảy lên Elasticsearch ở giai đoạn đầu.
+7. Search dùng **Postgres FTS** (`tsvector` generated column + GIN index + `unaccent` extension) — không ILIKE, không Elasticsearch. Query qua `plainto_tsquery('simple', unaccent(:q))` để diacritic-insensitive (`dien thoai` match `Điện Thoại`). SQL injection: parameter binding qua Prisma `$queryRaw`, không string concat.
 8. **Pagination**: `GET /products` dùng `PaginationDto { page, limit }` (offset) — xem `CONVENTIONS.md §8.6`. Default `limit=20`, max `100`.
 9. **Image upload**: 5MB max, MIME whitelist `jpeg/png/webp`, magic byte verify. Resize qua `sharp` sync, output 3 size webp. CẤM nhận filename gốc từ client.
 

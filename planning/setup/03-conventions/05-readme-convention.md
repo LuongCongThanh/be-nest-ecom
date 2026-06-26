@@ -1,6 +1,6 @@
 # TASK-121: Quản trị Tri thức: Nguồn Sự thật Duy nhất & Cộng tác (Knowledge Management: Source of Truth & Collaboration)
 
-> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
+> 🛠️ **Engineering Task** — đã tách khỏi Phase 1 business.
 > **Intent:** README & documentation convention.
 > **Single Source of Truth:** (Tài liệu này là chuẩn — chưa có doc canonical riêng)
 > **Charter business liên quan:** [../../business/01-identity/CHARTER.md](../../business/01-identity/CHARTER.md)
@@ -13,7 +13,7 @@
 
 - **Task ID**: TASK-121
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (Onboarding & Maintenance)
-- **Phụ thuộc**: Các task nền tảng giai đoạn đầu đã hoàn tất hoặc được chuẩn hóa
+- **Phụ thuộc**: Các task nền tảng Phase 1 đã hoàn tất hoặc được chuẩn hóa
 - **Trạng thái**: ⏳ Not started
 
 ---

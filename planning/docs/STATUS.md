@@ -1,10 +1,8 @@
 # 📊 STATUS — Waterfall Tracking Dashboard
 
-> **Vai trò**: file live duy nhất theo dõi tiến độ dự án theo mô hình **Waterfall**. Cập nhật sau mỗi phase/task hoàn thành. Không xóa entry cũ — chỉ append.
+> **Vai trò**: file live duy nhất theo dõi tiến độ dự án theo mô hình **Waterfall**. Cập nhật sau mỗi task hoàn thành. Không xóa entry cũ — chỉ append.
 
-> Từ thời điểm này, `STATUS.md` track theo **execution phase trong `todo/`**. Task ID trong `planning/docs/TASK_INDEX.md` vẫn dùng để tra cứu spec gốc, nhưng không còn là trục chính để điều phối thực thi hàng ngày.
-
-📍 Hôm nay: `2026-05-28` · Canon rule base: `planning/` · Canon execution order: `todo/` · Phase hiện tại: **Phase B — Foundation Implementation** ⏳
+📍 Hôm nay: `2026-05-19` · Phase hiện tại: **Phase A — Requirements & Design** ✅ (đã đóng) · Sắp vào: **Phase B — Foundation Implementation** ⏳
 
 ---
 
@@ -15,7 +13,7 @@ Dự án chia **6 phase tuần tự**. Phase trước phải đạt **Exit Gate*
 ```mermaid
 graph LR
     A[Phase A<br/>Requirements & Design<br/>✅ DONE]:::done
-    B[Phase B<br/>Foundation Impl<br/>Tuần 1-4]:::done
+    B[Phase B<br/>Foundation Impl<br/>Tuần 1-4]:::current
     C[Phase C<br/>Core Impl<br/>Tuần 5-9 🎯 MVP]:::pending
     D[Phase D<br/>Polish Impl<br/>Tuần 10-11]:::pending
     E[Phase E<br/>Verification<br/>Tuần 12 🚀 SHIP]:::pending
@@ -35,13 +33,13 @@ graph LR
 
 ```text
 Phase A — Requirements & Design        [████████████████████] 100%  ✅ Đóng
-Phase B — Foundation Impl  (W1-4)      [████████████████████] 100%  ✅ Đóng
-Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  🟢 Mở (Phase B đóng)
+Phase B — Foundation Impl  (W1-4)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏳ Sắp mở
+Phase C — Core Impl       (W5-9)      [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa (chờ B)
 Phase D — Polish Impl     (W10-11)    [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase E — Verification    (W12)       [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Khóa
 Phase F — Maintenance     (post-MVP)  [░░░░░░░░░░░░░░░░░░░░]   0%  ⏸ Backlog
 ─────────────────────────────────────────────────────────────────────────
-TỔNG (Phase B-E, execution files)      [████████░░░░░░░░░░░░]  41%  (12/29 done)
+TỔNG (Phase B-E, MVP)                  [░░░░░░░░░░░░░░░░░░░░]   0%  (0/35 task)
 ```
 
 ---
@@ -77,26 +75,22 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 ---
 
-## ✅ Phase B — Foundation Implementation (ĐÓNG)
-
----
-
-## ✅ Phase B — Foundation Implementation (ĐÓNG 2026-06-22)
+## ⏳ Phase B — Foundation Implementation (HIỆN TẠI)
 
 **Mục tiêu**: build nền tảng kỹ thuật (NestJS + DB + Auth). Hết Phase B → có thể đăng ký + đăng nhập user.
 
-**Phạm vi**: Tuần 1–4 (ROADMAP). Execution checklist chính nằm ở `todo/phase-b/`.
+**Phạm vi**: Tuần 1–4 (ROADMAP). ~9 task.
 
 ### Entry Gate (đã mở 🟢)
 
 - [x] Phase A đóng
-- [x] **Tools setup (Tuần 0) DONE** — repo đã có `package.json`, `node_modules/`, lint/test/build scripts
-- [x] Repo init + first commit — git repo đã tồn tại và đang được dùng
+- [ ] **Tools setup (Tuần 0) DONE** ← chưa
+- [ ] Repo init + first commit ← chưa
 
 ### Exit Gate (đóng phase khi ✅ tất cả)
 
 - [ ] `npm run start:dev` chạy, log `Nest application successfully started`
-- [ ] `GET /health/live` trả 200 khi app sống; `GET /health/ready` (terminus) trả 200 khi DB connected
+- [ ] `GET /health/live` + `GET /health/ready` (terminus) trả 200 với DB connected
 - [ ] `POST /api/v1/auth/register` + `POST /api/v1/auth/login` chạy thật, trả access+refresh token
 - [ ] `GET /api/v1/me` với Bearer token trả user info, không có `password`
 - [ ] `POST /api/v1/auth/refresh` rotate token, **detect reuse → kill family**
@@ -108,71 +102,80 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 - [ ] Global ValidationPipe + GlobalExceptionFilter → error response schema chuẩn
 - [ ] Lint pass + build pass
 
-### Execution tracker (`todo/phase-b/`)
+### Task tracker
 
-| Task file | Scope | Status | Note |
-| ------ | :-----: | :------: | ------ |
-| `00-tools-setup.md` | 🔴 BLOCKING | ✅ Done | 2026-05-22 |
-| `01-nestjs-scaffold.md` | 🔴 BLOCKING | ✅ Done | 2026-05-23 — app scaffold, `/health`, prefix, aliases |
-| `02-env-config.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — ConfigModule + schema validation |
-| `02b-swagger.md` | 🟡 SHOULD | ✅ Done | 2026-05-25 — Swagger bootstrap + addBearerAuth() |
-| `03-docker-postgres.md` | 🔴 BLOCKING | ✅ Done | 2026-05-26 — Docker compose PostgreSQL |
-| `04-prisma-connect.md` | 🔴 BLOCKING | ✅ Done | 2026-05-26 — PrismaService + driver adapter |
-| `05-prisma-schema.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — User/Address/RefreshToken schema |
-| `06-migrations.md` | 🔴 BLOCKING | ✅ Done | 2026-05-25 — migration workflow |
-| `07-base-classes.md` | 🟡 SHOULD | ✅ Done | 2026-05-27 — PaginatedResult, slugify, generateOrderId, UserRepository |
-| `08-seed-data.md` | 🟡 SHOULD | ✅ Done | 2026-05-28 — seed admin + user accounts |
-| `09-validation-pipe.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — GlobalValidationPipe + GlobalExceptionFilter (PR #9 merged) |
-| `10-jwt-redis.md` | 🔴 BLOCKING | ✅ Done | 2026-05-29 — JwtStrategy, RedisModule, TokenService |
-| `11-guards-decorators.md` | 🔴 BLOCKING | ✅ Done | 2026-06-15 — JwtAuthGuard, RolesGuard, @Public, @Roles, @CurrentUser (backfilled) |
-| `12-auth-feature.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — register/login flow hoàn thành; log học tập đã append |
-| `13-refresh-token.md` | 🔴 BLOCKING | ✅ Done | 2026-06-02 — refresh rotation + replay detection + PR #15 merged |
-| `14-users-crud.md` | 🟡 SHOULD | ✅ Done | 2026-06-15 — GET/PATCH /users/me, change-password, admin list/delete. PR #16 merged |
-| `15-phase-b-exit-gate.md` | 🔴 BLOCKING | ✅ Done | 2026-06-22 — Phase B Exit Gate passed |
+| Task | Tuần | Status | Effort | Owner | Started | Done |
+|------|:---:|:------:|:------:|-------|:-------:|:----:|
+| Tuần 0 — Tools setup | 0 | ⏳ | 1d | self | — | — |
+| 01-bootstrap-nestjs | 1 | ⏳ | 2h | self | — | — |
+| 02-env-config | 1 | ⏳ | 1h | self | — | — |
+| 01-postgres-setup | 1 | ⏳ | 1h | self | — | — |
+| 02-connect-postgres | 1 | ⏳ | 1h | self | — | — |
+| 03-schema-strategy | 2 | ⏳ | 1h | self | — | — |
+| 01-user-entity | 2 | ⏳ | 2h | self | — | — |
+| 04-run-migrations | 2 | ⏳ | 1h | self | — | — |
+| 01-base-classes | 2 | ⏳ | 2h | self | — | — |
+| 02-seed-data | 2 | ⏳ | 1h | self | — | — |
+| 03-validation-error | 3 | ⏳ | 2h | self | — | — |
+| 04-guards-decorators | 3 | ⏳ | 2h | self | — | — |
+| 02-jwt-auth | 3 | ⏳ | 2h | self | — | — |
+| 03-auth-dtos | 3 | ⏳ | 1h | self | — | — |
+| 04-register-login | 3 | ⏳ | 3h | self | — | — |
+| 08-refresh-token | 4 | ⏳ | 3h | self | — | — |
+| 05-users-crud | 4 | ⏳ | 2h | self | — | — |
+| 06-user-profile | 4 | ⏳ | 1h | self | — | — |
+| 07-change-password | 4 | ⏳ | 2h | self | — | — |
+| Address entity + CRUD | 4 | ⏳ | 2h | self | — | — |
 
 **Tổng ước**: ~32 giờ ≈ 4 tuần × 8h.
 
 **Status legend**: ⏳ Not started · 🔵 In progress · ⏸ Blocked · ✅ Done · ❌ Cancelled
 
-> Ghi chú: từ bản cập nhật này, progress ở đây phản ánh **execution files trong `planning/todo/`**, không dùng mẫu số `35 task` cũ của roadmap/spec tổng hợp.
-> Verify snapshot 2026-05-21: `npx tsc --noEmit` pass; `npm run build` đang fail vì Windows lock/permission trên file trong `dist/`, nên chưa thể coi code quality gate là pass.
-
 ---
 
-## 🔵 Phase C — Core Implementation (HIỆN TẠI)
+## ⏸ Phase C — Core Implementation (KHÓA — chờ Phase B)
 
 **Mục tiêu**: build core revenue flow. **Hết Phase C = MVP demo-able**.
 
-**Phạm vi**: Tuần 5–9. Execution checklist chính nằm ở `todo/phase-c/`.
+**Phạm vi**: Tuần 5–9. ~17 task.
 
 ### Entry Gate
 
-- [x] Phase B đóng (tất cả exit gate ✅) — 2026-06-22
+- [ ] Phase B đóng (tất cả exit gate ✅)
 
 ### Exit Gate
 
-- [ ] User browse `GET /api/v1/products` với pagination + text search
-- [ ] Admin/STAFF tạo/sửa/xóa Category, Product
+- [ ] User browse `GET /api/v1/products` với pagination + Postgres FTS search
+- [ ] Admin tạo/sửa/xóa Category, Product (với @Roles ADMIN)
 - [ ] User add/update/remove cart items (Guest qua cookie `gsid`, User qua JWT)
 - [ ] Cart Merge khi Guest login → tạo `mergeWarnings[]` đúng spec
 - [ ] `POST /api/v1/orders` với `Idempotency-Key` header → tạo Order PENDING + trừ stock atomic
 - [ ] Order state machine reject transition sai
 - [ ] Admin force-status endpoint log vào `OrderStateChangeLog`
 - [ ] Cleanup job 15-min cancel Order PENDING + hoàn stock
-- [ ] VNPay IPN/return verify HMAC + idempotent qua `providerTxId`
+- [ ] VNPay webhook verify HMAC + idempotent qua `providerTxId`
 - [ ] Payment SUCCESS đổi Order PENDING → PAID atomic
 - [ ] Test thủ công full flow: register → browse → cart → checkout → pay
 
-### Execution tracker (`todo/phase-c/`)
+### Task tracker
 
-| Task file | Status | Note |
-|------|:------:|------|
-| `todo/phase-c/01-catalog-schema.md` | ⏳ | schema |
-| `todo/phase-c/02-catalog-crud.md` | ⏳ | catalog CRUD |
-| `todo/phase-c/03-cart.md` | ⏳ | cart + guest merge |
-| `todo/phase-c/04-order.md` | ⏳ | checkout + state machine |
-| `todo/phase-c/05-payment.md` | ⏳ | VNPay |
-| `todo/phase-c/06-phase-c-exit-gate.md` | ⏳ | MVP gate |
+| Task | Tuần | Status | Effort |
+|------|:---:|:------:|:------:|
+| 01-category-entity | 5 | ⏳ | 1h |
+| 02-product-entity | 5 | ⏳ | 2h |
+| 03-categories-crud | 5 | ⏳ | 2h |
+| 04-products-crud | 5 | ⏳ | 3h |
+| 05-category-tree | 6 | ⏳ | 2h |
+| 06-products-search (FTS) | 6 | ⏳ | 3h |
+| 07-stock-management | 6 | ⏳ | 2h |
+| 01-cart-entities | 7 | ⏳ | 1h |
+| 02-shopping-cart | 7 | ⏳ | 3h |
+| 03-cart-calc | 7 | ⏳ | 2h |
+| 01-order-entities | 8 | ⏳ | 2h |
+| 02-order-creation 🎯 | 8 | ⏳ | 5h |
+| 03-order-mgmt | 8 | ⏳ | 3h |
+| 04-order-events | 8 | ⏳ | 2h |
+| 01-payment (VNPay) | 9 | ⏳ | 5h |
 
 🎯 **Tuần 8 milestone**: MVP demo-ready (chưa polish, chưa test).
 
@@ -182,7 +185,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 **Mục tiêu**: hoàn thiện DX/UX để pre-production.
 
-**Phạm vi**: Tuần 10–11. Execution checklist chính nằm ở `todo/phase-d/`.
+**Phạm vi**: Tuần 10–11. ~6 task.
 
 ### Entry Gate
 
@@ -192,20 +195,22 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 - [ ] Mọi exception trả response theo schema chuẩn (statusCode/code/message/errors/timestamp/path/requestId)
 - [ ] Request log có correlation ID + duration
-- [ ] Swagger UI ở `/docs` hiển thị mọi endpoint + DTO + response example
-- [ ] JSON success responses theo envelope chuẩn; `204 No Content` không bị wrap sai
+- [ ] Swagger UI ở `/api` hiển thị mọi endpoint + DTO + response example
+- [ ] Upload ảnh product 5MB → resize 3 size webp → trả 3 URL
 - [ ] Email verification flow chạy thật (Mailtrap dev)
 - [ ] Forgot password flow chạy thật (one-time token, expiry 1h)
-- [ ] Account recovery tokens chỉ lưu hash, không lưu raw token
 
-### Execution tracker (`todo/phase-d/`)
+### Task tracker
 
-| Task file | Status | Note |
-|------|:------:|------|
-| `todo/phase-d/01-error-logging.md` | ⏳ | filter + logging + response transform |
-| `todo/phase-d/02-swagger.md` | ⏳ | `/docs` |
-| `todo/phase-d/03-account-recovery.md` | ⏳ | verify + reset |
-| `todo/phase-d/04-phase-d-exit-gate.md` | ⏳ | polish gate |
+| Task | Tuần | Status | Effort |
+|------|:---:|:------:|:------:|
+| 01-error-filter | 10 | ⏳ | 2h |
+| 02-logging | 10 | ⏳ | 2h |
+| 03-response-transform | 10 | ⏳ | 1h |
+| 04-swagger | 10 | ⏳ | 2h |
+| 05-file-upload | 10 | ⏳ | 3h |
+| 08-product-images | 10 | ⏳ | 2h |
+| 09-account-recovery | 11 | ⏳ | 5h |
 
 ---
 
@@ -213,7 +218,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 **Mục tiêu**: chứng minh MVP đạt yêu cầu nghiệp vụ. **Hết Phase E = SHIP.**
 
-**Phạm vi**: Tuần 12. Execution checklist chính nằm ở `todo/phase-e/`.
+**Phạm vi**: Tuần 12. ~3 task.
 
 ### Entry Gate
 
@@ -230,12 +235,14 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 - [ ] README.md project có badge build + coverage
 - [ ] CHANGELOG ghi MVP release với commit hash
 
-### Execution tracker (`todo/phase-e/`)
+### Task tracker
 
-| Task file | Status | Note |
-|------|:------:|------|
-| `todo/phase-e/01-testing.md` | ⏳ | unit + e2e + verification |
-| `todo/phase-e/02-ship.md` | ⏳ | release / ship gate |
+| Task | Status | Effort |
+|------|:------:|:------:|
+| 01-unit-tests | ⏳ | 6h |
+| 02-e2e-tests | ⏳ | 4h |
+| Manual UAT checklist | ⏳ | 2h |
+| README project + CHANGELOG MVP | ⏳ | 1h |
 
 🚀 **Tuần 12 milestone**: SHIP — repo tag `v1.0.0`.
 
@@ -264,40 +271,17 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 ```
 [2026-05-19 18:00] [Phase A] [meta]              [DONE] Phase A đóng. 79 task spec + glossary + decisions locked.
 [2026-05-19 18:00] [Phase B] [meta]              [OPEN] Phase B mở. Bắt đầu Tuần 0 setup tools.
-[2026-05-21 00:00] [Phase B] [doc-audit]         [UPDATE] Đồng bộ lại tracker với repo thật: scaffold/env-config/Swagger bootstrap đang in progress; Docker/Prisma/Auth chưa bắt đầu.
-[2026-05-21 00:10] [Phase B] [verify]            [UPDATE] `npx tsc --noEmit` pass. `npm run build` fail do `EPERM` khi ghi/xóa file trong `dist/`, chưa kết luận là lỗi code.
-[2026-05-21 00:20] [Phase B] [task-02/02b]       [UPDATE] `ConfigModule` đã load typed config factories; `main.ts` dùng `ConfigService` cho port. Nâng Task 02 và 02b lên DONE.
 ```
 
-[2026-05-28 00:00] [Phase B] [task-03..07]       [DONE] Docker+Postgres, Prisma connect, schema, migrations, base-classes hoàn thành.
-[2026-05-28 00:00] [Phase B] [task-08]            [DONE] Seed data hoàn thành — admin + user accounts seeded.
-[2026-05-28 00:00] [docs]    [refactor-planning]  [DONE] Issue #7: sync planning/setup spec + todo/ task files. 10 commits trên branch docs/sync-planning-todo-consistency. Fixes: generateId→generateOrderId drift, thêm scope labels (BLOCKING/SHOULD/BACKLOG) toàn bộ Phase B-E, upgrade Phase C-E từ format ngắn lên format đầy đủ, thêm Prisma 7 adapter note vào spec.
-
-[2026-05-29 00:00] [Phase B] [task-09]            [DONE] ValidationPipe + GlobalExceptionFilter — commit 9aa8df3, PR #9 merged.
-[2026-05-29 00:00] [Phase B] [task-10]            [DONE] JwtStrategy + RedisModule + TokenService — commit f6da002.
-[2026-06-02 00:00] [Phase B] [task-12]            [DONE] Auth Feature hoàn thành; bổ sung learning log về DTO, AuthService, và cách học bớt phụ thuộc copy code.
-[2026-06-02 00:10] [Phase B] [task-13]            [DONE] Refresh token rotation + replay detection hoàn thành. PR #15 merged.
-[2026-06-03 00:00] [Phase B] [task-14]            [OPEN] Bắt đầu Users CRUD & Profile — self-service + admin governance.
-[2026-06-15 00:00] [Phase B] [task-11]            [DONE] Guards & Decorators backfilled — JwtAuthGuard, RolesGuard, @Public, @Roles, @CurrentUser đã có từ task 12; STATUS sync lại.
-[2026-06-15 00:00] [Phase B] [task-14]            [DONE] Users CRUD & Profile hoàn thành. PR #16 merged. STATUS sync lại.
-
-[2026-06-22 01:20] [Phase B] [task-14-backfill]  [DONE] Implement UserService + UsersController (task 14 bị thiếu). GET/PATCH /users/me, change-password (204 + RT revoke), admin list/delete, RBAC 403.
-[2026-06-22 01:20] [Phase B] [EXIT GATE PASSED]
-
-- ✅ Infrastructure: /health 200, /health/ready 200 (DB connected), Docker healthy, migrations applied, seed done
-- ✅ Auth: register 201, email-conflict 409, validation 422, login 200, wrong-pwd 401, refresh rotation, replay detection + family revoke, logout 204 + RT invalid
-- ✅ Users: GET /users/me no password, PATCH /users/me OK, change-password 204 + old RT revoked, admin list no password, user→403, admin soft delete 204, CANNOT_DELETE_SELF 403
-- ✅ Security: 404 JSON (not HTML), same error for enumeration, JWT payload = {sub,email,role,iat,exp} only, refresh_tokens stores hash not raw token
-- ✅ Build: lint 0 errors, tsc --noEmit pass, nest build pass
-
-Signed-off: self · Next: Phase C open.
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Phase C — Task 01** — bắt đầu Catalog Schema (`todo/phase-c/01-catalog-schema.md`).
+1. **Cài tools Tuần 0** — Node 20 + Docker Desktop + DBeaver + VSCode extensions (ESLint/Prettier/Prisma/REST Client).
+2. **Init repo** — `npm init nest`, `git init`, commit "chore: scaffold NestJS".
+3. **Task `01-bootstrap-nestjs`** — đọc spec ở `setup/01-project/01-bootstrap-nestjs.md`, code theo Acceptance Criteria, verify `GET /health` 200.
 
 ---
 

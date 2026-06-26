@@ -2,14 +2,6 @@
 
 Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước code, middleware xuyên suốt, hạ tầng scale.
 
-`setup/` là nơi giữ **engineering standards có tính enforce**. File ở đây nên trả lời:
-
-- project nên được tổ chức thế nào,
-- bootstrap/config/logging/validation nên theo rule nào,
-- và các cơ chế dùng chung nên được chuẩn hóa tới mức nào.
-
-`setup/` **không nên** trở thành execution checklist theo ngày; phần đó thuộc `../todo/`.
-
 ## 📑 Tài liệu canonical (source of truth)
 
 | File                                     | Nội dung                                        |
@@ -60,19 +52,19 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 | :--- | :--- |
 | TASK-301 | Write Unit Tests |
 | TASK-302 | Write E2E Tests |
-| TASK-313 | Rate Limiting & Abuse Protection |
-| TASK-307 | Security Enhancements |
-| TASK-320 | Role-Based Access Control (RBAC) |
-| TASK-308 | Setup CI/CD |
-| TASK-309 | Production Deployment |
-| TASK-312 | Logging, Monitoring, Tracing |
 | TASK-304 | Database Optimization |
 | TASK-306 | Add Caching |
+| TASK-307 | Security Enhancements |
+| TASK-308 | Setup CI/CD |
+| TASK-309 | Production Deployment |
 | TASK-310 | Enforce Clean Architecture Boundaries |
 | TASK-311 | Advanced Caching Strategy |
+| TASK-312 | Logging, Monitoring, Tracing |
+| TASK-313 | Rate Limiting & Abuse Protection |
 | TASK-314 | API Versioning |
 | TASK-315 | Feature Flags & Config Toggle |
 | TASK-316 | Elasticsearch Integration |
+| TASK-320 | Role-Based Access Control (RBAC) |
 | TASK-321 | Docker & Kubernetes |
 
 ## ⚠️ Lưu ý
@@ -80,4 +72,3 @@ Mọi task **không phải nghiệp vụ**: cài đặt, công cụ, quy ước 
 - **Single source of truth**: nội dung trùng với `CONVENTIONS.md` / `DATABASE_*.md` → các file canonical là chuẩn. Task chỉ giữ **intent + acceptance criteria + link**.
 - **Task ID giữ nguyên** (101→321) để truy vết lịch sử lên kế hoạch ban đầu. KHÔNG renumber.
 - Với người tự học: bám `../docs/ROADMAP.md`, các task `05-scale-infra` chỉ làm sau khi xong MVP.
-- Khi một lựa chọn implementation còn đang mở, file canonical nên mô tả **default khuyến nghị + trade-off**, không khóa cứng một biến thể quá sớm nếu repo chưa thật sự cần.

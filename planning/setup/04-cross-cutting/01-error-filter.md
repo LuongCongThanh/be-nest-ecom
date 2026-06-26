@@ -1,6 +1,6 @@
 # TASK-212: Chống chịu Lỗi: Quản trị Ngoại lệ & Tính phục hồi (Fault Tolerance: Global Error Handling & Resilience)
 
-> 🛠️ **Engineering Task** — đã tách khỏi business flow để sống ở lớp `setup/`.
+> 🛠️ **Engineering Task** — đã tách khỏi Phase 2 business.
 > **Intent:** Global exception filter + standardized error schema.
 > **Single Source of Truth:** ../CONVENTIONS.md (§5, §14)
 > **Charter business liên quan:** [../../business/CHARTER-revenue.md](../../business/CHARTER-revenue.md)

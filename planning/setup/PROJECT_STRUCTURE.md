@@ -1,8 +1,6 @@
 # 🏗️ Project Structure — Cấu trúc thư mục chuẩn
 
 > **Canonical**: file này là **single source of truth** cho cấu trúc thư mục dự án NestJS. CONVENTIONS.md §1 trỏ về đây. Mọi PR phải bám layout này.
->
-> File này khóa **shape của codebase**, không khóa cứng mọi implementation detail. Nếu một ví dụ bên dưới cũ hơn rule đang sống ở `CONVENTIONS.md` hoặc execution layer, hãy cập nhật ví dụ chứ không biến structure doc thành nơi giữ mâu thuẫn.
 
 ---
 
@@ -75,8 +73,8 @@ src/
 │       └── prisma.service.ts          ← Extends PrismaClient
 │
 ├── config/                            ← ⚙️ Environment config
-│   ├── configuration.ts               ← Typed config factories (`registerAs`)
-│   ├── env.validation.ts              ← Env validation tập trung
+│   ├── env.schema.ts                  ← class-validator EnvSchema class
+│   ├── validate.ts                    ← ConfigModule validate callback
 │   └── index.ts                       ← Barrel export
 │
 ├── shared/                            ← 🧩 Reusable across modules
@@ -91,8 +89,8 @@ src/
 │   │   └── money.ts                   ← BigInt math helpers
 │   ├── types/
 │   │   └── *.types.ts                 ← Shared cross-module types
-│   └── repositories/                  ← Shared contracts/helpers only (optional)
-│       └── repository.types.ts        ← Shared repository types/contracts
+│   └── repositories/
+│       └── base.repository.ts         ← Abstract BaseRepository<T>
 │
 ├── modules/                           ← 🎯 Business features (1 thư mục = 1 bounded context endpoint)
 │   ├── health/                        ← Liveness/Readiness
@@ -100,7 +98,7 @@ src/
 │   ├── users/                         ← User CRUD + Profile + Change Password
 │   ├── addresses/                     ← Address N per User
 │   ├── categories/                    ← Category tree
-│   ├── products/                      ← Product CRUD + Search + Stock
+│   ├── products/                      ← Product CRUD + Search FTS + Stock
 │   ├── carts/                         ← Cart (User + Guest)
 │   ├── orders/                        ← Order checkout + state machine
 │   ├── payments/                      ← VNPay webhook
@@ -147,7 +145,7 @@ modules/<feature>/
 ├── <feature>.module.ts                ← Nest module wire-up
 ├── <feature>.controller.ts            ← HTTP endpoints (>=1, có thể split nếu nhiều)
 ├── <feature>.service.ts               ← Business logic
-├── <feature>.repository.ts            ← Data access (optional, chỉ khi query logic đủ phức tạp)
+├── <feature>.repository.ts            ← Data access (optional nếu service đơn giản)
 ├── <feature>.service.spec.ts          ← Unit test sống cạnh service
 ├── dto/
 │   ├── create-<feature>.dto.ts
@@ -226,7 +224,7 @@ Bắt buộc setup trong `tsconfig.json` + `nest-cli.json` + `jest.config` (cho 
 | `*.filter.ts` | Exception filter | `global-exception.filter.ts` |
 | `*.pipe.ts` | Pipe | `parse-uuid.pipe.ts` |
 | `*.middleware.ts` | Middleware | `correlation-id.middleware.ts` |
-| `*.validator.ts` | Custom validation helper/constraint | `is-strong-password.validator.ts` |
+| `*.validator.ts` | Custom class-validator constraint | `is-strong-password.validator.ts` |
 | `*.exception.ts` | Custom exception class | `business.exception.ts` |
 | `*.strategy.ts` | Passport strategy | `jwt.strategy.ts` |
 | `*.adapter.ts` | External service adapter impl | `s3.adapter.ts` |
@@ -315,7 +313,7 @@ src/
 ├── common/
 │   └── prisma/ (Tuần 1)
 ├── config/
-│   └── env.validation.ts (Tuần 1)
+│   └── env.schema.ts (Tuần 1)
 ├── shared/
 │   ├── dto/
 │   └── utils/
@@ -325,8 +323,6 @@ src/
 ```
 
 **KHÔNG được**: làm flat `src/auth.module.ts` rồi nói "sẽ refactor sau". Refactor sau = không bao giờ refactor.
-
-**Cũng không nên**: dùng file structure này để khóa cứng generic base repository hay engine search cụ thể cho MVP. Đây là file về **shape**, không phải nơi giữ mọi quyết định vi mô.
 
 ---
 

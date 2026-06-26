@@ -16,7 +16,7 @@
 Báo cáo cho Admin/Manager đưa ra quyết định kinh doanh.
 
 - **Source of truth là Order**: stats luôn re-derive từ Order, không lưu denormalized total để tránh drift.
-- **MVP đủ dùng aggregate query**: PostgreSQL `GROUP BY` + index. Materialized view / cube để giai đoạn scale sau (TASK-329).
+- **Phase 2 đủ dùng aggregate query**: PostgreSQL `GROUP BY` + index. Materialized view / cube chỉ Phase 3 (TASK-329).
 - **Time bucket cố định**: day/week/month/quarter/year. Custom range cho phép nhưng cap 366 ngày.
 
 ---
@@ -28,7 +28,7 @@ Báo cáo cho Admin/Manager đưa ra quyết định kinh doanh.
 | `/admin/stats/revenue` | GET | ADMIN | Doanh thu theo bucket |
 | `/admin/stats/orders/velocity` | GET | ADMIN, STAFF | Số đơn theo bucket |
 | `/admin/stats/best-sellers` | GET | ADMIN, STAFF | Top N Product theo qty sold |
-| `/admin/stats/conversion` | GET | ADMIN | Conversion rate (cần TASK-329 traffic data, giai đoạn sau) |
+| `/admin/stats/conversion` | GET | ADMIN | Conversion rate (cần TASK-329 traffic data, Phase 3) |
 
 ### Common query params
 - `from`, `to` (ISO date)
@@ -78,7 +78,7 @@ Báo cáo cho Admin/Manager đưa ra quyết định kinh doanh.
 
 ## 🚫 Out of Scope
 
-- Conversion rate (cần traffic data) → giai đoạn sau, TASK-329.
+- Conversion rate (cần traffic data) → Phase 3 TASK-329.
 - Export to CSV/Excel → backlog.
-- Drilldown UI (admin dashboard) → giai đoạn sau, TASK-317.
-- User cohort analysis → giai đoạn sau.
+- Drilldown UI (admin dashboard) → Phase 3 TASK-317.
+- Customer cohort analysis → Phase 3.
