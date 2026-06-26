@@ -107,6 +107,8 @@ gh pr create --base main --title "feat(catalog): add product and category schema
 
 Điền PR template: summary, type of change, changes made, pre-merge checklist.
 
+**Screenshots / Demo (khuyến khích):** Kéo thả ảnh hoặc video vào comment box để mô tả thay đổi — ví dụ screenshot Postman response, terminal output, hoặc screen recording demo flow.
+
 > ⚠️ Chờ review và yêu cầu merge tường minh — KHÔNG tự merge.
 
 ---
