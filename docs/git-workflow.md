@@ -102,10 +102,10 @@ git push -u origin feat/<phase>/<task-slug>
 ## Bước 5 — Tạo PR vào `main`
 
 ```powershell
-gh pr create --base main --title "feat(catalog): add product and category schema"
+gh pr create --base main --title "feat(catalog): add product and category schema" --web
 ```
 
-Điền PR template: summary, type of change, changes made, pre-merge checklist.
+`--web` sẽ mở GitHub trên trình duyệt với PR template đã load sẵn. Điền đầy đủ: summary, type of change, changes made, pre-merge checklist.
 
 **Screenshots / Demo (khuyến khích):** Kéo thả ảnh hoặc video vào comment box để mô tả thay đổi — ví dụ screenshot Postman response, terminal output, hoặc screen recording demo flow.
 
@@ -147,7 +147,7 @@ git branch -d feat/<phase>/<task-slug>
 [ ] git add <files>
 [ ] git commit -m "<type>(<scope>): <description>"
 [ ] git push -u origin feat/<phase>/<task-slug>
-[ ] gh pr create --base main --title "..."
+[ ] gh pr create --base main --title "..." --web --title "..."
 [ ] chờ review + yêu cầu merge
 [ ] gh pr merge --merge --delete-branch
 [ ] git checkout main && git pull --rebase origin main
