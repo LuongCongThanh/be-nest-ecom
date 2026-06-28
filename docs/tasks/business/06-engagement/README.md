@@ -46,12 +46,12 @@ Các feature **tăng tương tác và retention** quanh Catalog/Order: Q&A, Revi
 
 | ID       | Topic                       | File                                                |
 | :------- | :-------------------------- | :-------------------------------------------------- |
-| TASK-217 | Q&A System                  | [link](./06-qa.md)           |
+| TASK-217 | Q&A System                  | [link](./01-qa.md)           |
 | TASK-219 | Reviews & Ratings           | [link](./02-reviews.md)               |
 | TASK-220 | Wishlist & Favorites        | [link](./03-wishlist.md)            |
-| TASK-224 | Discount & Coupon System    | [link](./01-coupons.md)        |
+| TASK-224 | Discount & Coupon System    | [link](./04-coupons.md)        |
 | TASK-225 | Multiple Shipping Methods   | [link](./05-shipping.md)     |
-| TASK-226 | Inventory Alerts            | [link](./04-inventory-alerts.md) |
+| TASK-226 | Inventory Alerts            | [link](./06-inventory-alerts.md) |
 | ~~TASK-216~~ | ⚠️ DEPRECATED — gộp vào TASK-219 | [link](./99-rating-system.DEPRECATED.md) |
 
 ---

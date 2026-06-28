@@ -74,8 +74,8 @@ grandTotal       = afterDiscount + shippingFee
 | TASK-111 | Order & OrderItem entities     | [link](./01-order-entities.md)                   |
 | TASK-209 | Order creation (checkout)      | [link](./02-order-creation.md)         |
 | TASK-210 | Order management               | [link](./03-order-mgmt.md)                 |
-| TASK-211 | Order statistics               | [link](./05-order-stats.md)                 |
-| TASK-222 | Order lifecycle events         | [link](./04-order-events.md)   |
+| TASK-211 | Order statistics               | [link](./04-order-stats.md)                 |
+| TASK-222 | Order lifecycle events         | [link](./05-order-events.md)   |
 
 ---
 

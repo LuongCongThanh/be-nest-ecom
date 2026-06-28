@@ -37,7 +37,7 @@ Check git log to confirm the user's actual naming pattern before creating:
 
 ```powershell
 git log --oneline -3
-git checkout -b ThanhLuongCong/feat/phase-b/03-docker-postgres
+git checkout -b feat/phase-b/03-docker-postgres
 ```
 
 If user tries to skip a task (e.g. "can we skip Task 04?"), warn:
@@ -95,7 +95,7 @@ Suggest a commit message. See [REFERENCE.md](REFERENCE.md) § Commit conventions
 ### Step 6 — Push
 
 ```powershell
-git push -u origin ThanhLuongCong/feat/<phase>/<task-slug>
+git push -u origin feat/<phase>/<task-slug>
 ```
 
 ### Step 7 — Review against plan
