@@ -16,4 +16,11 @@ export const envValidationSchema = Joi.object({
 
   // Redis
   REDIS_URL: Joi.string().required(), // e.g. redis://localhost:6379
+
+  // Cloudflare R2
+  R2_ACCOUNT_ID: Joi.string().required(),
+  R2_ACCESS_KEY_ID: Joi.string().required(),
+  R2_SECRET_ACCESS_KEY: Joi.string().required(),
+  R2_BUCKET_NAME: Joi.string().required(),
+  R2_PUBLIC_URL: Joi.string().uri().required(),
 });

@@ -11,8 +11,11 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { QueryCategoryDto } from '../dto/query-category.dto';
@@ -94,5 +97,25 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Restore a soft-deleted category' })
   restore(@Param('id') id: string) {
     return this.categoryService.restore(id);
+  }
+
+  @Post(':id/image')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload category image (medium 800px, webp)' })
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.categoryService.uploadImage(id, file.buffer);
+  }
+
+  @Delete(':id/image')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete category image' })
+  deleteImage(@Param('id') id: string) {
+    return this.categoryService.deleteImage(id);
   }
 }

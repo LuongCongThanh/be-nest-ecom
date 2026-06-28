@@ -12,6 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
+import { StorageModule } from '@common/storage/storage.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
 import { IdentityModule } from '@modules/identity/identity.module';
 
@@ -37,6 +38,7 @@ import { IdentityModule } from '@modules/identity/identity.module';
     }),
     HealthModule,
     PassportModule,
+    StorageModule,
     IdentityModule,
     CatalogModule,
   ],

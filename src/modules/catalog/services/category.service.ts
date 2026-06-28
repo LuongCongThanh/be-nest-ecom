@@ -1,3 +1,4 @@
+import { FileUploadService } from '@common/file-upload/file-upload.service';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { slugify } from '@common/utils/slugify.util';
 import {
@@ -16,7 +17,10 @@ const MAX_DEPTH = 5;
 
 @Injectable()
 export class CategoryService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly fileUpload: FileUploadService,
+  ) {}
 
   // ─── Create ───────────────────────────────────────────────────────────────
 
@@ -244,6 +248,30 @@ export class CategoryService {
         }),
       ),
     );
+  }
+
+  // ─── Image ───────────────────────────────────────────────────────────────
+
+  async uploadImage(id: string, buffer: Buffer): Promise<Category> {
+    const category = await this.findOne(id);
+    if (category.image) {
+      const oldKey = this.extractKey(category.image);
+      if (oldKey) await this.fileUpload.deleteFile(oldKey);
+    }
+    const { url } = await this.fileUpload.uploadCategoryImage(buffer, id);
+    return this.prisma.category.update({ where: { id }, data: { image: url } });
+  }
+
+  async deleteImage(id: string): Promise<void> {
+    const category = await this.findOne(id);
+    if (!category.image) return;
+    const key = this.extractKey(category.image);
+    if (key) await this.fileUpload.deleteFile(key);
+    await this.prisma.category.update({ where: { id }, data: { image: null } });
+  }
+
+  private extractKey(url: string): string | null {
+    try { return new URL(url).pathname.slice(1); } catch { return null; }
   }
 
   // ─── Private helpers ─────────────────────────────────────────────────────

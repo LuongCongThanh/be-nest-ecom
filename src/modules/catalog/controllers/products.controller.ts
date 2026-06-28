@@ -11,18 +11,25 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { QueryProductDto } from '../dto/query-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
+import { ProductImageService } from '../services/product-image.service';
 import { ProductService } from '../services/product.service';
 
 @ApiTags('products')
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly productImageService: ProductImageService,
+  ) {}
 
   // ─── Public endpoints ─────────────────────────────────────────────────────
 
@@ -67,5 +74,42 @@ export class ProductsController {
   @ApiOperation({ summary: 'Soft-delete product' })
   softDelete(@Param('id') id: string) {
     return this.productService.softDelete(id);
+  }
+
+  @Post(':id/images')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload product image (3 sizes: thumb/medium/original, webp)' })
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.productImageService.upload(id, file.buffer);
+  }
+
+  @Get(':id/images')
+  @Public()
+  @ApiOperation({ summary: 'List product images (medium size, ordered by position)' })
+  listImages(@Param('id') id: string) {
+    return this.productImageService.findAll(id);
+  }
+
+  @Delete(':id/images/:imageId')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete product image (removes all 3 sizes)' })
+  deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
+    return this.productImageService.delete(id, imageId);
+  }
+
+  @Patch(':id/images/reorder')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Reorder product images' })
+  @ApiBody({ schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, position: { type: 'number' } } } } } } })
+  reorderImages(@Param('id') id: string, @Body() body: { items: { id: string; position: number }[] }) {
+    return this.productImageService.reorder(id, body.items);
   }
 }
