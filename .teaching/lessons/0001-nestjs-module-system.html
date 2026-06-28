@@ -1,0 +1,243 @@
+<title>Bài 01 — NestJS Module System: Tại sao lại có Module?</title>
+<meta name="description" content="Hiểu Dependency Injection Container và Module boundary trong NestJS — nền tảng của mọi thứ">
+<link rel="stylesheet" href="../assets/styles.css">
+
+<div class="lesson-container">
+
+  <div class="lesson-header">
+    <div class="lesson-meta">Bài 01 · NestJS · be-nest-ecom</div>
+    <h1 class="lesson-title">NestJS Module System:<br>Tại sao lại có Module?</h1>
+    <p class="lesson-subtitle">Hiểu <em>tại sao</em> NestJS dùng Module — không chỉ <em>cách</em> dùng</p>
+  </div>
+
+  <div class="progress-bar"><div class="progress-fill" style="width: 8%"></div></div>
+
+  <!-- ============================================ -->
+  <h2>Vấn đề Module giải quyết</h2>
+
+  <p>Hãy tưởng tượng bạn có 3 file TypeScript thuần:</p>
+
+  <pre><code><span class="cm">// Không có framework nào cả</span>
+<span class="kw">const</span> prisma = <span class="kw">new</span> <span class="ty">PrismaClient</span>();
+<span class="kw">const</span> categoryRepo = <span class="kw">new</span> <span class="ty">CategoryRepository</span>(prisma);
+<span class="kw">const</span> categoryService = <span class="kw">new</span> <span class="ty">CategoryService</span>(categoryRepo);
+<span class="kw">const</span> categoryController = <span class="kw">new</span> <span class="ty">CategoryController</span>(categoryService);</code></pre>
+
+  <p>Code này <strong>hoạt động được</strong>. Nhưng có 3 vấn đề:</p>
+
+  <ol>
+    <li><strong>Ai tạo ra ai?</strong> — Bạn phải nhớ thứ tự và dependencies của tất cả object.</li>
+    <li><strong>Shared instances</strong> — Nếu 2 service cùng cần <code>PrismaClient</code>, bạn phải tự đảm bảo chỉ tạo 1 instance duy nhất.</li>
+    <li><strong>Testing</strong> — Để test <code>CategoryService</code>, bạn phải tạo cả <code>PrismaClient</code> thật.</li>
+  </ol>
+
+  <p>NestJS giải quyết cả 3 vấn đề này với <strong>Dependency Injection (DI) Container</strong>.</p>
+
+  <!-- ============================================ -->
+  <h2>DI Container là gì — thực sự</h2>
+
+  <p>DI Container là một <strong>"registry"</strong> — một bản đồ từ <em>token</em> (thường là class) đến <em>instance</em> của nó. Khi bạn viết:</p>
+
+  <pre><code><span class="fn">@Injectable</span>()
+<span class="kw">export class</span> <span class="ty">CategoryService</span> {
+  <span class="kw">constructor</span>(<span class="kw">private</span> repo: <span class="ty">CategoryRepository</span>) {}
+}</code></pre>
+
+  <p>Bạn đang nói với NestJS: <em>"Khi cần tạo <code>CategoryService</code>, hãy tự tìm <code>CategoryRepository</code> trong registry và inject vào."</em></p>
+
+  <div class="callout key">
+    <div class="callout-title">Nguyên tắc cốt lõi</div>
+    <p>Bạn <strong>không gọi <code>new</code></strong>. NestJS làm điều đó cho bạn — và đảm bảo mỗi class chỉ được tạo <strong>một lần</strong> (singleton theo mặc định) trong scope của Module.</p>
+  </div>
+
+  <!-- ============================================ -->
+  <h2>Module = Ranh giới rõ ràng</h2>
+
+  <p>Nếu DI Container là cái registry, thì <strong>Module</strong> là cái <em>phạm vi</em> (scope) của registry đó.</p>
+
+  <div class="diagram">
+    <pre style="background:none; color: var(--color-text); border:none; padding:0; font-size:0.82rem; text-align:left; display:inline-block;">
+┌─────────────────────────────────────────────────┐
+│                  AppModule                      │
+│                                                 │
+│   ┌──────────────────┐   ┌──────────────────┐  │
+│   │   CatalogModule  │   │    OrderModule   │  │
+│   │                  │   │                  │  │
+│   │  CategoryService │   │  OrderService    │  │
+│   │  ProductService  │   │  OrderRepository │  │
+│   │  CategoryRepo    │   │                  │  │
+│   └──────────────────┘   └──────────────────┘  │
+│                                                 │
+│   ┌──────────────────┐                          │
+│   │   SharedModule   │  ← exports PrismaService │
+│   │   PrismaService  │    sang mọi module khác  │
+│   └──────────────────┘                          │
+└─────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <p><code>CategoryService</code> <strong>không thể</strong> tự inject <code>OrderService</code> trừ khi <code>OrderModule</code> export nó và <code>CatalogModule</code> import <code>OrderModule</code>. Đây là ranh giới có chủ đích — ngăn code của bạn trở thành mạng nhện dependencies.</p>
+
+  <!-- ============================================ -->
+  <h2>Anatomy của một Module trong dự án bạn</h2>
+
+  <p>Trong be-nest-ecom, <code>CatalogModule</code> sẽ trông như thế này:</p>
+
+  <pre><code><span class="fn">@Module</span>({
+  imports: [<span class="ty">PrismaModule</span>],      <span class="cm">// Lấy PrismaService từ module khác</span>
+  controllers: [
+    <span class="ty">CategoryController</span>,    <span class="cm">// Xử lý HTTP request</span>
+    <span class="ty">ProductController</span>,
+  ],
+  providers: [
+    <span class="ty">CategoryService</span>,       <span class="cm">// Business logic — private mặc định</span>
+    <span class="ty">ProductService</span>,
+    <span class="ty">CategoryRepository</span>,    <span class="cm">// Data access layer</span>
+    <span class="ty">ProductRepository</span>,
+  ],
+  exports: [
+    <span class="ty">CategoryService</span>,       <span class="cm">// Chỉ export những gì module khác cần</span>
+  ],
+})
+<span class="kw">export class</span> <span class="ty">CatalogModule</span> {}</code></pre>
+
+  <div class="callout tip">
+    <div class="callout-title">Quy tắc thực tế</div>
+    <p><strong>providers</strong> = những gì module này tự tạo ra và quản lý.<br>
+    <strong>exports</strong> = tập con của providers mà module khác được phép dùng.<br>
+    <strong>imports</strong> = những module khác mà mình cần dùng exports của họ.</p>
+  </div>
+
+  <!-- ============================================ -->
+  <h2>Tại sao singleton là mặc định?</h2>
+
+  <p>Mỗi provider trong một Module được tạo <strong>một lần duy nhất</strong> khi app khởi động, và instance đó được share cho mọi class cần nó trong cùng scope.</p>
+
+  <p>Điều này có nghĩa là:</p>
+  <ul>
+    <li><code>CategoryService</code> và <code>ProductService</code> cùng inject <code>CategoryRepository</code> → chúng nhận <strong>cùng 1 instance</strong></li>
+    <li>Không lãng phí memory, không race condition trong initialization</li>
+    <li>Dễ test: inject mock thay thế toàn bộ dependency</li>
+  </ul>
+
+  <div class="callout warning">
+    <div class="callout-title">Cạm bẫy phổ biến</div>
+    <p>Nếu một provider có <strong>state mutable</strong> (biến đổi theo request), singleton scope sẽ gây lỗi race condition. Trong trường hợp đó dùng <code>REQUEST</code> scope — nhưng đây là ngoại lệ, không phải quy tắc.</p>
+  </div>
+
+  <!-- ============================================ -->
+  <h2>PrismaModule — Pattern trong dự án thực</h2>
+
+  <p>Dự án be-nest-ecom của bạn có (hoặc sẽ có) một <code>PrismaModule</code> được share toàn bộ app:</p>
+
+  <pre><code><span class="fn">@Module</span>({
+  providers: [<span class="ty">PrismaService</span>],
+  exports: [<span class="ty">PrismaService</span>],   <span class="cm">// Cho phép mọi module import</span>
+})
+<span class="kw">export class</span> <span class="ty">PrismaModule</span> {}
+
+<span class="cm">// PrismaService extends PrismaClient — singleton duy nhất</span>
+<span class="fn">@Injectable</span>()
+<span class="kw">export class</span> <span class="ty">PrismaService</span> <span class="kw">extends</span> <span class="ty">PrismaClient</span> <span class="kw">implements</span> <span class="ty">OnModuleInit</span> {
+  <span class="kw">async</span> <span class="fn">onModuleInit</span>() {
+    <span class="kw">await</span> <span class="kw">this</span>.<span class="fn">$connect</span>();
+  }
+}</code></pre>
+
+  <p>Khi <code>CatalogModule</code> imports <code>PrismaModule</code>, nó nhận được cùng 1 connection pool — không tạo kết nối database mới.</p>
+
+  <!-- ============================================ -->
+  <h2>Kiểm tra hiểu bài</h2>
+
+  <div class="quiz" id="q1">
+    <div class="quiz-title">Câu hỏi 1 / 3</div>
+    <div class="quiz-question">Bạn muốn <code>OrderService</code> trong <code>OrderModule</code> có thể dùng <code>CategoryService</code> từ <code>CatalogModule</code>. Bạn cần làm gì?</div>
+    <ul class="quiz-options">
+      <li class="quiz-option" onclick="answer(this, false, 'q1', 'Không đúng. Providers chỉ available trong module của chúng — thêm vào providers của OrderModule không có tác dụng với CategoryService.')">Thêm <code>CategoryService</code> vào <code>providers</code> của <code>OrderModule</code></li>
+      <li class="quiz-option" onclick="answer(this, true, 'q1', 'Đúng! Export từ CatalogModule, rồi import CatalogModule vào OrderModule — đây là cách duy nhất share provider giữa modules.')">Export <code>CategoryService</code> từ <code>CatalogModule</code>, sau đó import <code>CatalogModule</code> vào <code>OrderModule</code></li>
+      <li class="quiz-option" onclick="answer(this, false, 'q1', 'Không đúng. @Global() tồn tại nhưng là anti-pattern — nó phá vỡ ranh giới module và làm code khó test hơn.')">Đánh dấu <code>CatalogModule</code> là <code>@Global()</code></li>
+      <li class="quiz-option" onclick="answer(this, false, 'q1', 'Không đúng. Inject thẳng cross-module không được phép trong NestJS — DI container chỉ tìm trong scope của module hiện tại và các imported modules.')">Inject <code>CategoryService</code> trực tiếp mà không cần import</li>
+    </ul>
+    <div class="quiz-feedback" id="q1-feedback"></div>
+  </div>
+
+  <div class="quiz" id="q2">
+    <div class="quiz-title">Câu hỏi 2 / 3</div>
+    <div class="quiz-question">Trong NestJS, mặc định một <code>@Injectable()</code> provider có lifecycle thế nào?</div>
+    <ul class="quiz-options">
+      <li class="quiz-option" onclick="answer(this, false, 'q2', 'Không đúng. Nếu tạo instance mới mỗi lần inject, app sẽ tạo vô số database connections — nguy hiểm.')">Tạo instance mới mỗi lần được inject (transient)</li>
+      <li class="quiz-option" onclick="answer(this, false, 'q2', 'Không đúng. Request scope tồn tại trong NestJS nhưng không phải mặc định — phải khai báo tường minh.')">Tạo instance mới cho mỗi HTTP request (request scope)</li>
+      <li class="quiz-option" onclick="answer(this, true, 'q2', 'Đúng! Singleton là mặc định — một instance duy nhất cho toàn bộ vòng đời của module/app. Đây là lý do PrismaService chỉ tạo 1 connection pool duy nhất.')">Một instance duy nhất dùng chung trong module (singleton)</li>
+      <li class="quiz-option" onclick="answer(this, false, 'q2', 'Không đúng. NestJS singleton scope không phụ thuộc vào config environment.')">Singleton trong production, transient trong development</li>
+    </ul>
+    <div class="quiz-feedback" id="q2-feedback"></div>
+  </div>
+
+  <div class="quiz" id="q3">
+    <div class="quiz-title">Câu hỏi 3 / 3</div>
+    <div class="quiz-question">Sự khác biệt giữa <code>providers</code> và <code>exports</code> trong <code>@Module()</code> là gì?</div>
+    <ul class="quiz-options">
+      <li class="quiz-option" onclick="answer(this, false, 'q3', 'Không đúng. Đây là hai khái niệm riêng biệt với mục đích khác nhau — không thể dùng thay thế nhau.')"><code>providers</code> và <code>exports</code> là như nhau, có thể dùng cái nào cũng được</li>
+      <li class="quiz-option" onclick="answer(this, false, 'q3', 'Không đúng. exports không tạo thêm instances — nó chỉ khai báo providers nào được phép dùng bởi module bên ngoài.')"><code>exports</code> tạo thêm instances, <code>providers</code> chỉ khai báo type</li>
+      <li class="quiz-option" onclick="answer(this, false, 'q3', 'Không đúng. providers phải được khai báo trước exports — một class phải là provider trước khi có thể được export.')"><code>exports</code> là alias của <code>providers</code> cho modules con</li>
+      <li class="quiz-option" onclick="answer(this, true, 'q3', 'Đúng! providers = những gì module này quản lý (private mặc định). exports = tập con của providers mà module khác được phép inject. Nếu không export, class chỉ dùng được trong module của nó.')"><code>providers</code> = những gì module tạo và quản lý; <code>exports</code> = những providers nào được phép dùng bởi module bên ngoài</li>
+    </ul>
+    <div class="quiz-feedback" id="q3-feedback"></div>
+  </div>
+
+  <!-- ============================================ -->
+  <h2>Áp dụng ngay vào dự án</h2>
+
+  <p>Trong task hiện tại (feat/phase-c/02-catalog-crud), bạn sẽ tạo <code>CatalogModule</code>. Checklist module boundary:</p>
+
+  <ul>
+    <li>✓ <code>providers</code>: <code>CategoryService</code>, <code>ProductService</code>, <code>CategoryRepository</code>, <code>ProductRepository</code></li>
+    <li>✓ <code>controllers</code>: <code>CategoryController</code>, <code>ProductController</code></li>
+    <li>✓ <code>imports</code>: <code>PrismaModule</code> (để inject <code>PrismaService</code>)</li>
+    <li>✓ <code>exports</code>: chỉ export những gì module khác thực sự cần (thường là Service, không phải Repository)</li>
+  </ul>
+
+  <!-- ============================================ -->
+  <div class="primary-source">
+    <div class="primary-source-label">Đọc thêm — Primary Source</div>
+    <p><strong><a href="https://docs.nestjs.com/modules" target="_blank">NestJS Official Docs: Modules</a></strong> — Đây là nguồn chuẩn nhất để hiểu Module system. Đọc phần "Module re-exporting" và "Global modules" để hiểu khi nào nên (và không nên) dùng <code>@Global()</code>.</p>
+  </div>
+
+  <div class="ask-teacher">
+    <strong>Hỏi thầy?</strong> Nếu bạn chưa rõ phần nào — DI Container, singleton scope, hay tại sao không nên dùng @Global() — hãy hỏi trực tiếp trong chat. Bài học tiếp theo sẽ đi sâu vào <strong>Pipes và Validation</strong> hoặc <strong>Prisma Repository Pattern</strong> tùy theo task bạn đang làm.
+  </div>
+
+  <div class="lesson-nav">
+    <span>← Bài trước (chưa có)</span>
+    <a href="0002-prisma-repository-pattern.html">Bài 02: Prisma Repository Pattern →</a>
+  </div>
+
+</div>
+
+<script>
+function answer(el, isCorrect, quizId, feedback) {
+  const quiz = document.getElementById(quizId);
+  const options = quiz.querySelectorAll('.quiz-option');
+  const feedbackEl = document.getElementById(quizId + '-feedback');
+
+  // Disable all options
+  options.forEach(opt => {
+    opt.onclick = null;
+    opt.style.cursor = 'default';
+  });
+
+  el.classList.add(isCorrect ? 'correct' : 'wrong');
+  feedbackEl.textContent = feedback;
+  feedbackEl.style.color = isCorrect ? '#2d6a4f' : '#c1121f';
+
+  // If wrong, reveal correct after a moment
+  if (!isCorrect) {
+    setTimeout(() => {
+      options.forEach(opt => {
+        if (opt.onclick === null && !opt.classList.contains('wrong')) {
+          // find the correct one by re-reading onclick attr
+        }
+      });
+    }, 800);
+  }
+}
+</script>
