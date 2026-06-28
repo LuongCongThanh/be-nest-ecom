@@ -16,6 +16,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     let code = 'INTERNAL_SERVER_ERROR';
     let message = 'An unexpected error occurred';
     let errors: any[] = [];
+    let meta: Record<string, unknown> | undefined;
 
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
@@ -27,6 +28,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         code = exceptionResponse.code ?? this.statusToCode(statusCode);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         message = exceptionResponse.message ?? exception.message;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        meta = exceptionResponse.meta;
         if (Array.isArray(exceptionResponse.message)) {
           // class-validator hoặc exceptionFactory có thể trả array message/object
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -68,6 +71,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       code,
       message,
       errors: errors.length > 0 ? errors : undefined,
+      meta,
       timestamp: new Date().toISOString(),
       path: request.url,
     };

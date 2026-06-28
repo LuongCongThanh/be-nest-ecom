@@ -4,6 +4,7 @@ export interface ErrorResponse {
   code: string;
   message: string;
   errors?: FieldError[];
+  meta?: Record<string, unknown>;
   timestamp: string;
   path: string;
   requestId?: string;
