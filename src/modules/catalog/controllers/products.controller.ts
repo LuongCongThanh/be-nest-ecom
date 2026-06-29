@@ -17,6 +17,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
+import { ConfirmImageDto } from '../dto/confirm-image.dto';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { QueryProductDto } from '../dto/query-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
@@ -85,6 +86,14 @@ export class ProductsController {
   @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
   uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     return this.productImageService.upload(id, file.buffer);
+  }
+
+  @Post(':id/images/confirm')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @ApiOperation({ summary: 'Confirm presigned upload — save key to DB after direct upload to storage' })
+  confirmImage(@Param('id') id: string, @Body() dto: ConfirmImageDto) {
+    return this.productImageService.confirm(id, dto.key);
   }
 
   @Get(':id/images')

@@ -2,15 +2,21 @@ import { FileUploadService } from '@common/file-upload/file-upload.service';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ImageSize, ProductImage } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 const MAX_IMAGES = 10;
 
 @Injectable()
 export class ProductImageService {
+  private readonly storagePublicUrl: string;
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly fileUpload: FileUploadService,
-  ) {}
+    private readonly config: ConfigService,
+  ) {
+    this.storagePublicUrl = config.getOrThrow('STORAGE_PUBLIC_URL');
+  }
 
   async upload(productId: string, buffer: Buffer): Promise<ProductImage[]> {
     const existing = await this.prisma.productImage.findMany({
@@ -63,6 +69,28 @@ export class ProductImageService {
 
     await Promise.all(siblings.map((s) => this.fileUpload.deleteFile(s.key)));
     await this.prisma.productImage.deleteMany({ where: { id: { in: siblings.map((s) => s.id) } } });
+  }
+
+  async confirm(productId: string, key: string): Promise<ProductImage> {
+    const existing = await this.prisma.productImage.findMany({
+      where: { productId, size: ImageSize.MEDIUM },
+    });
+    if (existing.length >= MAX_IMAGES) {
+      throw new ConflictException({ code: 'IMAGE_LIMIT_EXCEEDED', message: `Max ${MAX_IMAGES} images per product` });
+    }
+    const url = `${this.storagePublicUrl}/${key}`;
+    const position = existing.length;
+    return this.prisma.productImage.create({
+      data: {
+        productId,
+        key,
+        url,
+        size: ImageSize.MEDIUM,
+        width: 0,
+        height: 0,
+        position,
+      },
+    });
   }
 
   async reorder(productId: string, items: { id: string; position: number }[]): Promise<void> {
