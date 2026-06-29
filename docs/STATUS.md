@@ -167,12 +167,14 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 
 | Task file | Status | Note |
 |------|:------:|------|
-| `todo/phase-c/01-catalog-schema.md` | ⏳ | schema |
-| `todo/phase-c/02-catalog-crud.md` | ⏳ | catalog CRUD |
-| `todo/phase-c/03-cart.md` | ⏳ | cart + guest merge |
-| `todo/phase-c/04-order.md` | ⏳ | checkout + state machine |
-| `todo/phase-c/05-payment.md` | ⏳ | VNPay |
-| `todo/phase-c/06-phase-c-exit-gate.md` | ⏳ | MVP gate |
+| `docs/tasks/business/02-catalog/01-category-entity.md` | ✅ Done | 2026-06-27 — PR #23 merged |
+| `docs/tasks/business/02-catalog/02-product-entity.md` | ✅ Done | 2026-06-27 — PR #23 merged |
+| `docs/tasks/business/02-catalog/03-categories-crud.md` | ✅ Done | 2026-06-27 — PR #24 merged |
+| `docs/tasks/business/02-catalog/04-products-crud.md` | ✅ Done | 2026-06-27 — PR #24 merged |
+| `docs/tasks/business/03-cart/02-shopping-cart.md` | ⏳ | cart + guest merge |
+| `docs/tasks/business/04-order/02-order-creation.md` | ⏳ | checkout + state machine |
+| `docs/tasks/business/05-payment/01-payment.md` | ⏳ | VNPay |
+| `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
 
 🎯 **Tuần 8 milestone**: MVP demo-ready (chưa polish, chưa test).
 
@@ -297,7 +299,9 @@ Signed-off: self · Next: Phase C open.
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Phase C — Task 01** — bắt đầu Catalog Schema (`todo/phase-c/01-catalog-schema.md`).
+1. **Phase C — Task tiếp theo** — Shopping Cart (`docs/tasks/business/03-cart/02-shopping-cart.md`).
+2. Sau cart: Order Creation → Payment (VNPay).
+3. PR #25 (file upload) đang chờ review — merge khi được yêu cầu.
 
 ---
 

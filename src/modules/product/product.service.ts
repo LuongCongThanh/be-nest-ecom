@@ -1,14 +1,10 @@
 import { PrismaService } from '@common/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { slugify } from '@common/utils/slugify.util';
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { QueryProductDto } from '../dto/query-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
+import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -46,7 +42,7 @@ export class ProductService {
         isActive: dto.isActive ?? true,
         isFeatured: dto.isFeatured ?? false,
         categoryId: dto.categoryId ?? null,
-        metadata: (dto.metadata ?? undefined) as any,
+        metadata: (dto.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
       },
     });
 
@@ -115,8 +111,7 @@ export class ProductService {
     }
 
     const newPrice = dto.price !== undefined ? BigInt(dto.price) : existing.price;
-    const newComparePrice =
-      dto.comparePrice !== undefined ? BigInt(dto.comparePrice) : existing.comparePrice;
+    const newComparePrice = dto.comparePrice !== undefined ? BigInt(dto.comparePrice) : existing.comparePrice;
 
     if (newComparePrice !== null && newComparePrice < newPrice) {
       throw new BadRequestException({
@@ -145,7 +140,7 @@ export class ProductService {
 
     const product = await this.prisma.product.update({
       where: { id },
-      data: updateData as any,
+      data: updateData,
       include: { category: { select: { id: true, name: true, slug: true } } },
     });
 

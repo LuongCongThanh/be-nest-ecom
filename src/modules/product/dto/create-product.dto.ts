@@ -1,21 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import {
-  IsBoolean,
-  IsInt,
-  IsObject,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { IsBoolean, IsInt, IsObject, IsOptional, IsString, IsUUID, Matches, MaxLength, Min } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'PHONE-IPHONE-001' })
   @IsString()
-  @Matches(/^[A-Z0-9\-]{3,32}$/, { message: 'sku must be uppercase alphanumeric with hyphens, 3-32 chars' })
+  @Matches(/^[A-Z0-9-]{3,32}$/, { message: 'sku must be uppercase alphanumeric with hyphens, 3-32 chars' })
   sku!: string;
 
   @ApiProperty({ example: 'iPhone 15 Pro Max 256GB' })
@@ -29,19 +19,19 @@ export class CreateProductDto {
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'slug must be lowercase kebab-case' })
   slug?: string;
 
-  @ApiPropertyOptional({ example: 'Mô tả chi tiết sản phẩm (Markdown)' })
+  @ApiPropertyOptional({ example: 'Detailed product description (Markdown)' })
   @IsOptional()
   @IsString()
   @MaxLength(5000)
   description?: string;
 
-  @ApiProperty({ example: 29990000, description: 'Giá bán thực tế (VND, đơn vị đồng)' })
+  @ApiProperty({ example: 29990000, description: 'Selling price (VND, in dong)' })
   @Type(() => Number)
   @IsInt()
   @Min(1)
   price!: number;
 
-  @ApiPropertyOptional({ example: 34990000, description: 'Giá niêm yết (phải >= price)' })
+  @ApiPropertyOptional({ example: 34990000, description: 'Listed price (must be >= price)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

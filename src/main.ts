@@ -39,4 +39,4 @@ async function bootstrap() {
   Logger.log(`Application running on port ${port}`, 'Bootstrap');
   Logger.log(`Swagger UI: http://localhost:${port}/docs`, 'Bootstrap');
 }
-bootstrap();
+void bootstrap();

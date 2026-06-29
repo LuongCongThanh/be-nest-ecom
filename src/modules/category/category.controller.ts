@@ -1,31 +1,19 @@
 import { Public } from '@common/decorators/public/public.decorator';
 import { Roles } from '@common/decorators/roles/roles.decorator';
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { CreateCategoryDto } from '../dto/create-category.dto';
-import { QueryCategoryDto } from '../dto/query-category.dto';
-import { ReorderCategoryDto } from '../dto/reorder-category.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
-import { CategoryService } from '../services/category.service';
+import { CategoryService } from './category.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { QueryCategoryDto } from './dto/query-category.dto';
+import { ReorderCategoryDto } from './dto/reorder-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @ApiTags('categories')
 @Controller('categories')
-export class CategoriesController {
+export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
-
-  // ─── Public endpoints ─────────────────────────────────────────────────────
 
   @Get()
   @Public()
@@ -48,8 +36,6 @@ export class CategoriesController {
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(id);
   }
-
-  // ─── Write endpoints (STAFF / ADMIN) ─────────────────────────────────────
 
   @Post()
   @ApiBearerAuth()
@@ -77,8 +63,6 @@ export class CategoriesController {
     return this.categoryService.update(id, dto);
   }
 
-  // ─── Admin-only endpoints ─────────────────────────────────────────────────
-
   @Delete(':id')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
@@ -94,5 +78,25 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Restore a soft-deleted category' })
   restore(@Param('id') id: string) {
     return this.categoryService.restore(id);
+  }
+
+  @Post(':id/image')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload category image (medium 800px, webp)' })
+  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
+  uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
+    return this.categoryService.uploadImage(id, file.buffer);
+  }
+
+  @Delete(':id/image')
+  @ApiBearerAuth()
+  @Roles(Role.ADMIN, Role.STAFF)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete category image' })
+  deleteImage(@Param('id') id: string) {
+    return this.categoryService.deleteImage(id);
   }
 }

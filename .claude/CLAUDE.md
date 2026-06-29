@@ -34,8 +34,22 @@ git commit -m "feat(<scope>): <description>"
 git push -u origin feat/<phase>/<task-slug>
 gh pr create --base main --title "feat(<scope>): <description>" --body "..."
 # Chỉ merge khi user yêu cầu tường minh:
-# gh pr merge --squash --delete-branch
+# gh pr merge --merge --delete-branch
 ```
+
+## PR template — BẮT BUỘC
+
+Trước khi chạy `gh pr create`, phải **đọc `.github/pull_request_template.md`** bằng Read tool, sau đó điền đầy đủ từng section vào `--body`:
+
+1. Summary
+2. Type of Change (tick đúng loại)
+3. Changes Made (liệt kê cụ thể)
+4. Testing (tick + ghi scenarios)
+5. Screenshots / Demo
+6. Breaking Changes (nếu có)
+7. Pre-Merge Checklist
+
+Không được tự ý viết body khác format. Không dùng `--web`.
 
 ---
 

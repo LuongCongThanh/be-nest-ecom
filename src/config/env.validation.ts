@@ -16,4 +16,13 @@ export const envValidationSchema = Joi.object({
 
   // Redis
   REDIS_URL: Joi.string().required(), // e.g. redis://localhost:6379
+
+  // Object Storage (MinIO / Cloudflare R2 / S3-compatible)
+  STORAGE_ENDPOINT: Joi.string().uri().required(),
+  STORAGE_ACCESS_KEY_ID: Joi.string().required(),
+  STORAGE_SECRET_ACCESS_KEY: Joi.string().required(),
+  STORAGE_BUCKET: Joi.string().required(),
+  STORAGE_PUBLIC_URL: Joi.string().uri().required(),
+  STORAGE_REGION: Joi.string().default('auto'),
+  STORAGE_FORCE_PATH_STYLE: Joi.string().valid('true', 'false').default('false'),
 });
