@@ -102,7 +102,7 @@ export class CategoriesController {
   @Post(':id/image')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload category image (medium 800px, webp)' })
   @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
