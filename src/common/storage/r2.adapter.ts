@@ -1,4 +1,5 @@
 import { DeleteObjectCommand, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IStorageAdapter } from './storage.interface';
@@ -10,16 +11,20 @@ export class R2Adapter implements IStorageAdapter {
   private readonly publicUrl: string;
 
   constructor(private readonly config: ConfigService) {
-    this.bucket = config.getOrThrow('R2_BUCKET_NAME');
-    this.publicUrl = config.getOrThrow('R2_PUBLIC_URL');
+    this.bucket = config.getOrThrow('STORAGE_BUCKET');
+    this.publicUrl = config.getOrThrow('STORAGE_PUBLIC_URL');
+
+    const endpoint = config.getOrThrow<string>('STORAGE_ENDPOINT');
+    const forcePathStyle = config.get<string>('STORAGE_FORCE_PATH_STYLE') === 'true';
 
     this.client = new S3Client({
-      region: 'auto',
-      endpoint: `https://${config.getOrThrow('R2_ACCOUNT_ID')}.r2.cloudflarestorage.com`,
+      region: config.get<string>('STORAGE_REGION') ?? 'auto',
+      endpoint,
       credentials: {
-        accessKeyId: config.getOrThrow('R2_ACCESS_KEY_ID'),
-        secretAccessKey: config.getOrThrow('R2_SECRET_ACCESS_KEY'),
+        accessKeyId: config.getOrThrow('STORAGE_ACCESS_KEY_ID'),
+        secretAccessKey: config.getOrThrow('STORAGE_SECRET_ACCESS_KEY'),
       },
+      forcePathStyle,
     });
   }
 
@@ -37,5 +42,14 @@ export class R2Adapter implements IStorageAdapter {
 
   async delete(key: string): Promise<void> {
     await this.client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
+  }
+
+  async getPresignedUploadUrl(key: string, contentType: string, expiresIn = 300): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      ContentType: contentType,
+    });
+    return getSignedUrl(this.client, command, { expiresIn });
   }
 }

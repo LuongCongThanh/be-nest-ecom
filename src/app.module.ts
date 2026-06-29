@@ -15,6 +15,7 @@ import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
 import { StorageModule } from '@common/storage/storage.module';
 import { CatalogModule } from '@modules/catalog/catalog.module';
 import { IdentityModule } from '@modules/identity/identity.module';
+import { MediaModule } from '@modules/media/media.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { IdentityModule } from '@modules/identity/identity.module';
     StorageModule,
     IdentityModule,
     CatalogModule,
+    MediaModule,
   ],
   controllers: [AppController],
   providers: [JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],

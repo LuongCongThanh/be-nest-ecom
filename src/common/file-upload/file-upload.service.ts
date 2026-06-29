@@ -4,6 +4,19 @@ import type { IStorageAdapter } from '../storage/storage.interface';
 import { STORAGE_ADAPTER } from '../storage/storage.interface';
 import { ImageProcessingService, ProcessedImage } from './image-processing.service';
 
+const ALLOWED_UPLOAD_TYPES: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+};
+
+export interface PresignedUploadResult {
+  uploadUrl: string;
+  key: string;
+  publicUrl: string;
+  expiresIn: number;
+}
+
 export interface UploadedImage {
   key: string;
   url: string;
@@ -48,5 +61,21 @@ export class FileUploadService {
 
   async deleteFile(key: string): Promise<void> {
     await this.storage.delete(key);
+  }
+
+  async createPresignedUrl(
+    folder: string,
+    contentType: string,
+    expiresIn = 300,
+  ): Promise<PresignedUploadResult> {
+    const ext = ALLOWED_UPLOAD_TYPES[contentType];
+    if (!ext) {
+      throw new Error(`Unsupported content type: ${contentType}`);
+    }
+    const key = `${folder}/${randomUUID()}.${ext}`;
+    const uploadUrl = await this.storage.getPresignedUploadUrl(key, contentType, expiresIn);
+    // public URL = same base as upload URL but without query params
+    const publicUrl = uploadUrl.split('?')[0];
+    return { uploadUrl, key, publicUrl, expiresIn };
   }
 }
