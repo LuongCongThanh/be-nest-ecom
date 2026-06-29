@@ -19,19 +19,19 @@ export class CreateProductDto {
   @Matches(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, { message: 'slug must be lowercase kebab-case' })
   slug?: string;
 
-  @ApiPropertyOptional({ example: 'Mô tả chi tiết sản phẩm (Markdown)' })
+  @ApiPropertyOptional({ example: 'Detailed product description (Markdown)' })
   @IsOptional()
   @IsString()
   @MaxLength(5000)
   description?: string;
 
-  @ApiProperty({ example: 29990000, description: 'Giá bán thực tế (VND, đơn vị đồng)' })
+  @ApiProperty({ example: 29990000, description: 'Selling price (VND, in dong)' })
   @Type(() => Number)
   @IsInt()
   @Min(1)
   price!: number;
 
-  @ApiPropertyOptional({ example: 34990000, description: 'Giá niêm yết (phải >= price)' })
+  @ApiPropertyOptional({ example: 34990000, description: 'Listed price (must be >= price)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()

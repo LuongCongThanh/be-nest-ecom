@@ -49,13 +49,11 @@ export class FileUploadService {
     const uuid = randomUUID();
 
     return Promise.all(
-      (Object.entries(sizes) as Array<['THUMB' | 'MEDIUM' | 'ORIGINAL', ProcessedImage]>).map(
-        async ([size, img]) => {
-          const key = `products/${productId}/${uuid}_${size.toLowerCase()}.webp`;
-          const url = await this.storage.upload(key, img.buffer, 'image/webp');
-          return { key, url, width: img.width, height: img.height, size };
-        },
-      ),
+      (Object.entries(sizes) as Array<['THUMB' | 'MEDIUM' | 'ORIGINAL', ProcessedImage]>).map(async ([size, img]) => {
+        const key = `products/${productId}/${uuid}_${size.toLowerCase()}.webp`;
+        const url = await this.storage.upload(key, img.buffer, 'image/webp');
+        return { key, url, width: img.width, height: img.height, size };
+      }),
     );
   }
 
@@ -63,11 +61,7 @@ export class FileUploadService {
     await this.storage.delete(key);
   }
 
-  async createPresignedUrl(
-    folder: string,
-    contentType: string,
-    expiresIn = 300,
-  ): Promise<PresignedUploadResult> {
+  async createPresignedUrl(folder: string, contentType: string, expiresIn = 300): Promise<PresignedUploadResult> {
     const ext = ALLOWED_UPLOAD_TYPES[contentType];
     if (!ext) {
       throw new Error(`Unsupported content type: ${contentType}`);

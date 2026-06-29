@@ -1,5 +1,5 @@
 import { Injectable, PayloadTooLargeException, UnsupportedMediaTypeException } from '@nestjs/common';
-import sharp = require('sharp');
+import sharp from 'sharp';
 
 const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -27,10 +27,7 @@ export class ImageProcessingService {
   }
 
   async processForCategory(buffer: Buffer): Promise<ProcessedImage> {
-    const { data, info } = await sharp(buffer)
-      .resize(800, null, { fit: 'inside', withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer({ resolveWithObject: true });
+    const { data, info } = await sharp(buffer).resize(800, null, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 82 }).toBuffer({ resolveWithObject: true });
     return { buffer: data, width: info.width, height: info.height };
   }
 
@@ -41,8 +38,8 @@ export class ImageProcessingService {
       sharp(buffer).resize(2000, null, { fit: 'inside', withoutEnlargement: true }).webp({ quality: 85 }).toBuffer({ resolveWithObject: true }),
     ]);
     return {
-      THUMB:    { buffer: thumb.data,    width: thumb.info.width,    height: thumb.info.height },
-      MEDIUM:   { buffer: medium.data,   width: medium.info.width,   height: medium.info.height },
+      THUMB: { buffer: thumb.data, width: thumb.info.width, height: thumb.info.height },
+      MEDIUM: { buffer: medium.data, width: medium.info.width, height: medium.info.height },
       ORIGINAL: { buffer: original.data, width: original.info.width, height: original.info.height },
     };
   }

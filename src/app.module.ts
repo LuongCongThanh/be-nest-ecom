@@ -13,9 +13,10 @@ import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
 import { StorageModule } from '@common/storage/storage.module';
-import { CatalogModule } from '@modules/catalog/catalog.module';
+import { CategoryModule } from '@modules/category/category.module';
 import { IdentityModule } from '@modules/identity/identity.module';
 import { MediaModule } from '@modules/media/media.module';
+import { ProductModule } from '@modules/product/product.module';
 
 @Module({
   imports: [
@@ -41,7 +42,8 @@ import { MediaModule } from '@modules/media/media.module';
     PassportModule,
     StorageModule,
     IdentityModule,
-    CatalogModule,
+    CategoryModule,
+    ProductModule,
     MediaModule,
   ],
   controllers: [AppController],

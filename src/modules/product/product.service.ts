@@ -2,9 +2,9 @@ import { PrismaService } from '@common/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { slugify } from '@common/utils/slugify.util';
 import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
-import { CreateProductDto } from '../dto/create-product.dto';
-import { QueryProductDto } from '../dto/query-product.dto';
-import { UpdateProductDto } from '../dto/update-product.dto';
+import { CreateProductDto } from './dto/create-product.dto';
+import { QueryProductDto } from './dto/query-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
