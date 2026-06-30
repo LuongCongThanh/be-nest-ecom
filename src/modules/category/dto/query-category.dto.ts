@@ -28,7 +28,7 @@ export class QueryCategoryDto {
   @Max(100)
   limit?: number = 20;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Include categories with isActive=false. Soft-deleted categories are never included.', default: false })
   @IsOptional()
   @IsBoolean()
   @Transform(({ value }: { value: unknown }) => {

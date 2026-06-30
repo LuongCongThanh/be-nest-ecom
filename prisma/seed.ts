@@ -81,30 +81,88 @@ async function main() {
   });
 
   // ─── Categories ───────────────────────────────────────────────────────────
+  // image is intentionally null — the IStorageAdapter pipeline (resize + webp) only
+  // runs through POST /categories/:id/image, raw URLs are never accepted (see CONTEXT.md).
   console.log('Seeding categories...');
 
   const catDienTu = await prisma.category.create({
-    data: { name: 'Điện Tử', slug: 'dien-tu', description: 'Thiết bị điện tử, công nghệ', sortOrder: 1 },
+    data: {
+      name: 'Electronics',
+      slug: 'electronics',
+      description: 'Electronic devices and technology products',
+      image: null,
+      parentId: null,
+      isActive: true,
+      sortOrder: 1,
+    },
   });
   const catThoiTrang = await prisma.category.create({
-    data: { name: 'Thời Trang', slug: 'thoi-trang', description: 'Quần áo, phụ kiện thời trang', sortOrder: 2 },
+    data: {
+      name: 'Fashion',
+      slug: 'fashion',
+      description: 'Clothing and fashion accessories',
+      image: null,
+      parentId: null,
+      isActive: true,
+      sortOrder: 2,
+    },
   });
   const catGiaDung = await prisma.category.create({
-    data: { name: 'Gia Dụng', slug: 'gia-dung', description: 'Đồ dùng gia đình', sortOrder: 3 },
+    data: {
+      name: 'Home Appliances',
+      slug: 'home-appliances',
+      description: 'Household appliances and home goods',
+      image: null,
+      parentId: null,
+      isActive: true,
+      sortOrder: 3,
+    },
   });
 
-  // Sub-categories cấp 2
+  // Level-2 sub-categories
   const catDienThoai = await prisma.category.create({
-    data: { name: 'Điện Thoại', slug: 'dien-thoai', parentId: catDienTu.id, sortOrder: 1 },
+    data: {
+      name: 'Phones',
+      slug: 'phones',
+      description: 'Smartphones and mobile phones',
+      image: null,
+      parentId: catDienTu.id,
+      isActive: true,
+      sortOrder: 1,
+    },
   });
   const catLaptop = await prisma.category.create({
-    data: { name: 'Laptop & Máy Tính Bảng', slug: 'laptop-may-tinh-bang', parentId: catDienTu.id, sortOrder: 2 },
+    data: {
+      name: 'Laptops & Tablets',
+      slug: 'laptops-tablets',
+      description: 'Laptops, tablets, and computing devices',
+      image: null,
+      parentId: catDienTu.id,
+      isActive: true,
+      sortOrder: 2,
+    },
   });
   const catAoNam = await prisma.category.create({
-    data: { name: 'Áo & Quần Nam', slug: 'ao-quan-nam', parentId: catThoiTrang.id, sortOrder: 1 },
+    data: {
+      name: "Men's Clothing",
+      slug: 'mens-clothing',
+      description: 'Clothing and accessories for men',
+      image: null,
+      parentId: catThoiTrang.id,
+      isActive: true,
+      sortOrder: 1,
+    },
   });
   const catAoNu = await prisma.category.create({
-    data: { name: 'Áo & Quần Nữ', slug: 'ao-quan-nu', parentId: catThoiTrang.id, sortOrder: 2 },
+    data: {
+      name: "Women's Clothing",
+      slug: 'womens-clothing',
+      description: 'Clothing and accessories for women',
+      image: null,
+      parentId: catThoiTrang.id,
+      isActive: true,
+      sortOrder: 2,
+    },
   });
 
   // ─── Products ─────────────────────────────────────────────────────────────
