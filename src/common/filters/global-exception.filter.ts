@@ -31,7 +31,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         meta = exceptionResponse.meta;
         if (Array.isArray(exceptionResponse.message)) {
-          // class-validator hoặc exceptionFactory có thể trả array message/object
+          // class-validator or exceptionFactory may return an array of messages/objects
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           errors = exceptionResponse.message.map((item: string | FieldError) => {
             if (typeof item === 'string') {
