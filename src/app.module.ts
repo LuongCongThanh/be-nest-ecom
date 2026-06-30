@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
 import { StorageModule } from '@common/storage/storage.module';
@@ -24,9 +25,16 @@ import { ProductModule } from '@modules/product/product.module';
       isGlobal: true,
       load: [appConfig, jwtConfig, databaseConfig],
       validationSchema: envValidationSchema,
-      validationOptions: {
-        abortEarly: true,
-      },
+      validationOptions: { abortEarly: true },
+    }),
+    ThrottlerModule.forRootAsync({
+      useFactory: (config: ConfigService) => [
+        {
+          ttl: config.get<number>('THROTTLE_TTL') ?? 60000,
+          limit: config.get<number>('THROTTLE_LIMIT') ?? 60,
+        },
+      ],
+      inject: [ConfigService],
     }),
     PrismaModule,
     RedisModule,
@@ -47,6 +55,6 @@ import { ProductModule } from '@modules/product/product.module';
     MediaModule,
   ],
   controllers: [AppController],
-  providers: [JwtStrategy, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
+  providers: [JwtStrategy, { provide: APP_GUARD, useClass: ThrottlerGuard }, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
 })
 export class AppModule {}
