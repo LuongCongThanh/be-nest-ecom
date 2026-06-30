@@ -7,8 +7,8 @@ import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { RefreshDto } from '../dto/refresh.dto/refresh.dto';
 
-// Hash giả dùng khi email không tồn tại để thời gian xử lý login ổn định hơn,
-// giảm khả năng đoán user tồn tại hay không qua timing attack.
+// Dummy hash used when the email does not exist to keep login processing time constant,
+// reducing the ability to infer user existence via timing attacks.
 const DUMMY_PASSWORD_HASH = bcrypt.hashSync('dummy-password-for-timing-attack-mitigation', 12);
 
 @Injectable()
@@ -18,9 +18,9 @@ export class AuthService {
     private readonly tokenService: TokenService,
   ) {}
 
-  // Tạo user mới, hash password trước khi lưu và trả về token sau khi đăng ký thành công.
+  // Creates a new user, hashes the password before saving, and returns tokens on successful registration.
   async register(dto: RegisterDto) {
-    // Không bao giờ lưu password thô; bcrypt cost 12 là mức mã hóa hiện tại.
+    // Never store raw passwords; bcrypt cost 12 is the current hashing strength.
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     try {
@@ -54,14 +54,14 @@ export class AuthService {
     }
   }
 
-  // Xác thực thông tin đăng nhập, kiểm tra trạng thái tài khoản rồi cấp access/refresh token.
+  // Validates credentials, checks account status, then issues access/refresh tokens.
   async login(dto: LoginDto) {
-    // Chỉ cho phép login với user chưa bị soft delete.
+    // Only allow login for users that have not been soft-deleted.
     const user = await this.prisma.user.findFirst({
       where: { email: dto.email.toLowerCase(), deletedAt: null },
     });
 
-    // Dù user có tồn tại hay không vẫn chạy bcrypt.compare để tránh lộ thông tin qua thời gian phản hồi.
+    // Always run bcrypt.compare regardless of user existence to avoid leaking information via response timing.
     const passwordMatch = user ? await bcrypt.compare(dto.password, user.password) : await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
 
     if (!user || !passwordMatch) {
@@ -71,7 +71,7 @@ export class AuthService {
       });
     }
 
-    // Tài khoản tồn tại nhưng bị khóa/inactive thì cũng không cho đăng nhập.
+    // Reject login for accounts that exist but are locked/inactive.
     if (!user.isActive) {
       throw new UnauthorizedException({
         code: 'ACCOUNT_INACTIVE',
@@ -84,7 +84,7 @@ export class AuthService {
     return { user: this.sanitizeUser(user), ...tokens };
   }
 
-  // Loại bỏ password trước khi trả dữ liệu user ra ngoài API response.
+  // Strips the password before returning user data in the API response.
   private sanitizeUser<T extends { password: string } & Record<string, unknown>>(user: T): Omit<T, 'password'> {
     return Object.fromEntries(Object.entries(user).filter(([key]) => key !== 'password')) as Omit<T, 'password'>;
   }

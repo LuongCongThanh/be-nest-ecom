@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsString, MinLength } from 'class-validator';
 
-// DTO này mô tả dữ liệu tối thiểu mà API login chấp nhận từ client.
+// Describes the minimum payload the login API accepts from the client.
 export class LoginDto {
-  // Bắt buộc phải là chuỗi đúng định dạng email.
+  // Must be a properly formatted email string.
   @ApiProperty({ example: 'john.doe@example.com' })
   @IsEmail()
   email!: string;
 
-  // Password phải là chuỗi và không được rỗng.
+  // Password must be a non-empty string.
   @ApiProperty({ example: 'Abc@12345' })
   @IsString()
   @MinLength(1)

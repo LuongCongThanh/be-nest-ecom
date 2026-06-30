@@ -1,9 +1,9 @@
 /**
- * Chuyển BigInt tiền VND sang string để serialize trong JSON response.
+ * Converts a VND BigInt amount to string for JSON response serialization.
  *
- * Tại sao dùng BigInt: float/number có precision bug với số lớn (VD: 9007199254740993 bị mất chữ số).
- * Tại sao serialize sang string: JSON.stringify throw TypeError nếu gặp BigInt trực tiếp.
- * Client nhận string rồi tự parse (parseInt / BigInt).
+ * Why BigInt: float/number has precision bugs with large values (e.g. 9007199254740993 loses digits).
+ * Why serialize to string: JSON.stringify throws TypeError when it encounters BigInt directly.
+ * Client receives the string and parses it (parseInt / BigInt).
  *
  * @example moneyToString(100000n) → "100000"
  */
@@ -12,7 +12,7 @@ export function moneyToString(value: bigint): string {
 }
 
 /**
- * Parse string tiền từ client/DB sang BigInt để tính toán.
+ * Parses a money string from client/DB to BigInt for calculations.
  *
  * @example moneyFromString("100000") → 100000n
  */

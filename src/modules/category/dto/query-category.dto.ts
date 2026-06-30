@@ -3,12 +3,12 @@ import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 export class QueryCategoryDto {
-  @ApiPropertyOptional({ description: 'Filter theo parent. Không gửi = tất cả levels' })
+  @ApiPropertyOptional({ description: 'Filter by parent. Omit to get all levels' })
   @IsOptional()
   @IsUUID()
   parentId?: string;
 
-  @ApiPropertyOptional({ description: 'Tìm theo tên' })
+  @ApiPropertyOptional({ description: 'Search by name' })
   @IsOptional()
   @IsString()
   search?: string;

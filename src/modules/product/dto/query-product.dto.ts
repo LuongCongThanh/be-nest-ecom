@@ -3,7 +3,7 @@ import { Transform, Type } from 'class-transformer';
 import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
 
 export class QueryProductDto {
-  @ApiPropertyOptional({ description: 'Text search theo tên sản phẩm' })
+  @ApiPropertyOptional({ description: 'Full-text search by product name' })
   @IsOptional()
   @IsString()
   search?: string;
@@ -23,14 +23,14 @@ export class QueryProductDto {
   })
   isFeatured?: boolean;
 
-  @ApiPropertyOptional({ description: 'Giá tối thiểu (VND)' })
+  @ApiPropertyOptional({ description: 'Minimum price (VND)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   minPrice?: number;
 
-  @ApiPropertyOptional({ description: 'Giá tối đa (VND)' })
+  @ApiPropertyOptional({ description: 'Maximum price (VND)' })
   @IsOptional()
   @Type(() => Number)
   @IsInt()
