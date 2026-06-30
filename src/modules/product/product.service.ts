@@ -155,6 +155,31 @@ export class ProductService {
     await this.prisma.product.update({ where: { id }, data: { deletedAt: new Date() } });
   }
 
+  // ─── Stock management (atomic) ────────────────────────────────────────────
+
+  async adjustStock(id: string, delta: number): Promise<void> {
+    await this.prisma.$transaction(async (tx) => {
+      const product = await tx.product.findFirst({
+        where: { id, deletedAt: null },
+        select: { id: true, stockQuantity: true },
+      });
+      if (!product) {
+        throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
+      }
+      const newQty = product.stockQuantity + delta;
+      if (newQty < 0) {
+        throw new BadRequestException({
+          code: 'INSUFFICIENT_STOCK',
+          message: `Insufficient stock. Available: ${product.stockQuantity}, requested: ${Math.abs(delta)}`,
+        });
+      }
+      await tx.product.update({
+        where: { id },
+        data: { stockQuantity: newQty },
+      });
+    });
+  }
+
   // ─── Admin: find all (includes inactive) ─────────────────────────────────
 
   async findAllAdmin(query: QueryProductDto) {
