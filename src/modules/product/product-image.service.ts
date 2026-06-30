@@ -43,7 +43,7 @@ export class ProductImageService {
             size: img.size,
             width: img.width,
             height: img.height,
-            position: img.size === 'MEDIUM' ? nextPosition : nextPosition,
+            position: img.size === ImageSize.MEDIUM ? nextPosition : 0,
           },
         }),
       ),
