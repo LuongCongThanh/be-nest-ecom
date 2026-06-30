@@ -305,29 +305,37 @@ export class CategoryService {
   }
 
   private async getDepth(categoryId: string): Promise<number> {
-    let depth = 0;
-    let currentId: string | null = categoryId;
-    while (currentId) {
-      const id: string = currentId;
-      const cat: { parentId: string | null } | null = await this.prisma.category.findUnique({
-        where: { id },
-        select: { parentId: true },
-      });
-      if (!cat) break;
-      depth++;
-      currentId = cat.parentId;
-    }
-    return depth;
+    const result = await this.prisma.$queryRaw<[{ depth: bigint }]>`
+      WITH RECURSIVE ancestors AS (
+        SELECT id, "parentId", 0 AS depth
+        FROM categories
+        WHERE id = ${categoryId}::uuid AND "deletedAt" IS NULL
+        UNION ALL
+        SELECT c.id, c."parentId", a.depth + 1
+        FROM categories c
+        JOIN ancestors a ON c.id = a."parentId"
+        WHERE c."deletedAt" IS NULL
+      )
+      SELECT COALESCE(MAX(depth), 0) AS depth FROM ancestors
+    `;
+    return Number(result[0]?.depth ?? 0);
   }
 
   private async getSubtreeHeight(categoryId: string): Promise<number> {
-    const children = await this.prisma.category.findMany({
-      where: { parentId: categoryId, deletedAt: null },
-      select: { id: true },
-    });
-    if (children.length === 0) return 1;
-    const heights = await Promise.all(children.map((c) => this.getSubtreeHeight(c.id)));
-    return 1 + Math.max(...heights);
+    const result = await this.prisma.$queryRaw<[{ height: bigint }]>`
+      WITH RECURSIVE subtree AS (
+        SELECT id, "parentId", 1 AS height
+        FROM categories
+        WHERE id = ${categoryId}::uuid AND "deletedAt" IS NULL
+        UNION ALL
+        SELECT c.id, c."parentId", s.height + 1
+        FROM categories c
+        JOIN subtree s ON c."parentId" = s.id
+        WHERE c."deletedAt" IS NULL
+      )
+      SELECT COALESCE(MAX(height), 1) AS height FROM subtree
+    `;
+    return Number(result[0]?.height ?? 1);
   }
 
   private async isCircular(categoryId: string, newParentId: string): Promise<boolean> {
