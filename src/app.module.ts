@@ -12,10 +12,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
-import { JwtStrategy } from '@modules/identity/strategies/jwt.strategy';
 import { StorageModule } from '@common/storage/storage.module';
 import { CategoryModule } from '@modules/category/category.module';
-import { IdentityModule } from '@modules/identity/identity.module';
+import { AuthModule } from '@modules/auth/auth.module';
+import { UserModule } from '@modules/user/user.module';
 import { MediaModule } from '@modules/media/media.module';
 import { ProductModule } from '@modules/product/product.module';
 
@@ -49,12 +49,17 @@ import { ProductModule } from '@modules/product/product.module';
     HealthModule,
     PassportModule,
     StorageModule,
-    IdentityModule,
+    AuthModule,
+    UserModule,
     CategoryModule,
     ProductModule,
     MediaModule,
   ],
   controllers: [AppController],
-  providers: [JwtStrategy, { provide: APP_GUARD, useClass: ThrottlerGuard }, { provide: APP_GUARD, useClass: JwtAuthGuard }, { provide: APP_GUARD, useClass: RolesGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+    { provide: APP_GUARD, useClass: RolesGuard },
+  ],
 })
 export class AppModule {}
