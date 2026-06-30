@@ -25,4 +25,7 @@ export const envValidationSchema = Joi.object({
   STORAGE_PUBLIC_URL: Joi.string().uri().required(),
   STORAGE_REGION: Joi.string().default('auto'),
   STORAGE_FORCE_PATH_STYLE: Joi.string().valid('true', 'false').default('false'),
+
+  // CORS
+  CORS_ORIGINS: Joi.string().default('*'),
 });

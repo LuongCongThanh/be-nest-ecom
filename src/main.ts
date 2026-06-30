@@ -8,6 +8,16 @@ import { AppModule } from 'src/app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  const configService = app.get(ConfigService);
+
+  const corsOrigins = configService.get<string>('app.corsOrigins') ?? '*';
+  app.enableCors({
+    origin: corsOrigins === '*' ? '*' : corsOrigins.split(',').map((o) => o.trim()),
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+
   app.setGlobalPrefix('api/v1', { exclude: ['health', 'health/(.*)'] });
 
   app.useGlobalPipes(
@@ -33,7 +43,6 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
 
-  const configService = app.get(ConfigService);
   const port = configService.get<number>('app.port') ?? 3000;
   await app.listen(port);
   Logger.log(`Application running on port ${port}`, 'Bootstrap');
