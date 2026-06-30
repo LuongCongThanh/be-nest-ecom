@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Prisma } from '@prisma/client';
 import { createHash, randomUUID } from 'crypto';
 import { PrismaService } from '../../../common/prisma/prisma.service';
-import { JwtPayload } from '../auth.types';
+import { JwtPayload } from '../types/auth.types';
 
 @Injectable()
 export class TokenService {

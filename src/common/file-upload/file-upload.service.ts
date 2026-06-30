@@ -10,6 +10,9 @@ const ALLOWED_UPLOAD_TYPES: Record<string, string> = {
   'image/webp': 'webp',
 };
 
+const ALLOWED_UPLOAD_FOLDERS = ['products', 'categories', 'avatars', 'media'] as const;
+type AllowedUploadFolder = (typeof ALLOWED_UPLOAD_FOLDERS)[number];
+
 export interface PresignedUploadResult {
   uploadUrl: string;
   key: string;
@@ -66,9 +69,14 @@ export class FileUploadService {
     if (!ext) {
       throw new Error(`Unsupported content type: ${contentType}`);
     }
-    const key = `${folder}/${randomUUID()}.${ext}`;
+
+    const sanitized = folder.toLowerCase().replace(/[^a-z0-9-]/g, '') as AllowedUploadFolder;
+    if (!(ALLOWED_UPLOAD_FOLDERS as readonly string[]).includes(sanitized)) {
+      throw new Error(`Invalid folder "${folder}". Allowed: ${ALLOWED_UPLOAD_FOLDERS.join(', ')}`);
+    }
+
+    const key = `${sanitized}/${randomUUID()}.${ext}`;
     const uploadUrl = await this.storage.getPresignedUploadUrl(key, contentType, expiresIn);
-    // public URL = same base as upload URL but without query params
     const publicUrl = uploadUrl.split('?')[0];
     return { uploadUrl, key, publicUrl, expiresIn };
   }

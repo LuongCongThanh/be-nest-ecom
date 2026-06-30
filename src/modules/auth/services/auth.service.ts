@@ -1,11 +1,11 @@
 import { PrismaService } from '@common/prisma/prisma.service';
-import { LoginDto } from '@modules/identity/dto/login.dto/login.dto';
-import { RegisterDto } from '@modules/identity/dto/register.dto/register.dto';
-import { TokenService } from '@modules/identity/services/token.service';
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { LoginDto } from '../dto/login.dto/login.dto';
 import { RefreshDto } from '../dto/refresh.dto/refresh.dto';
+import { RegisterDto } from '../dto/register.dto/register.dto';
+import { TokenService } from './token.service';
 
 // Dummy hash used when the email does not exist to keep login processing time constant,
 // reducing the ability to infer user existence via timing attacks.

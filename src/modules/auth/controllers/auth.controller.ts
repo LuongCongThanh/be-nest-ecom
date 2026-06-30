@@ -1,11 +1,11 @@
 import { Public } from '@common/decorators/public/public.decorator';
-import { AuthService } from '@modules/identity/services/auth.service';
+import { CurrentUser } from '../../../common/decorators/current-user/current-user.decorator';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CurrentUser } from '../../../common/decorators/current-user/current-user.decorator';
 import { LoginDto } from '../dto/login.dto/login.dto';
 import { RefreshDto } from '../dto/refresh.dto/refresh.dto';
 import { RegisterDto } from '../dto/register.dto/register.dto';
+import { AuthService } from '../services/auth.service';
 
 @ApiTags('auth')
 @Controller('auth')
