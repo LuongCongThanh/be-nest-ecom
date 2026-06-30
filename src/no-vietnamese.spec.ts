@@ -4,8 +4,8 @@ import * as path from 'path';
 // Vietnamese diacritical characters (lower + upper)
 const VIETNAMESE_PATTERN = /[àáâãèéêìíòóôõùúýăđơưạảấầẩẫậắằẳẵặẹẻẽếềểễệỉịọỏốồổỗộớờởỡợụủứừửữựỳỷỹÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝĂĐƠƯẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼẾỀỂỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪỬỮỰỲỶỸ]/;
 
-// Files whose Vietnamese chars are intentional (character-to-latin replacement maps, or this spec itself)
-const ALLOWED_BASENAMES = ['slugify.util.ts', 'no-vietnamese.spec.ts'];
+// This spec file contains Vietnamese chars in the regex literal — exclude it from its own scan
+const ALLOWED_BASENAMES = ['no-vietnamese.spec.ts'];
 
 function collectTsFiles(dir: string): string[] {
   const results: string[] = [];
