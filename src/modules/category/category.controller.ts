@@ -18,15 +18,15 @@ export class CategoryController {
   @Get()
   @Public()
   @ApiOperation({
-    summary: 'Flat list of categories',
+    summary: 'List categories — flat or nested tree',
     description:
-      'Paginated flat list. Returns only `isActive=true` categories by default — pass `includeInactive=true` to also include hidden ones. Never includes soft-deleted categories. ' +
-      'Use `parentId` to list direct children of a node, or omit it to get categories from all levels mixed together. ' +
-      'Use `search` for a case-insensitive substring match on `name`.',
+      'Default (`format=flat`): paginated flat list. Use `parentId` to list direct children of a node, or omit it to get categories from all levels mixed together. Use `search` for a case-insensitive substring match on `name`.\n\n' +
+      '`format=tree`: every category nested under its parent as `children[]`, starting from root nodes (`parentId = null`). No pagination — `parentId`/`search`/`page`/`limit` are ignored.\n\n' +
+      'Both: returns only `isActive=true` categories by default — pass `includeInactive=true` to also include hidden ones. Never includes soft-deleted categories.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Paginated result',
+    description: '`{ data, total, page, limit }` for format=flat, or `{ data: CategoryNode[] }` for format=tree',
     schema: {
       example: {
         data: [{ id: 'uuid', name: 'Home Appliances', slug: 'home-appliances', parentId: null, isActive: true, sortOrder: 0 }],
@@ -37,23 +37,11 @@ export class CategoryController {
     },
   })
   findAll(@Query() query: QueryCategoryDto) {
-    return this.categoryService.findAll(query, query.includeInactive ?? false);
-  }
-
-  // MUST be before :id to avoid matching "tree" as an id param
-  @Get('tree')
-  @Public()
-  @ApiOperation({
-    summary: 'Nested category tree (active only)',
-    description: 'Returns every active, non-deleted category nested under its parent as `children[]`, starting from root nodes (`parentId = null`). No pagination — the whole tree is returned.',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Array of root nodes, each with a recursive `children` array',
-    schema: { example: [{ id: 'uuid', name: 'Home Appliances', parentId: null, children: [{ id: 'uuid2', name: 'Kitchen', parentId: 'uuid', children: [] }] }] },
-  })
-  getTree() {
-    return this.categoryService.getTree(false);
+    const includeInactive = query.includeInactive ?? false;
+    if (query.format === 'tree') {
+      return this.categoryService.getTree(includeInactive).then((data) => ({ data }));
+    }
+    return this.categoryService.findAll(query, includeInactive);
   }
 
   @Get(':id')
