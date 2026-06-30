@@ -76,7 +76,9 @@ enum Role {
 model Category {
   id          String     @id @default(uuid())
   name        String
-  slug        String     @unique
+  // Not @unique here — uniqueness is enforced only among non-deleted rows via a
+  // partial index added by raw SQL in the migration (see add_category_slug_partial_unique).
+  slug        String
   description String?
   image       String?
   parentId    String?
@@ -93,6 +95,7 @@ model Category {
   @@index([parentId])
   @@index([slug])
   @@index([deletedAt])
+  @@index([parentId, deletedAt, sortOrder])
   @@map("categories")
 }
 
