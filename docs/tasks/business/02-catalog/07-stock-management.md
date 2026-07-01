@@ -5,7 +5,7 @@
 - **Task ID**: TASK-205
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Financial Impact)
 - **Phụ thuộc**: TASK-203 (Products CRUD)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 
@@ -25,17 +25,17 @@ Stock là tài sản. Sai 1 đơn vị = mất doanh thu HOẶC overselling (gi�
 
 ### Movement types
 
-| Type         | `delta` | Trigger          | Reference            |
-| :----------- | :------ | :--------------- | :------------------- |
-| `INBOUND`    | `+N`    | Nhập kho từ NCC  | Manual / PO          |
-| `OUTBOUND`   | `-N`    | Order created / checkout commit | OrderItem |
-| `RETURN`     | `+N`    | Order cancelled / refunded      | OrderItem |
-| `ADJUSTMENT` | `±N`    | Kiểm kê / hư hao | Manual + reason text |
+| Type         | `delta` | Trigger                         | Reference            |
+|:-------------|:--------|:--------------------------------|:---------------------|
+| `INBOUND`    | `+N`    | Nhập kho từ NCC                 | Manual / PO          |
+| `OUTBOUND`   | `-N`    | Order created / checkout commit | OrderItem            |
+| `RETURN`     | `+N`    | Order cancelled / refunded      | OrderItem            |
+| `ADJUSTMENT` | `±N`    | Kiểm kê / hư hao                | Manual + reason text |
 
 ### Endpoint
 
 | Endpoint                            | Method | Quyền        | Mô tả                                                            |
-| :---------------------------------- | :----- | :----------- | :--------------------------------------------------------------- |
+|:------------------------------------|:-------|:-------------|:-----------------------------------------------------------------|
 | `/admin/products/:id/stock`         | POST   | ADMIN, STAFF | Tạo manual movement (`INBOUND`, `ADJUSTMENT`) — phải có `reason` |
 | `/admin/products/:id/stock/history` | GET    | ADMIN        | List movements                                                   |
 

@@ -46,12 +46,39 @@ export class CategoryController {
 
   @Get(':id')
   @Public()
-  @ApiOperation({ summary: 'Get category by id' })
-  @ApiParam({ name: 'id', description: 'Category UUID' })
+  @ApiOperation({ summary: 'Get category by id or slug' })
+  @ApiParam({ name: 'id', description: 'Category UUID or slug' })
   @ApiResponse({ status: 200, description: 'Category found' })
   @ApiResponse({ status: 404, description: 'CATEGORY_NOT_FOUND' })
   findOne(@Param('id') id: string) {
     return this.categoryService.findOne(id);
+  }
+
+  // MUST be before :slug/breadcrumb to avoid routing conflicts
+  @Get('slug/:slug')
+  @Public()
+  @ApiOperation({
+    summary: 'Get category detail + direct children by slug',
+    description: 'Returns the category and its direct children (depth 1). Only active categories unless `includeInactive=true`.',
+  })
+  @ApiParam({ name: 'slug', description: 'Category slug' })
+  @ApiResponse({ status: 200, description: 'Category with children[]' })
+  @ApiResponse({ status: 404, description: 'CATEGORY_NOT_FOUND' })
+  findBySlug(@Param('slug') slug: string, @Query('includeInactive') includeInactive?: string) {
+    return this.categoryService.findBySlug(slug, includeInactive === 'true');
+  }
+
+  @Get('slug/:slug/breadcrumb')
+  @Public()
+  @ApiOperation({
+    summary: 'Get breadcrumb path from root to category',
+    description: 'Returns an ordered array `[root, ..., parent, category]` — each node has `{ id, name, slug }`.',
+  })
+  @ApiParam({ name: 'slug', description: 'Category slug' })
+  @ApiResponse({ status: 200, description: 'Array of ancestor nodes root-first' })
+  @ApiResponse({ status: 404, description: 'CATEGORY_NOT_FOUND' })
+  getBreadcrumb(@Param('slug') slug: string) {
+    return this.categoryService.getBreadcrumb(slug);
   }
 
   @Post()

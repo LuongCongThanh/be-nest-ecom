@@ -5,7 +5,7 @@
 - **Task ID**: TASK-202
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (Discovery)
 - **Phụ thuộc**: TASK-201 (Categories CRUD)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 

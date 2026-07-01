@@ -1,26 +1,47 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Max, Min } from 'class-validator';
+
+export enum ProductSortOption {
+  FEATURED = 'featured',
+  PRICE_ASC = 'priceAsc',
+  PRICE_DESC = 'priceDesc',
+  NEWEST = 'newest',
+  BESTSELLER = 'bestseller',
+}
+
+const boolTransform = ({ value }: { value: unknown }) => {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+};
 
 export class QueryProductDto {
-  @ApiPropertyOptional({ description: 'Full-text search by product name' })
+  @ApiPropertyOptional({ description: 'Text search on name' })
   @IsOptional()
   @IsString()
   search?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Filter by category slug (includes all descendants)' })
+  @IsOptional()
+  @IsString()
+  categorySlug?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by category UUID (direct match only, no descendants)' })
   @IsOptional()
   @IsUUID()
   categoryId?: string;
 
+  @ApiPropertyOptional({ description: 'true = only in-stock products (default behaviour); false = include out-of-stock' })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(boolTransform)
+  inStock?: boolean;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsBoolean()
-  @Transform(({ value }: { value: unknown }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return value;
-  })
+  @Transform(boolTransform)
   isFeatured?: boolean;
 
   @ApiPropertyOptional({ description: 'Minimum price (VND)' })
@@ -36,6 +57,11 @@ export class QueryProductDto {
   @IsInt()
   @Min(0)
   maxPrice?: number;
+
+  @ApiPropertyOptional({ enum: ProductSortOption, default: ProductSortOption.FEATURED })
+  @IsOptional()
+  @IsEnum(ProductSortOption)
+  sort?: ProductSortOption = ProductSortOption.FEATURED;
 
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()

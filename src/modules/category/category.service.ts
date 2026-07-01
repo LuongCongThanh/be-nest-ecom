@@ -91,12 +91,53 @@ export class CategoryService {
     return categories.filter((c) => c.parentId === parentId).map((c) => ({ ...c, children: this.buildTree(categories, c.id) }));
   }
 
-  // ─── Find one ─────────────────────────────────────────────────────────────
+  // ─── Find one (by ID or slug) ─────────────────────────────────────────────
 
   async findOne(id: string): Promise<Category> {
-    const category = await this.prisma.category.findFirst({ where: { id, deletedAt: null } });
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    const where = isUuid ? { id, deletedAt: null } : { slug: id, deletedAt: null };
+    const category = await this.prisma.category.findFirst({ where });
     if (!category) throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
     return category;
+  }
+
+  // ─── Find by slug (public detail + direct children) ──────────────────────
+
+  async findBySlug(slug: string, includeInactive = false) {
+    const activeFilter = includeInactive ? {} : { isActive: true };
+    const category = await this.prisma.category.findFirst({
+      where: { slug, deletedAt: null, ...activeFilter },
+      include: {
+        children: {
+          where: { deletedAt: null, ...activeFilter },
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+          select: { id: true, name: true, slug: true, image: true, sortOrder: true, isActive: true },
+        },
+      },
+    });
+    if (!category) throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
+    return category;
+  }
+
+  // ─── Breadcrumb (root → node) ─────────────────────────────────────────────
+
+  async getBreadcrumb(slug: string): Promise<{ id: string; name: string; slug: string }[]> {
+    const rows = await this.prisma.$queryRaw<{ id: string; name: string; slug: string; depth: number }[]>`
+      WITH RECURSIVE ancestors AS (
+        SELECT id, name, slug, "parentId", 0 AS depth
+        FROM categories
+        WHERE slug = ${slug} AND "deletedAt" IS NULL
+        UNION ALL
+        SELECT c.id, c.name, c.slug, c."parentId", a.depth + 1
+        FROM categories c
+        JOIN ancestors a ON c.id = a."parentId"
+        WHERE c."deletedAt" IS NULL
+      )
+      SELECT id, name, slug, depth FROM ancestors
+      ORDER BY depth DESC
+    `;
+    if (!rows.length) throw new NotFoundException({ code: 'CATEGORY_NOT_FOUND', message: 'Category not found' });
+    return rows.map(({ id, name, slug: s }) => ({ id, name, slug: s }));
   }
 
   // ─── Update ───────────────────────────────────────────────────────────────
