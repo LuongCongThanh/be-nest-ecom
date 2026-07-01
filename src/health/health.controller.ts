@@ -3,7 +3,7 @@ import { RedisService } from '@common/redis/redis.service';
 import type { IStorageAdapter } from '@common/storage/storage.interface';
 import { STORAGE_ADAPTER } from '@common/storage/storage.interface';
 import { Controller, Get, Inject, ServiceUnavailableException } from '@nestjs/common';
-import { Public } from '../common/decorators/public/public.decorator';
+import { Public } from '@common/decorators/public/public.decorator';
 
 interface HealthStatus {
   db: 'connected' | 'disconnected';

@@ -1,5 +1,5 @@
 import { Public } from '@common/decorators/public/public.decorator';
-import { CurrentUser } from '../../../common/decorators/current-user/current-user.decorator';
+import { CurrentUser } from '@common/decorators/current-user/current-user.decorator';
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from '../dto/login.dto/login.dto';
