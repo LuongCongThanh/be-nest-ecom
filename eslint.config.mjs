@@ -30,6 +30,20 @@ export default tseslint.config(
       '@typescript-eslint/no-floating-promises': 'warn',
       '@typescript-eslint/no-unsafe-argument': 'warn',
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      // Ban relative imports that cross module boundaries (../../ or deeper).
+      // Use tsconfig path aliases (@common/*, @modules/*, @config/*, @health/*) instead.
+      // Single-level ../ within the same module folder is still allowed.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../../*', '../../../*', '../../../../*'],
+              message: 'Use path aliases (@common/*, @modules/*, @config/*, @health/*) instead of deep relative imports.',
+            },
+          ],
+        },
+      ],
     },
   },
   {
