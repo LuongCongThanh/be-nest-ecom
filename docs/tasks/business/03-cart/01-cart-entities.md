@@ -5,7 +5,7 @@
 - **Task ID**: TASK-110
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (User Experience)
 - **Phụ thuộc**: TASK-109 (Product), TASK-218 (Variants)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section _Commerce Context_
 

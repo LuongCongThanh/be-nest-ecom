@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import type { IStorageAdapter } from '../storage/storage.interface';
-import { STORAGE_ADAPTER } from '../storage/storage.interface';
+import type { IStorageAdapter } from '@common/storage/storage.interface';
+import { STORAGE_ADAPTER } from '@common/storage/storage.interface';
 import { ImageProcessingService, ProcessedImage } from './image-processing.service';
 
 const ALLOWED_UPLOAD_TYPES: Record<string, string> = {

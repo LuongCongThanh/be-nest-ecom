@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { Request, Response } from 'express';
-import { ErrorResponse, FieldError } from '../interfaces/error-response.interface';
+import { ErrorResponse, FieldError } from '@common/interfaces/error-response.interface';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {

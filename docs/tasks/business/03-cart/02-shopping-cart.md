@@ -5,7 +5,7 @@
 - **Task ID**: TASK-207
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Conversion)
 - **Phụ thuộc**: TASK-110 (Cart Entity), TASK-205 (Stock)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 

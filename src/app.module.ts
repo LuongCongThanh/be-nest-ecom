@@ -18,6 +18,7 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { UserModule } from '@modules/user/user.module';
 import { MediaModule } from '@modules/media/media.module';
 import { ProductModule } from '@modules/product/product.module';
+import { CartModule } from '@modules/cart/cart.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ProductModule } from '@modules/product/product.module';
     UserModule,
     CategoryModule,
     ProductModule,
+    CartModule,
     MediaModule,
   ],
   controllers: [AppController],
