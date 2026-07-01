@@ -51,7 +51,7 @@ export class CartService {
   }
 
   private buildCartResponse(cartId: string, items: ReturnType<CartService['formatItems']>) {
-    const subtotal = items.filter((i) => !i.unavailable).reduce((sum, i) => sum + Number(i.currentPrice) * i.quantity, 0);
+    const subtotal = items.filter((i) => !i.unavailable).reduce((sum, i) => sum + BigInt(i.currentPrice) * BigInt(i.quantity), 0n);
 
     return {
       id: cartId,
@@ -147,10 +147,8 @@ export class CartService {
       select: { stockQuantity: true, deletedAt: true },
     });
 
-    if (product?.deletedAt !== null) {
-      throw new HttpException({ code: 'PRODUCT_UNAVAILABLE', message: 'Product is no longer available' }, HttpStatus.CONFLICT);
-    }
-    if ((product?.stockQuantity ?? 0) < dto.quantity) {
+    // Only enforce stock check for available products; unavailable ones stay in cart per spec AC-4
+    if (product?.deletedAt === null && (product?.stockQuantity ?? 0) < dto.quantity) {
       throw new HttpException({ code: 'INSUFFICIENT_STOCK', message: 'Not enough stock available', available: product?.stockQuantity ?? 0 }, HttpStatus.CONFLICT);
     }
 
@@ -184,42 +182,56 @@ export class CartService {
       return this.getCart(userId, undefined);
     }
 
-    const userCart = await this.prisma.cart.upsert({
-      where: { userId },
-      create: { userId, lastActivity: new Date() },
-      update: { lastActivity: new Date() },
+    // Batch-fetch all referenced products in one query to avoid N+1
+    const productIds = [...new Set(guestCart.items.map((i) => i.productId))];
+    const products = await this.prisma.product.findMany({
+      where: { id: { in: productIds }, deletedAt: null, isActive: true },
+      select: { id: true, price: true },
     });
+    const productMap = new Map(products.map((p) => [p.id, p]));
 
-    for (const guestItem of guestCart.items) {
-      const product = await this.prisma.product.findFirst({
-        where: { id: guestItem.productId, deletedAt: null, isActive: true },
-      });
-      if (!product) continue;
-
-      const existingUserItem = await this.prisma.cartItem.findFirst({
-        where: { cartId: userCart.id, productId: guestItem.productId, variantId: guestItem.variantId },
+    await this.prisma.$transaction(async (tx) => {
+      const userCart = await tx.cart.upsert({
+        where: { userId },
+        create: { userId, lastActivity: new Date() },
+        update: { lastActivity: new Date() },
       });
 
-      if (existingUserItem) {
-        const mergedQty = Math.min(existingUserItem.quantity + guestItem.quantity, product.stockQuantity);
-        await this.prisma.cartItem.update({ where: { id: existingUserItem.id }, data: { quantity: mergedQty } });
-      } else {
-        const qty = Math.min(guestItem.quantity, product.stockQuantity);
-        if (qty > 0) {
-          await this.prisma.cartItem.create({
+      // Batch-fetch existing user cart items for the same products
+      const existingItems = await tx.cartItem.findMany({
+        where: { cartId: userCart.id, productId: { in: productIds } },
+      });
+      const existingMap = new Map(existingItems.map((i) => [`${i.productId}:${i.variantId ?? ''}`, i]));
+
+      for (const guestItem of guestCart.items) {
+        const product = productMap.get(guestItem.productId);
+        if (!product) continue;
+
+        const key = `${guestItem.productId}:${guestItem.variantId ?? ''}`;
+        const existing = existingMap.get(key);
+
+        if (existing) {
+          // Accumulate quantities — stock validation happens at checkout, not merge
+          await tx.cartItem.update({
+            where: { id: existing.id },
+            data: { quantity: existing.quantity + guestItem.quantity },
+          });
+        } else {
+          await tx.cartItem.create({
             data: {
               cartId: userCart.id,
               productId: guestItem.productId,
               variantId: guestItem.variantId,
-              quantity: qty,
+              quantity: guestItem.quantity,
               priceAtAdded: product.price,
             },
           });
         }
       }
-    }
 
-    await this.prisma.cart.delete({ where: { id: guestCart.id } });
+      await tx.cart.delete({ where: { id: guestCart.id } });
+    });
+
     return this.getCart(userId, undefined);
   }
 }
