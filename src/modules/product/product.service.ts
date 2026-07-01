@@ -1,10 +1,11 @@
 import { PrismaService } from '@common/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { slugify } from '@common/utils/slugify.util';
-import { BadRequestException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { AdjustStockDto } from './dto/adjust-stock.dto';
 
 @Injectable()
 export class ProductService {
@@ -157,27 +158,142 @@ export class ProductService {
 
   // ─── Stock management (atomic) ────────────────────────────────────────────
 
-  async adjustStock(id: string, delta: number): Promise<void> {
-    await this.prisma.$transaction(async (tx) => {
-      const product = await tx.product.findFirst({
-        where: { id, deletedAt: null },
-        select: { id: true, stockQuantity: true },
-      });
-      if (!product) {
+  /**
+   * Deduct stock when an order is created. Uses SELECT FOR UPDATE to prevent
+   * overselling under concurrent checkouts. Accepts an external tx so
+   * OrderService can bundle this in the same checkout transaction.
+   */
+  async commitStock(productId: string, qty: number, orderItemId: string, tx?: Prisma.TransactionClient): Promise<void> {
+    const run = async (client: Prisma.TransactionClient) => {
+      const rows = await client.$queryRaw<{ id: string; stockQuantity: number }[]>`
+        SELECT id, "stockQuantity" FROM products
+        WHERE id = ${productId} AND "deletedAt" IS NULL
+        FOR UPDATE
+      `;
+      if (!rows.length) {
         throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
       }
-      const newQty = product.stockQuantity + delta;
+      const product = rows[0];
+      const newQty = product.stockQuantity - qty;
       if (newQty < 0) {
-        throw new BadRequestException({
+        throw new ConflictException({
           code: 'INSUFFICIENT_STOCK',
-          message: `Insufficient stock. Available: ${product.stockQuantity}, requested: ${Math.abs(delta)}`,
+          message: `Insufficient stock. Available: ${product.stockQuantity}, requested: ${qty}`,
         });
       }
-      await tx.product.update({
-        where: { id },
-        data: { stockQuantity: newQty },
+      await client.product.update({ where: { id: productId }, data: { stockQuantity: newQty } });
+      await client.stockMovement.create({
+        data: {
+          productId,
+          type: 'OUTBOUND' as const,
+          delta: -qty,
+          balanceAfter: newQty,
+          referenceType: 'OrderItem',
+          referenceId: orderItemId,
+        },
+      });
+    };
+
+    if (tx) {
+      await run(tx);
+    } else {
+      await this.prisma.$transaction(run);
+    }
+  }
+
+  /**
+   * Restore stock when an order is cancelled or refunded.
+   */
+  async releaseStock(productId: string, qty: number, orderItemId: string, tx?: Prisma.TransactionClient): Promise<void> {
+    const run = async (client: Prisma.TransactionClient) => {
+      const rows = await client.$queryRaw<{ id: string; stockQuantity: number }[]>`
+        SELECT id, "stockQuantity" FROM products
+        WHERE id = ${productId} AND "deletedAt" IS NULL
+        FOR UPDATE
+      `;
+      if (!rows.length) {
+        throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
+      }
+      const newQty = rows[0].stockQuantity + qty;
+      await client.product.update({ where: { id: productId }, data: { stockQuantity: newQty } });
+      await client.stockMovement.create({
+        data: {
+          productId,
+          type: 'RETURN' as const,
+          delta: qty,
+          balanceAfter: newQty,
+          referenceType: 'OrderItem',
+          referenceId: orderItemId,
+        },
+      });
+    };
+
+    if (tx) {
+      await run(tx);
+    } else {
+      await this.prisma.$transaction(run);
+    }
+  }
+
+  /**
+   * Admin manual stock adjustment (INBOUND or ADJUSTMENT type).
+   * Always requires a reason.
+   */
+  async manualAdjust(productId: string, dto: AdjustStockDto, performedById: string): Promise<void> {
+    if (!dto.reason?.trim()) {
+      throw new UnprocessableEntityException({ code: 'REASON_REQUIRED', message: 'reason is required for manual stock movements' });
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const rows = await tx.$queryRaw<{ id: string; stockQuantity: number }[]>`
+        SELECT id, "stockQuantity" FROM products
+        WHERE id = ${productId} AND "deletedAt" IS NULL
+        FOR UPDATE
+      `;
+      if (!rows.length) {
+        throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
+      }
+      const newQty = rows[0].stockQuantity + dto.delta;
+      if (newQty < 0) {
+        throw new ConflictException({
+          code: 'INSUFFICIENT_STOCK',
+          message: `Adjustment would result in negative stock. Current: ${rows[0].stockQuantity}, delta: ${dto.delta}`,
+        });
+      }
+      await tx.product.update({ where: { id: productId }, data: { stockQuantity: newQty } });
+      await tx.stockMovement.create({
+        data: {
+          productId,
+          type: dto.type,
+          delta: dto.delta,
+          balanceAfter: newQty,
+          reason: dto.reason,
+          performedById,
+        },
       });
     });
+  }
+
+  /**
+   * Admin stock movement history for a product.
+   */
+  async getStockHistory(productId: string, page = 1, limit = 20) {
+    const existing = await this.prisma.product.findFirst({ where: { id: productId, deletedAt: null } });
+    if (!existing) throw new NotFoundException({ code: 'PRODUCT_NOT_FOUND', message: 'Product not found' });
+
+    const skip = (page - 1) * limit;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.stockMovement.findMany({
+        where: { productId },
+        orderBy: { createdAt: 'asc' },
+        skip,
+        take: limit,
+        include: { performedBy: { select: { id: true, email: true, firstName: true, lastName: true } } },
+      }),
+      this.prisma.stockMovement.count({ where: { productId } }),
+    ]);
+
+    return { data, total, page, limit };
   }
 
   // ─── Admin: find all (includes inactive) ─────────────────────────────────
