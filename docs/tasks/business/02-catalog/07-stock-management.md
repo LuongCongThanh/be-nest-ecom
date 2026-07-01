@@ -5,7 +5,7 @@
 - **Task ID**: TASK-205
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Financial Impact)
 - **Phụ thuộc**: TASK-203 (Products CRUD)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: 🔵 In progress
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 

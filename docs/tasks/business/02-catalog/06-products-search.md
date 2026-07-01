@@ -5,7 +5,7 @@
 - **Task ID**: TASK-204
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (User Experience)
 - **Phụ thuộc**: TASK-203 (Products CRUD)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: 🔵 In progress
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 

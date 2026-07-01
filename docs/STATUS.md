@@ -175,6 +175,9 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `docs/tasks/business/04-order/02-order-creation.md` | ⏳ | checkout + state machine |
 | `docs/tasks/business/05-payment/01-payment.md` | ⏳ | VNPay |
 | `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
+| `docs/tasks/business/02-catalog/05-category-tree.md` | 🔵 In progress | Tree endpoint done (`?format=tree`). Breadcrumb + slug-based detail deferred (không nằm trong Phase C exit gate) |
+| `docs/tasks/business/02-catalog/06-products-search.md` | 🔵 In progress | Text search, price filter, isFeatured done. Facets, descendant-category filter, sort options deferred |
+| `docs/tasks/business/02-catalog/07-stock-management.md` | 🔵 In progress | `adjustStock()` internal helper done. StockMovement entity + admin endpoints deferred |
 
 🎯 **Tuần 8 milestone**: MVP demo-ready (chưa polish, chưa test).
 
@@ -293,6 +296,7 @@ Không có — phase này mở vô thời hạn. Mỗi feature thêm vào tự c
 - ✅ Build: lint 0 errors, tsc --noEmit pass, nest build pass
 
 Signed-off: self · Next: Phase C open.
+[2026-07-01 00:00] [Phase C] [TASK-202/204/205]     [SYNC] Backfill status từ code review: tree endpoint done (TASK-202 🔵), basic search done (TASK-204 🔵), adjustStock helper done (TASK-205 🔵). Breadcrumb, facets, StockMovement audit trail deferred — không nằm trong Phase C exit gate.
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
@@ -301,7 +305,7 @@ Signed-off: self · Next: Phase C open.
 
 1. **Phase C — Task tiếp theo** — Shopping Cart (`docs/tasks/business/03-cart/02-shopping-cart.md`).
 2. Sau cart: Order Creation → Payment (VNPay).
-3. PR #25 (file upload) đang chờ review — merge khi được yêu cầu.
+3. Deferred backlog: breadcrumb (TASK-202), facets/sort (TASK-204), StockMovement audit (TASK-205) — handle sau Phase E nếu cần.
 
 ---
 
