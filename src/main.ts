@@ -3,12 +3,16 @@ import { HttpStatus, Logger, UnprocessableEntityException, ValidationPipe } from
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const cookieParser = require('cookie-parser') as () => any;
 import { AppModule } from 'src/app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+
+  app.use(cookieParser());
 
   const corsOrigins = configService.get<string>('app.corsOrigins') ?? '*';
   app.enableCors({

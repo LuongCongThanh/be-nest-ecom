@@ -171,7 +171,8 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `docs/tasks/business/02-catalog/02-product-entity.md` | ✅ Done | 2026-06-27 — PR #23 merged |
 | `docs/tasks/business/02-catalog/03-categories-crud.md` | ✅ Done | 2026-06-27 — PR #24 merged |
 | `docs/tasks/business/02-catalog/04-products-crud.md` | ✅ Done | 2026-06-27 — PR #24 merged |
-| `docs/tasks/business/03-cart/02-shopping-cart.md` | ⏳ | cart + guest merge |
+| `docs/tasks/business/03-cart/01-cart-entities.md` | ✅ Done | 2026-07-01 — Cart + CartItem schema + migration |
+| `docs/tasks/business/03-cart/02-shopping-cart.md` | ✅ Done | 2026-07-01 — 6 endpoints: GET/POST/PATCH/DELETE item, DELETE cart, POST merge |
 | `docs/tasks/business/04-order/02-order-creation.md` | ⏳ | checkout + state machine |
 | `docs/tasks/business/05-payment/01-payment.md` | ⏳ | VNPay |
 | `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
@@ -300,15 +301,17 @@ Signed-off: self · Next: Phase C open.
 [2026-07-01 00:00] [Phase C] [TASK-205]             [DONE] StockMovement entity + migration + commitStock/releaseStock (SELECT FOR UPDATE) + admin stock endpoints
 [2026-07-01 00:00] [Phase C] [TASK-202]             [DONE] Slug detail + breadcrumb endpoints. findOne() now accepts UUID or slug
 [2026-07-01 00:00] [Phase C] [TASK-204]             [DONE] Sort, inStock default, descendant category filter (CTE), facets (categories/priceRanges/inStock): tree endpoint done (TASK-202 🔵), basic search done (TASK-204 🔵), adjustStock helper done (TASK-205 🔵). Breadcrumb, facets, StockMovement audit trail deferred — không nằm trong Phase C exit gate.
+[2026-07-01 10:00] [Phase C] [TASK-110]             [DONE] Cart + CartItem Prisma schema + migration. Guest cart via sessionId, user cart via unique userId FK.
+[2026-07-01 10:00] [Phase C] [TASK-207]             [DONE] Shopping Cart 6 endpoints. OptionalAuth guard for guest+user. cookie-parser + session_id cookie. mergeGuestCart on login. priceChanged + unavailable flags.
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Phase C — Task tiếp theo** — Shopping Cart (`docs/tasks/business/03-cart/02-shopping-cart.md`).
-2. Sau cart: Order Creation → Payment (VNPay).
-3. **Mở PR** cho branch `feat/catalog/catalog-spec-completion` sau khi commit docs.
+1. **Phase C — Task tiếp theo** — Order Creation (`docs/tasks/business/04-order/02-order-creation.md`).
+2. Sau order: Payment (VNPay) → Phase C exit gate.
+3. **Mở PR** cho branch `feat/cart/shopping-cart` sau khi commit.
 
 ---
 
