@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { ProductService } from '../product/product.service';
 import { FLAT_SHIPPING_FEE_VND, OrderService } from './order.service';
@@ -8,7 +9,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
-const productService = new ProductService(prisma);
+const productService = new ProductService(prisma, new ConfigService());
 const orderService = new OrderService(prisma, productService);
 
 const VALID_CHECKOUT_DTO: CreateOrderDto = {

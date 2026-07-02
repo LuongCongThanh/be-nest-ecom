@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { slugify } from '@common/utils/slugify.util';
 import { ProductService } from './product.service';
@@ -9,7 +10,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
-const productService = new ProductService(prisma);
+const productService = new ProductService(prisma, new ConfigService());
 
 interface ProductRecord {
   id: string;
