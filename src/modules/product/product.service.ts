@@ -458,8 +458,8 @@ export class ProductService {
   private serialize(product: any): any {
     return {
       ...product,
-      price: Number(product.price),
-      comparePrice: product.comparePrice !== null ? Number(product.comparePrice) : null,
+      price: (product.price as bigint).toString(),
+      comparePrice: product.comparePrice !== null ? (product.comparePrice as bigint).toString() : null,
     };
   }
 
