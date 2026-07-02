@@ -38,12 +38,15 @@ export class ProductController {
   }
 
   // Admin/staff creates a new catalog entry. Slug auto-generated from name if omitted.
+  // Images already uploaded via POST /media/presigned can be attached in the same call
+  // (see CreateProductDto.images) — no separate confirm step needed at creation time.
   @Post()
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({
     summary: 'Create a new product',
-    description: 'Admin/staff only. Validates unique slug and SKU, comparePrice >= price, and that categoryId (if given) exists. Auto-generates slug from name when not provided.',
+    description:
+      'Admin/staff only. Validates unique slug and SKU, comparePrice >= price, and that categoryId (if given) exists. Auto-generates slug from name when not provided. Optionally attaches images uploaded via POST /media/presigned — pass their storage keys in `images`, in display order (first = primary), created atomically with the product.',
   })
   create(@Body() dto: CreateProductDto) {
     return this.productService.create(dto);
