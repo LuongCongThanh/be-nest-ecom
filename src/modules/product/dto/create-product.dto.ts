@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsInt, IsObject, IsOptional, IsString, IsUUID, Matches, MaxLength, Min } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsBoolean, IsInt, IsObject, IsOptional, IsString, IsUUID, Matches, MaxLength, Min, ValidateNested } from 'class-validator';
+import { MAX_IMAGES } from '../product-image.service';
+import { ConfirmImageDto } from './confirm-image.dto';
 
 export class CreateProductDto {
   @ApiProperty({ example: 'PHONE-IPHONE-001' })
@@ -72,10 +74,14 @@ export class CreateProductDto {
   @IsObject()
   metadata?: Record<string, unknown>;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    type: [ConfirmImageDto],
+    description: 'Images already uploaded via a presigned URL (see POST /media/presigned). Order determines display position — the first entry becomes the primary image.',
+  })
   @IsOptional()
-  @IsString()
-  @MaxLength(200)
-  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))
-  images?: string;
+  @IsArray()
+  @ArrayMaxSize(MAX_IMAGES)
+  @ValidateNested({ each: true })
+  @Type(() => ConfirmImageDto)
+  images?: ConfirmImageDto[];
 }

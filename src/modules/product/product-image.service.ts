@@ -4,7 +4,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { ImageSize, ProductImage } from '@prisma/client';
 import { ConfigService } from '@nestjs/config';
 
-const MAX_IMAGES = 10;
+export const MAX_IMAGES = 10;
 
 @Injectable()
 export class ProductImageService {
