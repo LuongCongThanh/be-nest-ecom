@@ -160,7 +160,7 @@ describe('ProductService', () => {
       const created = await createProduct({ stockQuantity: 5 });
       createdProductIds.push(created.id);
 
-      const result = await findAllProducts({ page: 1, limit: 20 });
+      const result = await findAllProducts({ page: 1, limit: 20, search: created.name });
       expect(result.pagination.page).toBe(1);
       expect(result.data.some((p) => p.id === created.id)).toBe(true);
     });

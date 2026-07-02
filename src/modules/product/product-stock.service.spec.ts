@@ -1,9 +1,9 @@
-import 'dotenv/config';
-import { PrismaClient, StockMovementType } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaService } from '@common/prisma/prisma.service';
-import { ProductService } from './product.service';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { PrismaClient, StockMovementType } from '@prisma/client';
+import 'dotenv/config';
 import { CreateProductDto } from './dto/create-product.dto';
+import { ProductService } from './product.service';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
