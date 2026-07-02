@@ -11,6 +11,7 @@ import { QueryProductDto } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { AdjustStockDto } from './dto/adjust-stock.dto';
 import { ProductImageService } from './product-image.service';
+import { ProductStockService } from './product-stock.service';
 import { ProductService } from './product.service';
 
 @ApiTags('products')
@@ -19,6 +20,7 @@ export class ProductController {
   constructor(
     private readonly productService: ProductService,
     private readonly productImageService: ProductImageService,
+    private readonly productStockService: ProductStockService,
   ) {}
 
   @Get()
@@ -120,7 +122,7 @@ export class ProductController {
   @ApiResponse({ status: 409, description: 'INSUFFICIENT_STOCK — adjustment would result in negative stock' })
   @ApiResponse({ status: 422, description: 'REASON_REQUIRED' })
   manualAdjust(@Param('id') id: string, @Body() dto: AdjustStockDto, @CurrentUser('id') userId: string) {
-    return this.productService.manualAdjust(id, dto, userId);
+    return this.productStockService.manualAdjust(id, dto, userId);
   }
 
   @Get(':id/stock/history')
@@ -133,6 +135,6 @@ export class ProductController {
   @ApiResponse({ status: 200, description: 'Paginated list of stock movements' })
   @ApiResponse({ status: 404, description: 'PRODUCT_NOT_FOUND' })
   getStockHistory(@Param('id') id: string, @Query('page') page?: number, @Query('limit') limit?: number) {
-    return this.productService.getStockHistory(id, page ? +page : 1, limit ? +limit : 20);
+    return this.productStockService.getStockHistory(id, page ? +page : 1, limit ? +limit : 20);
   }
 }

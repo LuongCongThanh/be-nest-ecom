@@ -3,11 +3,13 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient, StockMovementType } from '@prisma/client';
 import 'dotenv/config';
 import { CreateProductDto } from './dto/create-product.dto';
+import { ProductStockService } from './product-stock.service';
 import { ProductService } from './product.service';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
 const productService = new ProductService(prisma);
+const productStockService = new ProductStockService(prisma);
 
 interface ProductRecord {
   id: string;
@@ -37,7 +39,7 @@ async function createTestUser() {
   return prisma.user.create({ data: { email: `stock-${uniqueSuffix()}@test.local`, password: 'x' } });
 }
 
-describe('ProductService — stock management', () => {
+describe('ProductStockService', () => {
   const createdProductIds: string[] = [];
   const createdUserIds: string[] = [];
 
@@ -55,7 +57,7 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await productService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 5, reason: 'Supplier delivery' }, user.id);
+      await productStockService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 5, reason: 'Supplier delivery' }, user.id);
 
       const updated = await prisma.product.findUniqueOrThrow({ where: { id: product.id } });
       expect(updated.stockQuantity).toBe(15);
@@ -71,7 +73,7 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await productService.manualAdjust(product.id, { type: StockMovementType.ADJUSTMENT, delta: -3, reason: 'Damaged goods' }, user.id);
+      await productStockService.manualAdjust(product.id, { type: StockMovementType.ADJUSTMENT, delta: -3, reason: 'Damaged goods' }, user.id);
 
       const updated = await prisma.product.findUniqueOrThrow({ where: { id: product.id } });
       expect(updated.stockQuantity).toBe(7);
@@ -83,7 +85,7 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await expect(productService.manualAdjust(product.id, { type: StockMovementType.ADJUSTMENT, delta: -5, reason: 'Stocktake' }, user.id)).rejects.toMatchObject({
+      await expect(productStockService.manualAdjust(product.id, { type: StockMovementType.ADJUSTMENT, delta: -5, reason: 'Stocktake' }, user.id)).rejects.toMatchObject({
         response: { code: 'INSUFFICIENT_STOCK' },
       });
 
@@ -97,7 +99,7 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await expect(productService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 5 }, user.id)).rejects.toMatchObject({
+      await expect(productStockService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 5 }, user.id)).rejects.toMatchObject({
         response: { code: 'REASON_REQUIRED' },
       });
     });
@@ -106,7 +108,7 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await expect(productService.manualAdjust('00000000-0000-0000-0000-000000000000', { type: StockMovementType.INBOUND, delta: 5, reason: 'x' }, user.id)).rejects.toMatchObject({
+      await expect(productStockService.manualAdjust('00000000-0000-0000-0000-000000000000', { type: StockMovementType.INBOUND, delta: 5, reason: 'x' }, user.id)).rejects.toMatchObject({
         response: { code: 'PRODUCT_NOT_FOUND' },
       });
     });
@@ -119,16 +121,16 @@ describe('ProductService — stock management', () => {
       const user = await createTestUser();
       createdUserIds.push(user.id);
 
-      await productService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 1, reason: 'first' }, user.id);
-      await productService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 2, reason: 'second' }, user.id);
+      await productStockService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 1, reason: 'first' }, user.id);
+      await productStockService.manualAdjust(product.id, { type: StockMovementType.INBOUND, delta: 2, reason: 'second' }, user.id);
 
-      const history = await productService.getStockHistory(product.id, 1, 20);
+      const history = await productStockService.getStockHistory(product.id, 1, 20);
       expect(history.total).toBe(2);
       expect(history.data.map((m) => m.delta)).toEqual([1, 2]);
     });
 
     it('throws PRODUCT_NOT_FOUND for a missing product', async () => {
-      await expect(productService.getStockHistory('00000000-0000-0000-0000-000000000000')).rejects.toMatchObject({
+      await expect(productStockService.getStockHistory('00000000-0000-0000-0000-000000000000')).rejects.toMatchObject({
         response: { code: 'PRODUCT_NOT_FOUND' },
       });
     });
