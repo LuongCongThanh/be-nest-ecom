@@ -235,6 +235,7 @@ enum PaymentStatus {
 model Order {
   id                       String        @id @default(uuid())
   orderNumber              String        @unique
+  idempotencyKey           String        @unique
   userId                   String?
   customerEmailSnapshot    String
   status                   OrderStatus   @default(PENDING)

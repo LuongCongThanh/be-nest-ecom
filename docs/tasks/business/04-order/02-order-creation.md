@@ -5,7 +5,7 @@
 - **Task ID**: TASK-209
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Revenue Path)
 - **Phụ thuộc**: TASK-208 (Calculation), TASK-205 (Stock), TASK-111 (Order Entity)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: 🔵 In progress — AC-1,2,4,5 done (OrderService.checkout + POST /orders, TDD, 5 integration test + manual smoke test qua HTTP thật). MVP trim: bỏ coupon/discount (TASK-224) và tính ship động (TASK-225, dùng flat fee), bỏ event `order.created` (TASK-222) và payment thật (TASK-221). AC-3 (race condition 10 client đồng thời) dời — cần load-test tooling, không hợp Jest unit test; cơ chế `SELECT FOR UPDATE` ở `commitStock` (TASK-205) đã đảm bảo đúng invariant, nhưng chưa có test tải thật xác nhận. AC-6 (placedAt=createdAt) đúng theo thiết kế (cùng `@default(now())` trong 1 INSERT) nhưng chưa assert riêng.
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 

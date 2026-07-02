@@ -113,6 +113,13 @@
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
+    "moduleNameMapper": {
+      "^@common/(.*)$": "<rootDir>/common/$1",
+      "^@modules/(.*)$": "<rootDir>/modules/$1",
+      "^@shared/(.*)$": "<rootDir>/shared/$1",
+      "^@config/(.*)$": "<rootDir>/config/$1",
+      "^@health/(.*)$": "<rootDir>/health/$1"
+    },
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
     },
