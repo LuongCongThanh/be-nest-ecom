@@ -173,6 +173,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `docs/tasks/business/02-catalog/04-products-crud.md` | ✅ Done | 2026-06-27 — PR #24 merged |
 | `docs/tasks/business/03-cart/01-cart-entities.md` | ✅ Done | 2026-07-01 — Cart + CartItem schema + migration |
 | `docs/tasks/business/03-cart/02-shopping-cart.md` | ✅ Done | 2026-07-01 — 6 endpoints: GET/POST/PATCH/DELETE item, DELETE cart, POST merge |
+| `docs/tasks/business/04-order/01-order-entities.md` | 🔵 In progress | 2026-07-02 — Order/OrderItem schema+migration, order_number_seq (raw SQL), `order-status.util.ts` (transition/refund-window/format/grandTotal, unit-tested), AC-1 snapshot verified via integration test. AC-4 deferred to TASK-209/210 |
 | `docs/tasks/business/04-order/02-order-creation.md` | ⏳ | checkout + state machine |
 | `docs/tasks/business/05-payment/01-payment.md` | ⏳ | VNPay |
 | `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
@@ -303,6 +304,7 @@ Signed-off: self · Next: Phase C open.
 [2026-07-01 00:00] [Phase C] [TASK-204]             [DONE] Sort, inStock default, descendant category filter (CTE), facets (categories/priceRanges/inStock): tree endpoint done (TASK-202 🔵), basic search done (TASK-204 🔵), adjustStock helper done (TASK-205 🔵). Breadcrumb, facets, StockMovement audit trail deferred — không nằm trong Phase C exit gate.
 [2026-07-01 10:00] [Phase C] [TASK-110]             [DONE] Cart + CartItem Prisma schema + migration. Guest cart via sessionId, user cart via unique userId FK.
 [2026-07-01 10:00] [Phase C] [TASK-207]             [DONE] Shopping Cart 6 endpoints. OptionalAuth guard for guest+user. cookie-parser + session_id cookie. mergeGuestCart on login. priceChanged + unavailable flags.
+[2026-07-02 00:00] [Phase C] [TASK-111]             [IN PROGRESS] Order/OrderItem Prisma schema + migration (raw SQL `order_number_seq`, không dùng autoincrement vì orderNumber là String đã format). order-status.util.ts: isValidOrderTransition, isWithinRefundWindow, formatOrderNumber, calculateGrandTotal — TDD, 10 unit test + 1 integration test (snapshot invariant AC-1), tất cả GREEN. AC-4 dời sang TASK-209/210 (cần OrderController/Guard chưa tồn tại).
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---

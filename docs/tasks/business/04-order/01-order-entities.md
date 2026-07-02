@@ -5,7 +5,7 @@
 - **Task ID**: TASK-111
 - **Độ ưu tiên**: 🔴 CHÍ TRỌNG (Revenue & Legal)
 - **Phụ thuộc**: TASK-110 (Cart), TASK-106 (Snapshot strategy)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: 🔵 In progress — AC-1,2,3,5,6 done (schema + migration + `order-status.util.ts` unit/integration tests). AC-4 (user chỉ thấy Order của mình) dời sang TASK-209/210 — chưa có OrderController/Guard nên chưa có endpoint để test 403.
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — section *Commerce Context*, đặc biệt *Order State Machine*
 
