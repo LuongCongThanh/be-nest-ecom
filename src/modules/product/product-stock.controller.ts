@@ -11,6 +11,9 @@ import { ProductStockService } from './product-stock.service';
 export class ProductStockController {
   constructor(private readonly productStockService: ProductStockService) {}
 
+  // Manual warehouse correction (receiving new stock or fixing a count), not the automatic
+  // deduction/release that happens on checkout/cancel. Row-locks the product to stay atomic
+  // under concurrent adjustments.
   @Post(':id/stock')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
@@ -29,10 +32,16 @@ export class ProductStockController {
     return this.productStockService.manualAdjust(id, dto, userId);
   }
 
+  // Audit trail: every stock change for this product (manual adjustments, order deductions,
+  // order-cancel releases), oldest first.
   @Get(':id/stock/history')
   @ApiBearerAuth()
   @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Stock movement history for a product (ADMIN only)' })
+  @ApiOperation({
+    summary: 'Stock movement history for a product (ADMIN only)',
+    description:
+      'Admin only. Paginated audit log of every StockMovement for this product (manual adjustments plus automatic order-checkout deductions and order-cancel releases), ordered oldest first.',
+  })
   @ApiParam({ name: 'id', description: 'Product UUID' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })

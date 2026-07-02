@@ -12,46 +12,70 @@ import { ProductImageService } from './product-image.service';
 export class ProductImageController {
   constructor(private readonly productImageService: ProductImageService) {}
 
+  // Direct multipart upload: server resizes into thumb/medium/original and converts to webp.
+  // Rejects once the product already has MAX_IMAGES (10) medium images.
   @Post(':id/images')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload product image (3 sizes: thumb/medium/original, webp)' })
+  @ApiOperation({
+    summary: 'Upload product image (3 sizes: thumb/medium/original, webp)',
+    description:
+      'Admin/staff only. Server-side resize pipeline: generates thumb (200px), medium (800px), and original (capped 2000px) sizes, all converted to webp. Max 5MB input, max 10 images per product.',
+  })
   @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary' } } } })
   uploadImage(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     return this.productImageService.upload(id, file.buffer);
   }
 
+  // Second half of the presigned-URL flow: client already uploaded the file straight to storage
+  // using a key from POST /media/presigned; this just records that key against the product.
   @Post(':id/images/confirm')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
-  @ApiOperation({ summary: 'Confirm presigned upload — save key to DB after direct upload to storage' })
+  @ApiOperation({
+    summary: 'Confirm presigned upload — save key to DB after direct upload to storage',
+    description:
+      'Admin/staff only. Use after the client has uploaded a file directly to storage via a presigned URL (see POST /media/presigned). Trusts the given key and creates a MEDIUM-size ProductImage row at the next position.',
+  })
   confirmImage(@Param('id') id: string, @Body() dto: ConfirmImageDto) {
     return this.productImageService.confirm(id, dto.key);
   }
 
+  // Storefront gallery: medium-size images only, ordered by position (position 0 = primary image).
   @Get(':id/images')
   @Public()
-  @ApiOperation({ summary: 'List product images (medium size, ordered by position)' })
+  @ApiOperation({
+    summary: 'List product images (medium size, ordered by position)',
+    description: 'Public. Returns only the MEDIUM-size variant of each image, sorted by position ascending — position 0 is the primary/cover image.',
+  })
   listImages(@Param('id') id: string) {
     return this.productImageService.findAll(id);
   }
 
+  // Deletes an image and all its sibling sizes (thumb/medium/original share the same uuid prefix).
   @Delete(':id/images/:imageId')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Delete product image (removes all 3 sizes)' })
+  @ApiOperation({
+    summary: 'Delete product image (removes all 3 sizes)',
+    description: 'Admin/staff only. Deletes the given image plus its thumb/medium/original siblings from both the database and storage.',
+  })
   deleteImage(@Param('id') id: string, @Param('imageId') imageId: string) {
     return this.productImageService.delete(id, imageId);
   }
 
+  // Bulk-update the display order of a product's images in a single atomic call.
   @Patch(':id/images/reorder')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({ summary: 'Reorder product images' })
+  @ApiOperation({
+    summary: 'Reorder product images',
+    description: 'Admin/staff only. Applies the given list of { id, position } pairs atomically. Position 0 becomes the new primary/cover image.',
+  })
   @ApiBody({ schema: { type: 'object', properties: { items: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, position: { type: 'number' } } } } } } })
   reorderImages(@Param('id') id: string, @Body() body: { items: { id: string; position: number }[] }) {
     return this.productImageService.reorder(id, body.items);
