@@ -426,33 +426,6 @@ export class ProductService {
     return { data, total, page, limit };
   }
 
-  // ─── Admin: find all (includes inactive) ─────────────────────────────────
-
-  async findAllAdmin(query: QueryProductDto) {
-    const { page = 1, limit = 20, search, categoryId, isFeatured } = query;
-    const skip = (page - 1) * limit;
-
-    const where = {
-      deletedAt: null,
-      ...(search ? { name: { contains: search, mode: 'insensitive' as const } } : {}),
-      ...(categoryId ? { categoryId } : {}),
-      ...(isFeatured !== undefined ? { isFeatured } : {}),
-    };
-
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.product.findMany({
-        where,
-        orderBy: [{ createdAt: 'desc' }],
-        skip,
-        take: limit,
-        include: { category: { select: { id: true, name: true, slug: true } } },
-      }),
-      this.prisma.product.count({ where }),
-    ]);
-
-    return { data: data.map((p) => this.serialize(p)), total, page, limit };
-  }
-
   // ─── Private helpers ─────────────────────────────────────────────────────
 
   private serialize(product: any): any {
