@@ -78,7 +78,7 @@ export class ProductService {
   // ─── Find all (public — with filtering, sorting, facets) ─────────────────
 
   async findAll(query: QueryProductDto) {
-    const { page = 1, sort = ProductSortOption.FEATURED, search, categorySlug, categoryId, isFeatured, minPrice, maxPrice } = query;
+    const { page = 1, sort, search, categorySlug, categoryId, isFeatured, minPrice, maxPrice } = query;
     const limit = Math.min(query.limit ?? 20, 100);
     // inStock defaults to true (public browsing shows only in-stock products)
     const inStock = query.inStock ?? true;
@@ -97,8 +97,16 @@ export class ProductService {
       resolvedCategoryIds = [categoryId];
     }
 
-    const where = this.buildPublicWhere({ search, categoryIds: resolvedCategoryIds, isFeatured, minPrice, maxPrice, inStock });
-    const orderBy = this.buildOrderBy(sort);
+    const trimmedSearch = search?.trim();
+    if (trimmedSearch) {
+      return this.findAllBySearch({ search: trimmedSearch, sort, page, limit, skip, categoryIds: resolvedCategoryIds, isFeatured, minPrice, maxPrice, inStock });
+    }
+
+    // No search term → default sort is `featured`. When searching, the default is
+    // relevance instead (see findAllBySearch), unless the caller picks an explicit sort.
+    const effectiveSort = sort ?? ProductSortOption.FEATURED;
+    const where = this.buildPublicWhere({ categoryIds: resolvedCategoryIds, isFeatured, minPrice, maxPrice, inStock });
+    const orderBy = this.buildOrderBy(effectiveSort);
 
     const [[data, total], facets] = await Promise.all([
       this.prisma.$transaction([
@@ -121,26 +129,11 @@ export class ProductService {
     };
   }
 
-  private buildPublicWhere({
-    search,
-    categoryIds,
-    isFeatured,
-    minPrice,
-    maxPrice,
-    inStock,
-  }: {
-    search?: string;
-    categoryIds?: string[];
-    isFeatured?: boolean;
-    minPrice?: number;
-    maxPrice?: number;
-    inStock: boolean;
-  }) {
+  private buildPublicWhere({ categoryIds, isFeatured, minPrice, maxPrice, inStock }: { categoryIds?: string[]; isFeatured?: boolean; minPrice?: number; maxPrice?: number; inStock: boolean }) {
     return {
       deletedAt: null,
       isActive: true,
       ...(inStock ? { stockQuantity: { gt: 0 } } : {}),
-      ...(search ? { name: { contains: search, mode: 'insensitive' as const } } : {}),
       ...(categoryIds ? { categoryId: { in: categoryIds } } : {}),
       ...(isFeatured !== undefined ? { isFeatured } : {}),
       ...(minPrice !== undefined || maxPrice !== undefined
@@ -151,6 +144,146 @@ export class ProductService {
             },
           }
         : {}),
+    };
+  }
+
+  // ─── Full-text search (Postgres tsvector + GIN expression index) ─────────
+  // Isolated raw-SQL path used only when `search` is present. The browsing
+  // path above (buildPublicWhere/buildOrderBy/computeFacets) is untouched.
+
+  private readonly SEARCH_VECTOR_SQL = Prisma.sql`(
+    setweight(to_tsvector('simple', immutable_unaccent(p.name)), 'A') ||
+    setweight(to_tsvector('simple', immutable_unaccent(coalesce(p.description, ''))), 'B') ||
+    setweight(to_tsvector('simple', immutable_unaccent(p.sku)), 'C')
+  )`;
+
+  private buildSearchTsQuery(search: string): Prisma.Sql {
+    const words = search.split(/\s+/).filter(Boolean).slice(0, 10);
+    const fragments = words.map((word) => Prisma.sql`plainto_tsquery('simple', immutable_unaccent(${word}))`);
+    // OR between words — a product matching more words ranks higher via ts_rank,
+    // but isn't excluded just for missing one (fixes "too few results").
+    return Prisma.sql`(${Prisma.join(fragments, ' || ')})`;
+  }
+
+  private buildSearchOrderBy(sort: ProductSortOption | undefined, rankSql: Prisma.Sql): Prisma.Sql {
+    switch (sort) {
+      case ProductSortOption.PRICE_ASC:
+        return Prisma.sql`p.price ASC`;
+      case ProductSortOption.PRICE_DESC:
+        return Prisma.sql`p.price DESC`;
+      case ProductSortOption.NEWEST:
+        return Prisma.sql`p."createdAt" DESC`;
+      case ProductSortOption.BESTSELLER:
+        return Prisma.sql`p."createdAt" DESC`;
+      case ProductSortOption.FEATURED:
+        return Prisma.sql`p."isFeatured" DESC, p."createdAt" DESC`;
+      default:
+        // No explicit sort while searching → default to relevance.
+        return Prisma.sql`${rankSql} DESC`;
+    }
+  }
+
+  private async findAllBySearch(params: {
+    search: string;
+    sort?: ProductSortOption;
+    page: number;
+    limit: number;
+    skip: number;
+    categoryIds?: string[];
+    isFeatured?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    inStock: boolean;
+  }) {
+    const { search, sort, page, limit, skip, categoryIds, isFeatured, minPrice, maxPrice, inStock } = params;
+
+    const tsquery = this.buildSearchTsQuery(search);
+
+    const baseConditions: Prisma.Sql[] = [Prisma.sql`p."deletedAt" IS NULL`, Prisma.sql`p."isActive" = true`, Prisma.sql`${this.SEARCH_VECTOR_SQL} @@ ${tsquery}`];
+    if (categoryIds?.length) baseConditions.push(Prisma.sql`p."categoryId" IN (${Prisma.join(categoryIds)})`);
+    if (isFeatured !== undefined) baseConditions.push(Prisma.sql`p."isFeatured" = ${isFeatured}`);
+    if (minPrice !== undefined) baseConditions.push(Prisma.sql`p.price >= ${BigInt(minPrice)}`);
+    if (maxPrice !== undefined) baseConditions.push(Prisma.sql`p.price <= ${BigInt(maxPrice)}`);
+
+    const whereSql = Prisma.join(inStock ? [...baseConditions, Prisma.sql`p."stockQuantity" > 0`] : baseConditions, ' AND ');
+    const rankSql = Prisma.sql`ts_rank(${this.SEARCH_VECTOR_SQL}, ${tsquery})`;
+    const orderBySql = this.buildSearchOrderBy(sort, rankSql);
+
+    const [rows, countRows, facets] = await Promise.all([
+      this.prisma.$queryRaw<Record<string, unknown>[]>`
+        SELECT p.*, c.id as "categoryTableId", c.name as "categoryName", c.slug as "categorySlug"
+        FROM products p
+        LEFT JOIN categories c ON c.id = p."categoryId"
+        WHERE ${whereSql}
+        ORDER BY ${orderBySql}
+        LIMIT ${limit} OFFSET ${skip}
+      `,
+      this.prisma.$queryRaw<{ count: bigint }[]>`SELECT COUNT(*)::bigint as count FROM products p WHERE ${whereSql}`,
+      this.computeFacetsRaw(baseConditions, inStock),
+    ]);
+
+    const total = Number(countRows[0]?.count ?? 0);
+
+    return {
+      data: rows.map((row) => this.serializeSearchRow(row)),
+      pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+      facets,
+    };
+  }
+
+  private serializeSearchRow(row: Record<string, unknown>) {
+    const { categoryTableId, categoryName, categorySlug, ...product } = row;
+    return this.serialize({
+      ...product,
+      category: categoryTableId ? { id: categoryTableId, name: categoryName, slug: categorySlug } : null,
+    });
+  }
+
+  private async computeFacetsRaw(baseConditions: Prisma.Sql[], inStock: boolean) {
+    const PRICE_BUCKETS = [
+      { range: '0-1M', gte: 0, lt: 1_000_000 },
+      { range: '1M-5M', gte: 1_000_000, lt: 5_000_000 },
+      { range: '5M-10M', gte: 5_000_000, lt: 10_000_000 },
+      { range: '10M-20M', gte: 10_000_000, lt: 20_000_000 },
+      { range: 'over-20M', gte: 20_000_000, lt: undefined },
+    ];
+
+    const whereSql = Prisma.join(inStock ? [...baseConditions, Prisma.sql`p."stockQuantity" > 0`] : baseConditions, ' AND ');
+    const baseWhereSql = Prisma.join(baseConditions, ' AND ');
+
+    const [categoryGroups, priceRangeCounts, inStockRows] = await Promise.all([
+      this.prisma.$queryRaw<{ categoryId: string; count: bigint }[]>`
+        SELECT p."categoryId" as "categoryId", COUNT(*)::bigint as count
+        FROM products p
+        WHERE ${whereSql} AND p."categoryId" IS NOT NULL
+        GROUP BY p."categoryId"
+      `,
+      Promise.all(
+        PRICE_BUCKETS.map(async (b) => {
+          const priceCondition = b.lt !== undefined ? Prisma.sql`p.price >= ${BigInt(b.gte)} AND p.price < ${BigInt(b.lt)}` : Prisma.sql`p.price >= ${BigInt(b.gte)}`;
+          const rows = await this.prisma.$queryRaw<{ count: bigint }[]>`
+            SELECT COUNT(*)::bigint as count FROM products p WHERE ${whereSql} AND ${priceCondition}
+          `;
+          return { range: b.range, count: Number(rows[0]?.count ?? 0) };
+        }),
+      ),
+      this.prisma.$queryRaw<{ inStock: boolean; count: bigint }[]>`
+        SELECT (p."stockQuantity" > 0) as "inStock", COUNT(*)::bigint as count
+        FROM products p
+        WHERE ${baseWhereSql}
+        GROUP BY (p."stockQuantity" > 0)
+      `,
+    ]);
+
+    const catIds = categoryGroups.map((g) => g.categoryId);
+    const categories = catIds.length ? await this.prisma.category.findMany({ where: { id: { in: catIds }, deletedAt: null }, select: { id: true, name: true, slug: true } }) : [];
+    const catMap = new Map(categories.map((c) => [c.id, c]));
+    const inStockMap = new Map(inStockRows.map((r) => [r.inStock, Number(r.count)]));
+
+    return {
+      categories: categoryGroups.map((g) => ({ ...catMap.get(g.categoryId), count: Number(g.count) })).filter((g) => g.slug),
+      priceRanges: priceRangeCounts,
+      inStock: { true: inStockMap.get(true) ?? 0, false: inStockMap.get(false) ?? 0 },
     };
   }
 

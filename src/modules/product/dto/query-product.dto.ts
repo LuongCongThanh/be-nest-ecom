@@ -61,7 +61,7 @@ export class QueryProductDto {
   @ApiPropertyOptional({ enum: ProductSortOption, default: ProductSortOption.FEATURED })
   @IsOptional()
   @IsEnum(ProductSortOption)
-  sort?: ProductSortOption = ProductSortOption.FEATURED;
+  sort?: ProductSortOption;
 
   @ApiPropertyOptional({ default: 1 })
   @IsOptional()
