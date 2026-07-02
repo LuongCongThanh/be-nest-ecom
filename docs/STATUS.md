@@ -174,7 +174,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `docs/tasks/business/03-cart/01-cart-entities.md` | ✅ Done | 2026-07-01 — Cart + CartItem schema + migration |
 | `docs/tasks/business/03-cart/02-shopping-cart.md` | ✅ Done | 2026-07-01 — 6 endpoints: GET/POST/PATCH/DELETE item, DELETE cart, POST merge |
 | `docs/tasks/business/04-order/01-order-entities.md` | 🔵 In progress | 2026-07-02 — Order/OrderItem schema+migration, order_number_seq (raw SQL), `order-status.util.ts` (transition/refund-window/format/grandTotal, unit-tested), AC-1 snapshot verified via integration test. AC-4 deferred to TASK-209/210 |
-| `docs/tasks/business/04-order/02-order-creation.md` | ⏳ | checkout + state machine |
+| `docs/tasks/business/04-order/02-order-creation.md` | 🔵 In progress | 2026-07-02 — `POST /orders` checkout flow, OrderService (TDD, 5 tests) + manual smoke test qua HTTP. MVP trim: no coupon/dynamic-shipping/event/payment. AC-3 (concurrency) deferred to load-test tooling |
 | `docs/tasks/business/05-payment/01-payment.md` | ⏳ | VNPay |
 | `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
 | `docs/tasks/business/02-catalog/05-category-tree.md` | ✅ Done | 2026-07-01 — tree, slug detail (`GET /categories/slug/:slug`), breadcrumb endpoint |
@@ -305,15 +305,16 @@ Signed-off: self · Next: Phase C open.
 [2026-07-01 10:00] [Phase C] [TASK-110]             [DONE] Cart + CartItem Prisma schema + migration. Guest cart via sessionId, user cart via unique userId FK.
 [2026-07-01 10:00] [Phase C] [TASK-207]             [DONE] Shopping Cart 6 endpoints. OptionalAuth guard for guest+user. cookie-parser + session_id cookie. mergeGuestCart on login. priceChanged + unavailable flags.
 [2026-07-02 00:00] [Phase C] [TASK-111]             [IN PROGRESS] Order/OrderItem Prisma schema + migration (raw SQL `order_number_seq`, không dùng autoincrement vì orderNumber là String đã format). order-status.util.ts: isValidOrderTransition, isWithinRefundWindow, formatOrderNumber, calculateGrandTotal — TDD, 10 unit test + 1 integration test (snapshot invariant AC-1), tất cả GREEN. AC-4 dời sang TASK-209/210 (cần OrderController/Guard chưa tồn tại).
+[2026-07-02 00:00] [Phase C] [TASK-209]             [IN PROGRESS] OrderService.checkout + POST /orders. Thêm cột Order.idempotencyKey (migration tay, ngoài scope TASK-111 gốc). TDD 5 test (empty cart, all-unavailable, snapshot giá hiện tại + clear cart + trừ kho, rollback khi thiếu stock, idempotency replay). Manual smoke test qua HTTP thật (login seed user → add cart → POST /orders) — response đúng format, BigInt serialize string OK. MVP trim: discountAmount=0 (coupon TASK-224 chưa build), shippingFee flat 30_000 (TASK-225 chưa build), không emit event/payment (TASK-222/221). AC-3 (race 10 concurrent client) dời — cần load-test tooling.
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Phase C — Task tiếp theo** — Order Creation (`docs/tasks/business/04-order/02-order-creation.md`).
-2. Sau order: Payment (VNPay) → Phase C exit gate.
-3. **Mở PR** cho branch `feat/cart/shopping-cart` sau khi commit.
+1. Merge PR #34 (`feat/order/order-entities`) rồi rebase `feat/order/order-creation` lên `main`.
+2. **Phase C — Task tiếp theo** — Payment (VNPay), `docs/tasks/business/05-payment/01-payment.md` → Phase C exit gate.
+3. Quay lại AC-3 (TASK-209, race condition) khi có load-test tooling — Phase E.
 
 ---
 

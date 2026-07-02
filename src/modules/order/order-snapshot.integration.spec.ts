@@ -31,6 +31,7 @@ describe('Order snapshot invariant (AC-1)', () => {
     const order = await prisma.order.create({
       data: {
         orderNumber: `ORD-TEST-${Date.now()}`,
+        idempotencyKey: `test-key-${Date.now()}`,
         customerEmailSnapshot: 'buyer@example.com',
         subtotal: 25_000_000n,
         shippingFee: 0n,
