@@ -9,6 +9,7 @@ import { slugify } from '@common/utils/slugify.util';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductSortOption } from './dto/query-product.dto';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
@@ -31,6 +32,7 @@ interface ProductRecord {
 interface ProductListResult {
   data: ProductRecord[];
   pagination: { page: number; limit: number; total: number; totalPages: number };
+  facets: { categories: { id: string; name: string; slug: string; count: number }[]; priceRanges: { range: string; count: number }[]; inStock: { true: number; false: number } };
 }
 
 function uniqueSuffix() {
@@ -217,6 +219,92 @@ describe('ProductService', () => {
       const result = await findAllProducts({ page: 1, limit: 20, search: `Unique-Search-Name-${suffix}` });
       expect(result.data).toHaveLength(1);
       expect(result.data[0].id).toBe(created.id);
+    });
+
+    describe('full-text search', () => {
+      it('matches Vietnamese names when searched without diacritics', async () => {
+        const suffix = uniqueSuffix();
+        // Unicode escapes avoid literal diacritic characters, which no-vietnamese.spec.ts bans in src/*.ts.
+        const accentedName = '\u0110\u1EB7cbietsanpham';
+        const created = await createProduct({ name: `${accentedName}${suffix}`, stockQuantity: 5 });
+        createdProductIds.push(created.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: `dacbietsanpham${suffix}` });
+        expect(result.data.some((p) => p.id === created.id)).toBe(true);
+      });
+
+      it('matches a term that only appears in the description', async () => {
+        const suffix = uniqueSuffix();
+        const created = await createProduct({ name: `Product ${suffix}`, description: `Specialfeature${suffix} included`, stockQuantity: 5 });
+        createdProductIds.push(created.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: `Specialfeature${suffix}` });
+        expect(result.data.some((p) => p.id === created.id)).toBe(true);
+      });
+
+      it('matches a term that only appears in the sku', async () => {
+        const created = await createProduct({ stockQuantity: 5 });
+        createdProductIds.push(created.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: created.sku });
+        expect(result.data.some((p) => p.id === created.id)).toBe(true);
+      });
+
+      it('returns a product matching only some of multiple search words (OR semantics)', async () => {
+        const suffix = uniqueSuffix();
+        const created = await createProduct({ name: `Zqvordan${suffix}`, stockQuantity: 5 });
+        createdProductIds.push(created.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: `Zqvordan${suffix} NonExistentWordXyz999` });
+        expect(result.data.some((p) => p.id === created.id)).toBe(true);
+      });
+
+      it('ranks a product matching more search words higher than one matching fewer', async () => {
+        const suffix = uniqueSuffix();
+        const wordA = `Kappazoid${suffix}`;
+        const wordB = `Numeraxis${suffix}`;
+        const bothMatch = await createProduct({ name: `${wordA} ${wordB}`, stockQuantity: 5 });
+        createdProductIds.push(bothMatch.id);
+        const oneMatch = await createProduct({ name: `${wordA} Something`, stockQuantity: 5 });
+        createdProductIds.push(oneMatch.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: `${wordA} ${wordB}` });
+        const ids = result.data.map((p) => p.id);
+        expect(ids.indexOf(bothMatch.id)).toBeLessThan(ids.indexOf(oneMatch.id));
+      });
+
+      it('explicit sort overrides relevance ranking while searching', async () => {
+        const suffix = uniqueSuffix();
+        const wordA = `Plexinor${suffix}`;
+        const cheap = await createProduct({ name: `${wordA} Alpha`, price: 50_000, stockQuantity: 5 });
+        createdProductIds.push(cheap.id);
+        const expensive = await createProduct({ name: `${wordA} Beta`, price: 500_000, stockQuantity: 5 });
+        createdProductIds.push(expensive.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: wordA, sort: ProductSortOption.PRICE_ASC });
+        const ids = result.data.map((p) => p.id);
+        expect(ids.indexOf(cheap.id)).toBeLessThan(ids.indexOf(expensive.id));
+      });
+
+      it('reflects the search-matched set in facets, not the whole catalog', async () => {
+        const suffix = uniqueSuffix();
+        const category = await createTestCategory();
+        createdCategoryIds.push(category.id);
+        const created = await createProduct({ name: `Bravotellix${suffix}`, categoryId: category.id, stockQuantity: 5 });
+        createdProductIds.push(created.id);
+
+        const result = await findAllProducts({ page: 1, limit: 20, search: `Bravotellix${suffix}` });
+        expect(result.facets.categories.some((c: { id: string }) => c.id === category.id)).toBe(true);
+      });
+
+      it('does not throw on garbage or special-character search input', async () => {
+        await expect(findAllProducts({ page: 1, limit: 20, search: "'; DROP TABLE products; --" })).resolves.toBeDefined();
+        await expect(findAllProducts({ page: 1, limit: 20, search: '&|!():*' })).resolves.toBeDefined();
+      });
+
+      it('treats whitespace-only search as no search at all', async () => {
+        await expect(findAllProducts({ page: 1, limit: 20, search: '   ' })).resolves.toBeDefined();
+      });
     });
   });
 
