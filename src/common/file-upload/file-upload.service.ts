@@ -80,4 +80,8 @@ export class FileUploadService {
     const publicUrl = uploadUrl.split('?')[0];
     return { uploadUrl, key, publicUrl, expiresIn };
   }
+
+  async createPresignedUrls(folder: string, contentTypes: string[], expiresIn = 300): Promise<PresignedUploadResult[]> {
+    return Promise.all(contentTypes.map((contentType) => this.createPresignedUrl(folder, contentType, expiresIn)));
+  }
 }

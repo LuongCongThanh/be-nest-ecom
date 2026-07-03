@@ -1,6 +1,9 @@
 import 'dotenv/config';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ImageSize } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { ConfigService } from '@nestjs/config';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { slugify } from '@common/utils/slugify.util';
 import { ProductService } from './product.service';
@@ -9,7 +12,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
-const productService = new ProductService(prisma);
+const productService = new ProductService(prisma, new ConfigService());
 
 interface ProductRecord {
   id: string;
@@ -127,6 +130,39 @@ describe('ProductService', () => {
       createdProductIds.push(product.id);
 
       expect(product.categoryId).toBe(category.id);
+    });
+
+    it('creates a product with no images when the field is omitted (backward compatible)', async () => {
+      const product = await createProduct();
+      createdProductIds.push(product.id);
+
+      const images = await prisma.productImage.findMany({ where: { productId: product.id } });
+      expect(images).toHaveLength(0);
+    });
+
+    it('creates images at positions matching array order — first entry becomes primary', async () => {
+      const product = await createProduct({
+        images: [{ key: 'products/first.jpg' }, { key: 'products/second.jpg' }, { key: 'products/third.jpg' }],
+      });
+      createdProductIds.push(product.id);
+
+      const images = await prisma.productImage.findMany({ where: { productId: product.id }, orderBy: { position: 'asc' } });
+      expect(images.map((i) => i.key)).toEqual(['products/first.jpg', 'products/second.jpg', 'products/third.jpg']);
+      expect(images.map((i) => i.position)).toEqual([0, 1, 2]);
+      expect(images.every((i) => i.size === ImageSize.MEDIUM)).toBe(true);
+    });
+
+    it('rejects more than MAX_IMAGES entries at the DTO validation layer', async () => {
+      const dto = plainToInstance(CreateProductDto, {
+        sku: 'SKU-TOO-MANY',
+        name: 'Too Many Images',
+        price: 1000,
+        images: Array.from({ length: 11 }, (_, i) => ({ key: `products/${i}.jpg` })),
+      });
+
+      const errors = await validate(dto);
+
+      expect(errors.some((e) => e.property === 'images')).toBe(true);
     });
   });
 

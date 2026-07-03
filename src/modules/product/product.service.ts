@@ -1,14 +1,22 @@
 import { PrismaService } from '@common/prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { ImageSize, Prisma } from '@prisma/client';
 import { slugify } from '@common/utils/slugify.util';
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { CreateProductDto } from './dto/create-product.dto';
 import { QueryProductDto, ProductSortOption } from './dto/query-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly storagePublicUrl: string;
+
+  constructor(
+    private readonly prisma: PrismaService,
+    config: ConfigService,
+  ) {
+    this.storagePublicUrl = config.getOrThrow('STORAGE_PUBLIC_URL');
+  }
 
   // ─── Create ───────────────────────────────────────────────────────────────
 
@@ -29,21 +37,39 @@ export class ProductService {
       await this.assertCategoryExists(dto.categoryId);
     }
 
-    const product = await this.prisma.product.create({
-      data: {
-        sku: dto.sku,
-        name: dto.name,
-        slug,
-        description: dto.description,
-        price: BigInt(dto.price),
-        comparePrice: dto.comparePrice !== undefined ? BigInt(dto.comparePrice) : null,
-        stockQuantity: dto.stockQuantity ?? 0,
-        lowStockThreshold: dto.lowStockThreshold ?? 5,
-        isActive: dto.isActive ?? true,
-        isFeatured: dto.isFeatured ?? false,
-        categoryId: dto.categoryId ?? null,
-        metadata: (dto.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
-      },
+    const product = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.product.create({
+        data: {
+          sku: dto.sku,
+          name: dto.name,
+          slug,
+          description: dto.description,
+          price: BigInt(dto.price),
+          comparePrice: dto.comparePrice !== undefined ? BigInt(dto.comparePrice) : null,
+          stockQuantity: dto.stockQuantity ?? 0,
+          lowStockThreshold: dto.lowStockThreshold ?? 5,
+          isActive: dto.isActive ?? true,
+          isFeatured: dto.isFeatured ?? false,
+          categoryId: dto.categoryId ?? null,
+          metadata: (dto.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
+        },
+      });
+
+      if (dto.images?.length) {
+        await tx.productImage.createMany({
+          data: dto.images.map((image, position) => ({
+            productId: created.id,
+            key: image.key,
+            url: `${this.storagePublicUrl}/${image.key}`,
+            size: ImageSize.MEDIUM,
+            width: 0,
+            height: 0,
+            position,
+          })),
+        });
+      }
+
+      return created;
     });
 
     return this.serialize(product);

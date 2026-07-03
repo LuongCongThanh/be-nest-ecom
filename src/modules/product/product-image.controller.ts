@@ -31,13 +31,15 @@ export class ProductImageController {
 
   // Second half of the presigned-URL flow: client already uploaded the file straight to storage
   // using a key from POST /media/presigned; this just records that key against the product.
+  // Use this to add images to an EXISTING product — to attach images while creating a new
+  // product in one call, pass the keys in CreateProductDto.images (POST /products) instead.
   @Post(':id/images/confirm')
   @ApiBearerAuth()
   @Roles(Role.ADMIN, Role.STAFF)
   @ApiOperation({
     summary: 'Confirm presigned upload — save key to DB after direct upload to storage',
     description:
-      'Admin/staff only. Use after the client has uploaded a file directly to storage via a presigned URL (see POST /media/presigned). Trusts the given key and creates a MEDIUM-size ProductImage row at the next position.',
+      'Admin/staff only. For adding images to an existing product. Use after the client has uploaded a file directly to storage via a presigned URL (see POST /media/presigned). Trusts the given key and creates a MEDIUM-size ProductImage row at the next position. To attach images at product-creation time in one call, use `images` on POST /products instead.',
   })
   confirmImage(@Param('id') id: string, @Body() dto: ConfirmImageDto) {
     return this.productImageService.confirm(id, dto.key);

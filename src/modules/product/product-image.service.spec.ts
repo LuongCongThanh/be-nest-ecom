@@ -13,9 +13,9 @@ import { CreateProductDto } from './dto/create-product.dto';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
-const productService = new ProductService(prisma);
-
 const config = new ConfigService();
+const productService = new ProductService(prisma, config);
+
 const storageAdapter = new R2Adapter(config);
 const fileUpload = new FileUploadService(storageAdapter, new ImageProcessingService());
 const productImageService = new ProductImageService(prisma, fileUpload, config);
