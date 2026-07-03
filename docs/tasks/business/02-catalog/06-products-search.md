@@ -29,12 +29,12 @@ API public để storefront query Product theo nhiều tiêu chí. Mục tiêu <
 
 | Param                  | Type    | Mô tả                                                                 |
 | :--------------------- | :------ | :-------------------------------------------------------------------- |
-| `q`                    | string  | Text search trên `name + description + sku`                           |
+| `search`               | string  | Field tên thật là `search` (không phải `q`). Postgres full-text search trên `name` (weight A) + `description` (B) + `sku` (C). Diacritic-insensitive (`unaccent`), OR-match giữa các từ (khớp thiếu 1 từ vẫn ra kết quả), rank theo `ts_rank` — khớp càng nhiều từ càng lên đầu. |
 | `categorySlug`         | string  | Filter theo slug (include descendants)                                |
 | `minPrice`, `maxPrice` | number  | Khoảng giá                                                            |
 | `inStock`              | boolean | Chỉ Product có `stockQuantity > 0`                                    |
-| `featured`             | boolean | Chỉ `isFeatured=true`                                                 |
-| `sort`                 | enum    | `featured` (default), `priceAsc`, `priceDesc`, `newest`, `bestseller` |
+| `isFeatured`           | boolean | Field tên thật là `isFeatured` (không phải `featured`). Chỉ `isFeatured=true` |
+| `sort`                 | enum    | `priceAsc`, `priceDesc`, `newest`, `bestseller`, `featured`. Mặc định: `relevance` khi có `search` mà không truyền `sort`; `featured` khi không search. Truyền `sort` tường minh luôn thắng. |
 | `page`, `limit`        | int     | Pagination (limit default 20, max 100)                                |
 
 ### Response shape
@@ -51,11 +51,15 @@ API public để storefront query Product theo nhiều tiêu chí. Mục tiêu <
 }
 ```
 
-### Ranking strategy (default `featured`)
+### Ranking strategy
 
+**Khi có `search` (mặc định, chưa truyền `sort`)**: rank theo `ts_rank` (độ khớp full-text) — sản phẩm khớp nhiều từ tìm kiếm hơn lên đầu. Truyền `sort` tường minh sẽ override, dùng đúng nghĩa `sort` đó (giá, mới nhất...) thay vì relevance.
+
+**Khi không có `search` (mặc định `featured`)**:
 1. `isFeatured=true` đầu
-2. Bestseller (số OrderItem 30 ngày gần nhất — denormalized counter)
-3. `createdAt DESC`
+2. `createdAt DESC`
+
+`bestseller` hiện tại **fallback về `newest`** — chưa có denormalized counter đơn hàng thật, đây là việc để làm sau (không thuộc phạm vi TASK-204/nâng cấp full-text search này).
 
 ---
 

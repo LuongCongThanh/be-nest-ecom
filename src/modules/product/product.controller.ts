@@ -15,12 +15,14 @@ export class ProductController {
 
   // Storefront product listing: paginated, searchable, filterable by category/price/featured.
   // Only returns active, in-stock (by default), non-deleted products.
+  // `search` runs Postgres full-text search across name/description/sku, diacritic-insensitive,
+  // OR-matched across words and ranked by relevance (products matching more words rank higher).
   @Get()
   @Public()
   @ApiOperation({
     summary: 'Browse active products with pagination & search',
     description:
-      'Public storefront listing. Supports text search, category/price filters, sorting, and pagination. Excludes inactive, out-of-stock (by default), and soft-deleted products. Also returns facets for filter UIs.',
+      'Public storefront listing. `search` full-text matches name (highest weight), description, and sku — diacritic-insensitive (works for Vietnamese text typed without accent marks) and OR-matched across words, so a partial match still returns ranked by relevance. Sorting defaults to relevance when searching, or `featured` when not; pass `sort` to override either way. Also supports category/price filters and returns facets for filter UIs. Excludes inactive, out-of-stock (by default), and soft-deleted products.',
   })
   findAll(@Query() query: QueryProductDto) {
     return this.productService.findAll(query);
