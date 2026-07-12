@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { PrismaService } from '@common/prisma/prisma.service';
 import { ProductService } from '../product/product.service';
 import { FLAT_SHIPPING_FEE_VND, OrderService } from './order.service';
@@ -10,7 +11,8 @@ import { CreateOrderDto } from './dto/create-order.dto';
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter }) as unknown as PrismaService;
 const productService = new ProductService(prisma, new ConfigService());
-const orderService = new OrderService(prisma, productService);
+const eventEmitter = new EventEmitter2();
+const orderService = new OrderService(prisma, productService, eventEmitter);
 
 const VALID_CHECKOUT_DTO: CreateOrderDto = {
   shippingAddress: {
@@ -44,6 +46,25 @@ async function createTestProduct(overrides: Partial<{ price: bigint; stockQuanti
       price: overrides.price ?? 100_000n,
       stockQuantity: overrides.stockQuantity ?? 10,
       deletedAt: overrides.deletedAt ?? null,
+    },
+  });
+}
+
+async function createTestOrder(userId: string, overrides: Partial<{ status: 'PENDING' | 'PAID' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED' | 'REFUNDED' }> = {}) {
+  const suffix = uniqueSuffix();
+  return prisma.order.create({
+    data: {
+      orderNumber: `ORD-TEST-${suffix}`,
+      idempotencyKey: `idem-${suffix}`,
+      userId,
+      customerEmailSnapshot: 'test@test.local',
+      status: overrides.status ?? 'PENDING',
+      subtotal: 100_000n,
+      shippingFee: 30_000n,
+      grandTotal: 130_000n,
+      shippingAddressSnapshot: { recipient: 'Test' },
+      shippingMethod: 'standard',
+      paymentProvider: 'cod',
     },
   });
 }
@@ -153,5 +174,61 @@ describe('OrderService.checkout', () => {
 
     const product2 = await prisma.product.findUniqueOrThrow({ where: { id: product.id } });
     expect(product2.stockQuantity).toBe(3); // decremented once, not twice
+  });
+});
+
+describe('OrderService.findAllForUser', () => {
+  const createdUserIds: string[] = [];
+
+  afterAll(async () => {
+    await prisma.orderItem.deleteMany({ where: { order: { userId: { in: createdUserIds } } } });
+    await prisma.order.deleteMany({ where: { userId: { in: createdUserIds } } });
+    await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
+    await prisma.$disconnect();
+  });
+
+  it('only returns orders belonging to the requesting user (AC-1)', async () => {
+    const userA = await createTestUser();
+    const userB = await createTestUser();
+    createdUserIds.push(userA.id, userB.id);
+    await createTestOrder(userA.id);
+    await createTestOrder(userA.id);
+    await createTestOrder(userA.id);
+    await createTestOrder(userB.id);
+    await createTestOrder(userB.id);
+
+    const result = await orderService.findAllForUser(userA.id, { page: 1, limit: 20 });
+
+    expect(result.total).toBe(3);
+    expect(result.data).toHaveLength(3);
+    expect(result.data.every((order) => order.userId === userA.id)).toBe(true);
+  });
+
+  it('filters by status', async () => {
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    await createTestOrder(user.id, { status: 'PENDING' });
+    await createTestOrder(user.id, { status: 'PAID' });
+    await createTestOrder(user.id, { status: 'PAID' });
+
+    const result = await orderService.findAllForUser(user.id, { status: 'PAID', page: 1, limit: 20 });
+
+    expect(result.total).toBe(2);
+    expect(result.data.every((order) => order.status === 'PAID')).toBe(true);
+  });
+
+  it('paginates results', async () => {
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    await createTestOrder(user.id);
+    await createTestOrder(user.id);
+    await createTestOrder(user.id);
+
+    const firstPage = await orderService.findAllForUser(user.id, { page: 1, limit: 2 });
+    const secondPage = await orderService.findAllForUser(user.id, { page: 2, limit: 2 });
+
+    expect(firstPage.data).toHaveLength(2);
+    expect(secondPage.data).toHaveLength(1);
+    expect(firstPage.total).toBe(3);
   });
 });

@@ -21,6 +21,23 @@ export function isWithinRefundWindow(deliveredAt: Date, now: Date): boolean {
   return elapsedMs <= windowMs;
 }
 
+const SELF_CANCEL_WINDOW_MINUTES = 30;
+
+// "Self-Cancel Window" (CONTEXT.md): 30 min after checkout (placedAt), only while status is still PAID.
+export function isWithinSelfCancelWindow(placedAt: Date, now: Date): boolean {
+  const elapsedMs = now.getTime() - placedAt.getTime();
+  const windowMs = SELF_CANCEL_WINDOW_MINUTES * 60 * 1000;
+  return elapsedMs <= windowMs;
+}
+
+const AUTO_CANCEL_TIMEOUT_MINUTES = 15;
+
+export function isPastAutoCancelTimeout(placedAt: Date, now: Date): boolean {
+  const elapsedMs = now.getTime() - placedAt.getTime();
+  const windowMs = AUTO_CANCEL_TIMEOUT_MINUTES * 60 * 1000;
+  return elapsedMs > windowMs;
+}
+
 export function formatOrderNumber(sequenceValue: number, year: number): string {
   return `ORD-${year}-${sequenceValue.toString().padStart(6, '0')}`;
 }

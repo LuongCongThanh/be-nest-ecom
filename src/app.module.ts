@@ -8,8 +8,10 @@ import { HealthModule } from '@health/health.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { StorageModule } from '@common/storage/storage.module';
@@ -40,6 +42,8 @@ import { OrderModule } from '@modules/order/order.module';
     }),
     PrismaModule,
     RedisModule,
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         secret: config.get<string>('JWT_SECRET'),

@@ -1,4 +1,4 @@
-import { calculateGrandTotal, formatOrderNumber, isValidOrderTransition, isWithinRefundWindow } from './order-status.util';
+import { calculateGrandTotal, formatOrderNumber, isPastAutoCancelTimeout, isValidOrderTransition, isWithinRefundWindow, isWithinSelfCancelWindow } from './order-status.util';
 
 describe('isValidOrderTransition', () => {
   it('allows PENDING -> PAID', () => {
@@ -29,6 +29,34 @@ describe('isWithinRefundWindow', () => {
     const deliveredAt = new Date('2026-06-29T00:00:00Z');
     const now = new Date('2026-07-02T00:00:00Z');
     expect(isWithinRefundWindow(deliveredAt, now)).toBe(true);
+  });
+});
+
+describe('isWithinSelfCancelWindow', () => {
+  it('allows self-cancel 10 min after placedAt (still PAID)', () => {
+    const placedAt = new Date('2026-07-02T00:00:00Z');
+    const now = new Date('2026-07-02T00:10:00Z');
+    expect(isWithinSelfCancelWindow(placedAt, now)).toBe(true);
+  });
+
+  it('rejects self-cancel 31 min after placedAt (AC-2)', () => {
+    const placedAt = new Date('2026-07-02T00:00:00Z');
+    const now = new Date('2026-07-02T00:31:00Z');
+    expect(isWithinSelfCancelWindow(placedAt, now)).toBe(false);
+  });
+});
+
+describe('isPastAutoCancelTimeout', () => {
+  it('is false at 14 minutes', () => {
+    const placedAt = new Date('2026-07-02T00:00:00Z');
+    const now = new Date('2026-07-02T00:14:00Z');
+    expect(isPastAutoCancelTimeout(placedAt, now)).toBe(false);
+  });
+
+  it('is true past 15 minutes (AC-5)', () => {
+    const placedAt = new Date('2026-07-02T00:00:00Z');
+    const now = new Date('2026-07-02T00:16:00Z');
+    expect(isPastAutoCancelTimeout(placedAt, now)).toBe(true);
   });
 });
 

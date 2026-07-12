@@ -5,7 +5,7 @@
 - **Task ID**: TASK-210
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (Operations)
 - **Phụ thuộc**: TASK-209 (Order Creation)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — *Order State Machine*
 
@@ -88,3 +88,7 @@ Vận hành Order sau khi đã tạo. State machine enforce ở mọi API.
 - Notification email per transition → TASK-222 + downstream subscribers.
 - Return logistics (RMA) → backlog.
 - Order analytics → TASK-211.
+
+## 📝 Scope note (2026-07-12)
+
+`CONTEXT.md` (repo root) và Phase C Exit Gate (`docs/STATUS.md`) yêu cầu `PATCH /orders/:id/force-status` (ADMIN, bypass state machine, bắt buộc `reason`, log `OrderStateChangeLog`). Endpoint này ban đầu không nằm trong bảng Admin scope ở trên — bổ sung vào scope của TASK-210 vì cùng nhóm lifecycle ops và Phase C không thể đóng exit gate nếu thiếu nó. Xem checklist [`checklists/03-order-mgmt.md`](./checklists/03-order-mgmt.md) Step 11–12 + AC-7.

@@ -5,7 +5,7 @@
 - **Task ID**: TASK-221
 - **Độ ưu tiên**: 🔴 KHẨN CẤP (Financial Integrity)
 - **Phụ thuộc**: TASK-209 (Order Creation), TASK-222 (Lifecycle Events)
-- **Trạng thái**: ⏳ Not started
+- **Trạng thái**: ⏸ Deferred → Phase F backlog (2026-07-05) — MVP dùng COD thay thế, xem [ADR-0001](../../adr/0001-cod-only-mvp-payment.md)
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md)
 
