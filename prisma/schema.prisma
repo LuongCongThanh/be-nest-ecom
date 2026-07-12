@@ -249,6 +249,8 @@ model Order {
   paymentStatus            PaymentStatus @default(UNPAID)
   paymentProvider          String
   paymentRef               String?
+  trackingNumber           String?
+  carrier                  String?
   placedAt                 DateTime      @default(now())
   cancelledAt              DateTime?
   deliveredAt              DateTime?
@@ -257,10 +259,27 @@ model Order {
 
   user                     User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
   items                    OrderItem[]
+  stateChangeLogs          OrderStateChangeLog[]
 
   @@index([userId])
   @@index([status])
   @@map("orders")
+}
+
+model OrderStateChangeLog {
+  id              String      @id @default(uuid())
+  orderId         String
+  fromState       OrderStatus
+  toState         OrderStatus
+  changedBy       String?
+  reason          String?
+  isForceOverride Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  order           Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_state_change_logs")
 }
 
 model OrderItem {
