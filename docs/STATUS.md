@@ -156,10 +156,10 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 - [ ] User add/update/remove cart items (Guest qua cookie `gsid`, User qua JWT)
 - [ ] Cart Merge khi Guest login → tạo `mergeWarnings[]` đúng spec
 - [ ] `POST /api/v1/orders` với `Idempotency-Key` header → tạo Order PENDING + trừ stock atomic
-- [ ] Order state machine reject transition sai
-- [ ] Admin force-status endpoint log vào `OrderStateChangeLog`
-- [ ] Cleanup job 15-min cancel Order PENDING + hoàn stock
-- [ ] Admin `POST /admin/orders/:id/pay` xác nhận COD → Order PENDING → PAID atomic (VNPay/online gateway dời sang Phase F backlog — [ADR-0001](./adr/0001-cod-only-mvp-payment.md))
+- [x] Order state machine reject transition sai — 2026-07-12, `isValidOrderTransition` enforced trên mọi endpoint TASK-210 (409 INVALID_TRANSITION)
+- [x] Admin force-status endpoint log vào `OrderStateChangeLog` — 2026-07-12, `PATCH /admin/orders/:id/force-status`
+- [x] Cleanup job 15-min cancel Order PENDING + hoàn stock — 2026-07-12, `@Cron(EVERY_5_MINUTES)` trong OrderService.autoCancelExpiredPendingOrders (unit-tested; chưa quan sát live theo lịch thật)
+- [x] Admin `POST /admin/orders/:id/pay` xác nhận COD → Order PENDING → PAID atomic (VNPay/online gateway dời sang Phase F backlog — [ADR-0001](./adr/0001-cod-only-mvp-payment.md)) — 2026-07-12, verified qua HTTP thật
 - [ ] Test thủ công full flow: register → browse → cart → checkout → pay (COD)
 
 ### Execution tracker (`todo/phase-c/`)
@@ -174,7 +174,7 @@ TỔNG (Phase B-E, execution files)      [████████░░░░�
 | `docs/tasks/business/03-cart/02-shopping-cart.md` | ✅ Done | 2026-07-01 — 6 endpoints: GET/POST/PATCH/DELETE item, DELETE cart, POST merge |
 | `docs/tasks/business/04-order/01-order-entities.md` | 🔵 In progress | 2026-07-02 — Order/OrderItem schema+migration, order_number_seq (raw SQL), `order-status.util.ts` (transition/refund-window/format/grandTotal, unit-tested), AC-1 snapshot verified via integration test. AC-4 deferred to TASK-209/210 |
 | `docs/tasks/business/04-order/02-order-creation.md` | 🔵 In progress | 2026-07-02 — `POST /orders` checkout flow, OrderService (TDD, 5 tests) + manual smoke test qua HTTP. MVP trim: no coupon/dynamic-shipping/event/payment. AC-3 (concurrency) deferred to load-test tooling |
-| `docs/tasks/business/04-order/03-order-mgmt.md` | 🔵 In progress | 2026-07-12 — Bắt đầu thật. Sync lại note trước đó ghi nhầm "in progress" khi chưa có code (0/6 endpoint). Scope mở rộng thêm force-status + OrderStateChangeLog (Phase C exit gate). Chứa endpoint `POST /admin/orders/:id/pay` dùng để confirm COD |
+| `docs/tasks/business/04-order/03-order-mgmt.md` | ✅ Done | 2026-07-12 — Toàn bộ 11 endpoint (user: list/detail/cancel; admin: list/pay/ship/deliver/cancel/refund/force-status) + auto-cancel cron + OrderStateChangeLog. 37 test pass, lint/tsc/build sạch, verified qua HTTP thật (register→checkout→cancel, admin pay→ship→deliver→refund→force-status, RBAC 403, ownership 403) |
 | `docs/tasks/business/05-payment/01-payment.md` | ⏸ Deferred → Phase F backlog | 2026-07-05 — COD thay thế cho MVP, xem [ADR-0001](../adr/0001-cod-only-mvp-payment.md) |
 | `docs/tasks/business/02-catalog/08-product-images.md` | ✅ Done | 2026-06-29 — PR #25 (file upload + presigned URL) |
 | `docs/tasks/business/02-catalog/05-category-tree.md` | ✅ Done | 2026-07-01 — tree, slug detail (`GET /categories/slug/:slug`), breadcrumb endpoint |
@@ -308,13 +308,14 @@ Signed-off: self · Next: Phase C open.
 [2026-07-02 00:00] [Phase C] [TASK-209]             [IN PROGRESS] OrderService.checkout + POST /orders. Thêm cột Order.idempotencyKey (migration tay, ngoài scope TASK-111 gốc). TDD 5 test (empty cart, all-unavailable, snapshot giá hiện tại + clear cart + trừ kho, rollback khi thiếu stock, idempotency replay). Manual smoke test qua HTTP thật (login seed user → add cart → POST /orders) — response đúng format, BigInt serialize string OK. MVP trim: discountAmount=0 (coupon TASK-224 chưa build), shippingFee flat 30_000 (TASK-225 chưa build), không emit event/payment (TASK-222/221). AC-3 (race 10 concurrent client) dời — cần load-test tooling.
 [2026-07-05 00:00] [Phase C] [ADR-0001]              [DECISION] COD-only cho MVP payment; TASK-221 (VNPay) dời sang Phase F backlog. Task tiếp theo đổi sang TASK-210 (Order Management) — chứa `POST /admin/orders/:id/pay` để confirm COD. Xem docs/adr/0001-cod-only-mvp-payment.md.
 [2026-07-12 00:00] [Phase C] [TASK-210]              [SYNC] Đối chiếu code thật: chưa có endpoint/cron nào của Order Management (0/6). Sửa tracker từ "In progress" (ghi nhầm) về "Not started". Bắt đầu task hôm nay.
+[2026-07-12 05:00] [Phase C] [TASK-210]              [DONE] Order Management hoàn thành trên branch feat/order/order-management. 11 endpoint: user (GET /orders, GET /orders/:id, POST /orders/:id/cancel), admin (GET/pay/ship/deliver/cancel/refund/force-status /admin/orders). Auto-cancel cron (@nestjs/schedule) + event emit (@nestjs/event-emitter). Scope mở rộng thêm PATCH /admin/orders/:id/force-status + OrderStateChangeLog (Phase C exit gate, không có trong bảng endpoint gốc của file task — xem "Scope note" trong 03-order-mgmt.md). Migration 20260712042437_add_order_tracking_and_state_log (trackingNumber, carrier, OrderStateChangeLog). 37 test pass (14 mới cho lifecycle + 4 mới cho util), tsc/lint/build sạch. Verified qua HTTP thật: full flow user (checkout→list→detail→self-cancel) + admin (pay→ship 422 rồi success→deliver→refund→force-status) + RBAC 403 + ownership 403. Swagger /docs-json xác nhận 11 path. 4 Phase C exit-gate checkbox chuyển ✅ (state machine reject, force-status log, cleanup job, admin pay COD).
 <!-- Thêm entry mới phía dưới. KHÔNG xóa entry cũ. -->
 
 ---
 
 ## 🎯 Next 3 Actions (cập nhật mỗi session)
 
-1. **Phase C — Task tiếp theo** — Order Management, `docs/tasks/business/04-order/03-order-mgmt.md` (TASK-210): list/detail/cancel (user) + admin pay/ship/deliver/cancel/refund + auto-cancel job. Endpoint `POST /admin/orders/:id/pay` dùng để confirm COD → Phase C exit gate.
+1. **Phase C — Task tiếp theo** — TASK-211 (Order Statistics, `docs/tasks/business/04-order/04-order-stats.md`) hoặc TASK-222 (Order Lifecycle Events subscribers, `docs/tasks/business/04-order/05-order-events.md`) — lưu ý TASK-210 đã emit sẵn `order.paid/shipped/delivered/cancelled/refunded` qua `@nestjs/event-emitter`, TASK-222 giờ chỉ còn phần viết subscriber (notification/analytics), chưa có subscriber nào lắng nghe các event này.
 2. TASK-221 (VNPay/online gateway) dời sang Phase F backlog — xem [ADR-0001](./adr/0001-cod-only-mvp-payment.md).
 3. Quay lại AC-3 (TASK-209, race condition) khi có load-test tooling — Phase E.
 

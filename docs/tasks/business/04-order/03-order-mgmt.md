@@ -5,7 +5,7 @@
 - **Task ID**: TASK-210
 - **Độ ưu tiên**: 🔵 TRUNG BÌNH (Operations)
 - **Phụ thuộc**: TASK-209 (Order Creation)
-- **Trạng thái**: 🔵 In progress
+- **Trạng thái**: ✅ Done
 
 > 📜 Charter: [`./CHARTER.md`](./CHARTER.md) · 🗣️ Glossary: [`../../docs/CONTEXT.md`](../../docs/CONTEXT.md) — *Order State Machine*
 
