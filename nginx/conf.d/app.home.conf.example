@@ -1,0 +1,30 @@
+# Config for the home + ngrok + self-hosted-MinIO path (docker-compose.home.yml).
+# ngrok terminates TLS at its own edge and forwards plain HTTP to this container over the
+# compose network, so there's no certbot/bootstrap step here — rename straight to
+# app.conf and start nginx. See docs/DEPLOYMENT-HOME.md.
+server {
+    listen 80;
+    server_name _;
+
+    client_max_body_size 10m;
+
+    location / {
+        proxy_pass http://app:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Self-hosted MinIO, reached via path-style S3 requests. Host header MUST be forwarded
+    # unchanged — the app's S3 client signs requests against the public ngrok host, and
+    # MinIO's SigV4 verification checks the Host header it receives against that signature.
+    location /storage/ {
+        proxy_pass http://minio:9000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        client_max_body_size 20m;
+    }
+}
