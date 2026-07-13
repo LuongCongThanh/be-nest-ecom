@@ -29,18 +29,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-      # bitnami/minio (unlike minio/minio) runs its server with no extra `command:` needed —
-      # GitHub Actions service containers can't override a service's command — and
-      # MINIO_DEFAULT_BUCKETS creates the bucket product-image.service.spec.ts writes to
-      # on startup, so no separate "create bucket" step is needed.
-      minio:
-        image: bitnami/minio:latest
-        env:
-          MINIO_ROOT_USER: ci-test-key
-          MINIO_ROOT_PASSWORD: ci-test-secret
-          MINIO_DEFAULT_BUCKETS: ci-test-bucket
-        ports:
-          - 9000:9000
     env:
       NODE_ENV: test
       DATABASE_URL: postgresql://ecom_test:ecom_test@localhost:5432/ecom_test
@@ -70,13 +58,23 @@ jobs:
       - run: npx prisma generate
       - run: npx prisma migrate deploy
 
-      - name: Wait for MinIO to accept connections
+      # GitHub Actions `services:` containers can't override a service's command, and
+      # minio/minio's default CMD needs `server /data` args to actually start the server
+      # (see the same override in docker-compose.home.yml) — so MinIO runs as a plain
+      # `docker run` step here instead, where the command is fully under our control.
+      - name: Start MinIO for storage tests
         run: |
+          docker run -d --name ci-minio -p 9000:9000 \
+            -e MINIO_ROOT_USER=ci-test-key -e MINIO_ROOT_PASSWORD=ci-test-secret \
+            minio/minio server /data
           for i in $(seq 1 20); do
-            curl -sf http://localhost:9000/minio/health/live && exit 0
+            curl -sf http://localhost:9000/minio/health/live && break
+            if [ "$i" = "20" ]; then echo "MinIO did not become ready in time" && exit 1; fi
             sleep 2
           done
-          echo "MinIO did not become ready in time" && exit 1
+          docker run --rm --network host \
+            -e MC_HOST_local=http://ci-test-key:ci-test-secret@localhost:9000 \
+            minio/mc mb --ignore-existing local/ci-test-bucket
 
       - run: npm run lint
       - run: npm run test
