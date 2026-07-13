@@ -51,7 +51,7 @@ services:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     command:
       - http
-      - --domain=${NGROK_DOMAIN}
+      - --url=${NGROK_DOMAIN}
       - nginx:80
     depends_on:
       - nginx
