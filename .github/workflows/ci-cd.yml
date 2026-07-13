@@ -1,0 +1,70 @@
+name: CI/CD
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Lint, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      # prisma.config.ts needs DATABASE_URL to resolve even for `generate` (no real
+      # connection made) — mirrors the dummy value used in the Dockerfile build stage.
+      - run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+
+  deploy:
+    name: Deploy to VPS
+    needs: ci
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-vps
+      cancel-in-progress: true
+    steps:
+      - name: SSH deploy, rebuild, and migrate
+        uses: appleboy/ssh-action@v1.2.4
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd "${{ secrets.VPS_DEPLOY_PATH }}"
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up -d --build app
+
+            echo "Waiting for app healthcheck..."
+            for i in $(seq 1 20); do
+              status=$(docker inspect --format='{{.State.Health.Status}}' ecom_app_prod 2>/dev/null || echo "starting")
+              if [ "$status" = "healthy" ]; then
+                echo "app is healthy"
+                break
+              fi
+              if [ "$i" = "20" ]; then
+                echo "app did not become healthy in time"
+                docker compose -f docker-compose.prod.yml logs --tail=100 app
+                exit 1
+              fi
+              sleep 3
+            done
+
+            docker compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy
