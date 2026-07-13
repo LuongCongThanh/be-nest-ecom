@@ -32,39 +32,61 @@ jobs:
       - run: npm run build
 
   deploy:
-    name: Deploy to VPS
+    name: Deploy to home-server
     needs: ci
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    # Runs on a self-hosted runner installed on the home-server machine itself — that
+    # machine has no public IP/inbound SSH (that's the whole reason it's behind ngrok),
+    # so a GitHub-hosted runner can't reach it. The runner polls out to GitHub instead.
+    runs-on: [self-hosted, home-server]
     concurrency:
-      group: deploy-vps
+      group: deploy-home-server
       cancel-in-progress: true
+    defaults:
+      run:
+        shell: pwsh
+    # Deploys from a dedicated clone (D:\my-doc\project\deploy-be-nest-ecom), separate
+    # from any working copy used for day-to-day development on this same machine, so a
+    # hard reset to origin/main here never touches uncommitted dev work elsewhere.
+    env:
+      DEPLOY_DIR: D:\my-doc\project\deploy-be-nest-ecom
     steps:
-      - name: SSH deploy, rebuild, and migrate
-        uses: appleboy/ssh-action@v1.2.4
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -e
-            cd "${{ secrets.VPS_DEPLOY_PATH }}"
-            git pull origin main
-            docker compose -f docker-compose.prod.yml up -d --build app
+      - name: Pull latest main into the dedicated deploy clone
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          git fetch origin main
+          git reset --hard origin/main
 
-            echo "Waiting for app healthcheck..."
-            for i in $(seq 1 20); do
-              status=$(docker inspect --format='{{.State.Health.Status}}' ecom_app_prod 2>/dev/null || echo "starting")
-              if [ "$status" = "healthy" ]; then
-                echo "app is healthy"
-                break
-              fi
-              if [ "$i" = "20" ]; then
-                echo "app did not become healthy in time"
-                docker compose -f docker-compose.prod.yml logs --tail=100 app
-                exit 1
-              fi
-              sleep 3
-            done
+      # nginx/conf.d/app.conf is a one-time manual rename (docs/DEPLOYMENT-HOME.md step 5),
+      # not a tracked file — `git reset --hard` above would otherwise restore the VPS-only
+      # app.conf.example/bootstrap.conf and delete app.conf on every single deploy. Re-apply
+      # it here so the home-server nginx config is idempotent across deploys.
+      - name: Re-apply home-server nginx config
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          Copy-Item nginx\conf.d\app.home.conf.example nginx\conf.d\app.conf -Force
+          Remove-Item nginx\conf.d\app.conf.example, nginx\conf.d\bootstrap.conf -ErrorAction SilentlyContinue
 
-            docker compose -f docker-compose.prod.yml exec -T app npx prisma migrate deploy
+      - name: Rebuild and restart the app container
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml up -d --build app
+
+      - name: Wait for the app container to report healthy
+        run: |
+          $healthy = $false
+          for ($i = 0; $i -lt 20; $i++) {
+            $status = docker inspect --format='{{.State.Health.Status}}' ecom_app_prod 2>$null
+            if ($status -eq "healthy") { $healthy = $true; break }
+            Start-Sleep -Seconds 3
+          }
+          if (-not $healthy) {
+            Set-Location $env:DEPLOY_DIR
+            docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml logs --tail=100 app
+            throw "app did not become healthy in time"
+          }
+
+      - name: Run pending database migrations
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml exec -T app npx prisma migrate deploy
