@@ -1,28 +1,10 @@
-# Alternate STEP 2 config for the home + self-hosted-MinIO path (docker-compose.home.yml).
-# Same as app.conf.example plus a /storage/ location proxying to the minio container.
-# Use this INSTEAD OF app.conf.example when following docs/DEPLOYMENT-HOME.md — rename to
-# app.conf (and remove bootstrap.conf) once certbot has issued the certificate.
+# Config for the home + ngrok + self-hosted-MinIO path (docker-compose.home.yml).
+# ngrok terminates TLS at its own edge and forwards plain HTTP to this container over the
+# compose network, so there's no certbot/bootstrap step here — rename straight to
+# app.conf and start nginx. See docs/DEPLOYMENT-HOME.md.
 server {
     listen 80;
-    server_name YOUR_DOMAIN;
-
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    http2 on;
-    server_name YOUR_DOMAIN;
-
-    ssl_certificate     /etc/letsencrypt/live/YOUR_DOMAIN/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/YOUR_DOMAIN/privkey.pem;
-    ssl_protocols TLSv1.2 TLSv1.3;
+    server_name _;
 
     client_max_body_size 10m;
 
@@ -35,8 +17,8 @@ server {
     }
 
     # Self-hosted MinIO, reached via path-style S3 requests. Host header MUST be forwarded
-    # unchanged — the app's S3 client signs requests against this public host, and MinIO's
-    # SigV4 verification checks the Host header it receives against that signature.
+    # unchanged — the app's S3 client signs requests against the public ngrok host, and
+    # MinIO's SigV4 verification checks the Host header it receives against that signature.
     location /storage/ {
         proxy_pass http://minio:9000/;
         proxy_set_header Host $host;

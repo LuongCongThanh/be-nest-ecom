@@ -1,5 +1,6 @@
-# Overlay for self-hosting on a home PC behind DuckDNS, with self-hosted MinIO for storage
-# (instead of Cloudflare R2). Combine with docker-compose.prod.yml — never used alone.
+# Overlay for self-hosting on a home PC, published to the internet via an ngrok tunnel
+# (no router port-forwarding, no dynamic DNS), with self-hosted MinIO for storage instead
+# of Cloudflare R2. Combine with docker-compose.prod.yml — never used alone.
 #
 # Usage:
 #   docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml up -d --build
@@ -39,29 +40,26 @@ services:
       "
     restart: 'no'
 
-  # Keeps the DuckDNS A record pointed at this machine's current public IP —
-  # home ISPs rarely hand out a static one.
-  duckdns:
-    image: lscr.io/linuxserver/duckdns:latest
-    container_name: ecom_duckdns
+  # Holds the outbound-only tunnel to ngrok's edge and forwards the reserved static
+  # domain to nginx over the compose network. No router config needed — nginx never
+  # needs a port published to the host for this path to work.
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: ecom_ngrok
     restart: unless-stopped
     environment:
-      - TZ=${TZ:-Asia/Ho_Chi_Minh}
-      - SUBDOMAINS=${DUCKDNS_SUBDOMAIN}
-      - TOKEN=${DUCKDNS_TOKEN}
-      - LOG_FILE=false
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    command:
+      - http
+      - --domain=${NGROK_DOMAIN}
+      - nginx:80
+    depends_on:
+      - nginx
 
-  # The app container calls STORAGE_ENDPOINT (https://<PUBLIC_DOMAIN>/storage) both to
-  # relay uploads and to sign presigned URLs — the signature is only valid for that exact
-  # host. This alias resolves the public domain to the nginx container *inside* the
-  # compose network, so the app's own outbound calls to its public domain never leave the
-  # machine (avoids relying on the home router supporting NAT hairpinning/loopback).
+  # ngrok terminates TLS at its own edge, so nginx only needs to serve plain HTTP —
+  # no certbot, no cert renewal, no bootstrap/app two-step here.
   nginx:
     depends_on: [app, minio]
-    networks:
-      default:
-        aliases:
-          - ${PUBLIC_DOMAIN}
 
 networks:
   default:
