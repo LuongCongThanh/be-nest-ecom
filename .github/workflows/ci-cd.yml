@@ -29,6 +29,18 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      # bitnami/minio (unlike minio/minio) runs its server with no extra `command:` needed —
+      # GitHub Actions service containers can't override a service's command — and
+      # MINIO_DEFAULT_BUCKETS creates the bucket product-image.service.spec.ts writes to
+      # on startup, so no separate "create bucket" step is needed.
+      minio:
+        image: bitnami/minio:latest
+        env:
+          MINIO_ROOT_USER: ci-test-key
+          MINIO_ROOT_PASSWORD: ci-test-secret
+          MINIO_DEFAULT_BUCKETS: ci-test-bucket
+        ports:
+          - 9000:9000
     env:
       NODE_ENV: test
       DATABASE_URL: postgresql://ecom_test:ecom_test@localhost:5432/ecom_test
@@ -57,6 +69,14 @@ jobs:
       - run: npm ci
       - run: npx prisma generate
       - run: npx prisma migrate deploy
+
+      - name: Wait for MinIO to accept connections
+        run: |
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:9000/minio/health/live && exit 0
+            sleep 2
+          done
+          echo "MinIO did not become ready in time" && exit 1
 
       - run: npm run lint
       - run: npm run test
