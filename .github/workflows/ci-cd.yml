@@ -11,6 +11,41 @@ jobs:
   ci:
     name: Lint, test, build
     runs-on: ubuntu-latest
+    # `npm run test` isn't pure unit tests — several specs (order-snapshot, product,
+    # file-upload...) hit a real Postgres via Prisma and read config keys through
+    # `ConfigService.getOrThrow`, the same way they do against the local .env in dev.
+    # A service container + matching env vars here is what makes that pass in CI.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ecom_test
+          POSTGRES_PASSWORD: ecom_test
+          POSTGRES_DB: ecom_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ecom_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://ecom_test:ecom_test@localhost:5432/ecom_test
+      JWT_SECRET: ci-test-secret-not-used-anywhere-real
+      JWT_EXPIRES_IN: 15m
+      REFRESH_TOKEN_EXPIRES_IN: 7d
+      REDIS_URL: redis://localhost:6379
+      CORS_ORIGINS: http://localhost:3000
+      LOG_FORMAT: json
+      LOG_LEVEL: error
+      STORAGE_ENDPOINT: http://localhost:9000
+      STORAGE_ACCESS_KEY_ID: ci-test-key
+      STORAGE_SECRET_ACCESS_KEY: ci-test-secret
+      STORAGE_BUCKET: ci-test-bucket
+      STORAGE_PUBLIC_URL: http://localhost:9000/ci-test-bucket
+      STORAGE_REGION: auto
+      STORAGE_FORCE_PATH_STYLE: 'true'
     steps:
       - uses: actions/checkout@v4
 
@@ -20,12 +55,8 @@ jobs:
           cache: npm
 
       - run: npm ci
-
-      # prisma.config.ts needs DATABASE_URL to resolve even for `generate` (no real
-      # connection made) — mirrors the dummy value used in the Dockerfile build stage.
       - run: npx prisma generate
-        env:
-          DATABASE_URL: postgresql://dummy:dummy@localhost:5432/dummy
+      - run: npx prisma migrate deploy
 
       - run: npm run lint
       - run: npm run test
