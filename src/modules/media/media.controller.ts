@@ -1,9 +1,20 @@
 import { Roles } from '@common/decorators/roles/roles.decorator';
 import { FileUploadService } from '@common/file-upload/file-upload.service';
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
 import { PresignedUrlDto } from './dto/presigned-url.dto';
+
+const PRESIGNED_EXAMPLE = {
+  files: [
+    {
+      uploadUrl: 'https://storage.example.com/products/uuid.jpg?X-Amz-Signature=...',
+      key: 'products/uuid.jpg',
+      publicUrl: 'https://storage.example.com/products/uuid.jpg',
+      expiresIn: 300,
+    },
+  ],
+};
 
 @ApiTags('media')
 @Controller('media')
@@ -19,8 +30,10 @@ export class MediaController {
   @ApiOperation({
     summary: 'Get presigned URLs for direct upload to MinIO/R2',
     description:
-      'Batch endpoint: pass one entry per file you intend to upload. Returns one presigned URL/key per entry, in the same order as `files`. Upload each file directly to its `uploadUrl`, then reference the `key` when creating/updating the owning resource.',
+      'Batch endpoint: pass one entry per file you intend to upload. Returns one presigned URL/key per entry, in the same order as `files`. Upload each file directly to its `uploadUrl` (each URL expires in `expiresIn` seconds), then reference the `key` when creating/updating the owning resource.',
   })
+  @ApiResponse({ status: 201, description: 'One presigned URL per requested file', schema: { example: PRESIGNED_EXAMPLE } })
+  @ApiResponse({ status: 422, description: 'VALIDATION_FAILED — folder must be one of products/categories/users, contentType must be one of image/jpeg/png/webp' })
   async getPresignedUrls(@Body() dto: PresignedUrlDto) {
     const files = await this.fileUpload.createPresignedUrls(
       dto.folder,
