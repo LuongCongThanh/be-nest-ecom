@@ -116,10 +116,23 @@ jobs:
           Copy-Item nginx\conf.d\app.home.conf.example nginx\conf.d\app.conf -Force
           Remove-Item nginx\conf.d\app.conf.example, nginx\conf.d\bootstrap.conf -ErrorAction SilentlyContinue
 
-      - name: Rebuild and restart the app container
+      - name: Build the app image
         run: |
           Set-Location $env:DEPLOY_DIR
-          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml up -d --build app
+          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml build app
+
+      # Runs against the freshly built image via a throwaway container (--rm), while the
+      # old app container is still serving traffic — so schema changes land before any
+      # new code that depends on them starts running.
+      - name: Run pending database migrations
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml run --rm --no-deps app npx prisma migrate deploy
+
+      - name: Restart the app container
+        run: |
+          Set-Location $env:DEPLOY_DIR
+          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml up -d app
 
       - name: Wait for the app container to report healthy
         run: |
@@ -134,8 +147,3 @@ jobs:
             docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml logs --tail=100 app
             throw "app did not become healthy in time"
           }
-
-      - name: Run pending database migrations
-        run: |
-          Set-Location $env:DEPLOY_DIR
-          docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.home.yml exec -T app npx prisma migrate deploy
