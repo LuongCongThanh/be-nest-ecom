@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import type { IStorageAdapter } from '@common/storage/storage.interface';
 import { STORAGE_ADAPTER } from '@common/storage/storage.interface';
@@ -10,7 +10,7 @@ const ALLOWED_UPLOAD_TYPES: Record<string, string> = {
   'image/webp': 'webp',
 };
 
-const ALLOWED_UPLOAD_FOLDERS = ['products', 'categories', 'avatars', 'media'] as const;
+const ALLOWED_UPLOAD_FOLDERS = ['products', 'categories', 'users'] as const;
 type AllowedUploadFolder = (typeof ALLOWED_UPLOAD_FOLDERS)[number];
 
 export interface PresignedUploadResult {
@@ -67,12 +67,12 @@ export class FileUploadService {
   async createPresignedUrl(folder: string, contentType: string, expiresIn = 300): Promise<PresignedUploadResult> {
     const ext = ALLOWED_UPLOAD_TYPES[contentType];
     if (!ext) {
-      throw new Error(`Unsupported content type: ${contentType}`);
+      throw new BadRequestException({ code: 'UNSUPPORTED_CONTENT_TYPE', message: `Unsupported content type: ${contentType}` });
     }
 
     const sanitized = folder.toLowerCase().replace(/[^a-z0-9-]/g, '') as AllowedUploadFolder;
     if (!(ALLOWED_UPLOAD_FOLDERS as readonly string[]).includes(sanitized)) {
-      throw new Error(`Invalid folder "${folder}". Allowed: ${ALLOWED_UPLOAD_FOLDERS.join(', ')}`);
+      throw new BadRequestException({ code: 'INVALID_UPLOAD_FOLDER', message: `Invalid folder "${folder}". Allowed: ${ALLOWED_UPLOAD_FOLDERS.join(', ')}` });
     }
 
     const key = `${sanitized}/${randomUUID()}.${ext}`;
