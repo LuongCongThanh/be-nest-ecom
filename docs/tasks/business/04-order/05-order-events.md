@@ -9,6 +9,26 @@
 
 ---
 
+## 📌 Scope note (MVP, chốt qua grill-with-docs 2026-07-15)
+
+Sau khi grill lại thiết kế gốc với thực trạng codebase, scope MVP thu hẹp đáng kể so với bản gốc bên dưới:
+
+- **Chỉ build 1 listener: Notification** (structured-log placeholder, chưa gửi email thật — email thật là TASK-124/Phase D, chưa build). **Bỏ Inventory** (đã trừ/hoàn kho đồng bộ trong transaction, TASK-210), **bỏ Analytics** (audit đã có `OrderStateChangeLog` đồng bộ; stats TASK-211 query trực tiếp Order/OrderItem, cố tình không denormalize), **bỏ Shipping** (chưa có module logistics nào trong repo).
+- **Không lắng nghe `order.force-status-changed`** — coi là thao tác support nội bộ, không tự động notify khách.
+- **Delivery at-most-once**, không phải queue bền — xem [ADR-0003](../../../adr/0003-notification-listener-at-most-once.md). Scenario "Retry Logic" ở bảng TDD bên dưới **không áp dụng**, bỏ khỏi acceptance criteria thực tế.
+- **Không cần idempotency guard** ở listener — state machine (`isValidOrderTransition`) đã đảm bảo 1 transition chỉ emit đúng 1 lần, không có nguy cơ emit trùng.
+- **Module riêng `src/modules/notification/`** — không gộp vào `order/` — vì hạ tầng email dùng chung cho cả TASK-124 (account verification/forgot-password) sau này.
+- Listener query lại Order + User từ DB để log đầy đủ ngữ cảnh (order number, email, trạng thái mới) — tập dượt đúng shape của việc gửi email thật sau này.
+
+**Acceptance criteria thực tế cho MVP** (thay thế toàn bộ "TIÊU CHUẨN THÀNH CÔNG" + bảng TDD gốc bên dưới):
+
+1. Mỗi 1 trong 5 event (`order.paid/shipped/delivered/cancelled/refunded`) → `NotificationListener` query lại Order+User, log 1 dòng chứa order number, email, trạng thái mới.
+2. Listener throw lỗi (vd Order/User bị xóa giữa chừng) → không crash request gốc (`@OnEvent` mặc định `suppressErrors: true`), response vẫn trả bình thường cho client.
+
+Phần bên dưới là **spec gốc trước khi grill** — giữ lại để tham khảo ngữ cảnh/lý do ban đầu, không còn là acceptance criteria hiện hành.
+
+---
+
 ## 🎯 CHIẾN LƯỢC SỰ KIỆN (Event-Driven Strategy)
 
 ### 💡 Tại sao Điều phối bằng Sự kiện quan trọng?

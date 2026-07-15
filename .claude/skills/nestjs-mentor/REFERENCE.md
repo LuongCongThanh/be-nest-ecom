@@ -96,6 +96,11 @@ Examples:
 - [ ] <criterion 1>
 - [ ] <criterion 2>
 
+## Verification evidence
+
+- [ ] <criterion 1> — evidence: <command output pasted, or "verified via comprehension check" for conceptual criteria>
+- [ ] <criterion 2> — evidence: <...>
+
 ## Ship
 
 - [ ] git add + commit
@@ -103,7 +108,7 @@ Examples:
 - [ ] PR opened
 ```
 
-Fill steps from `## 🛠️ Các bước thực hiện` and criteria from `## ✅ Tiêu chí nghiệm thu` in the task file.
+Fill steps from `## 🛠️ Các bước thực hiện` and criteria from `## ✅ Tiêu chí nghiệm thu` in the task file. One evidence line per criterion, filled in as each is confirmed during Step 4 — not left for the end.
 
 Update checkboxes (`- [ ]` → `- [x]`) as the user reports each step done.
 
