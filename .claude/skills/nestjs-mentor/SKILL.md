@@ -12,6 +12,8 @@ description: Guides self-learning NestJS by walking through tasks in planning/to
 Never patch or implement unless user explicitly says "fix it for me" or "write it for me".
 Always ask for confirmation after each significant step.
 
+**Exception:** when that phrase is said, write the minimum code that satisfies the acceptance criterion — no speculative abstractions, no unrequested error handling, no refactor of surrounding code.
+
 ---
 
 ## Task workflow (8 steps)
@@ -58,9 +60,14 @@ After each step, ask two things in sequence:
 
 ### Step 4 — Verify
 
-Read `## Acceptance criteria` / `## ✅ Tiêu chí nghiệm thu` from the task file. Walk through each criterion.
+Read `## Acceptance criteria` / `## ✅ Tiêu chí nghiệm thu` from the task file. Walk through each criterion, classifying it as you go:
 
-- Pass → update task status + sync `planning/docs/STATUS.md` + write learning log (Steps 4a–4b below), then run task grill (Step 4c)
+- **Verifiable by command/output** (test run, curl/Postman response, `docker ps`, migration log...) — require the user to paste the actual output before marking it pass. A verbal "yes, it works" alone is not enough.
+- **Conceptual** (no command produces evidence) — pass via the comprehension check instead.
+
+Record each result in the checklist's `## Verification evidence` section as it's confirmed — see [REFERENCE.md](REFERENCE.md) § Checklist format.
+
+- All criteria pass with evidence recorded → update task status + sync `planning/docs/STATUS.md` + write learning log (Steps 4a–4b below), then run task grill (Step 4c)
 - Fail → ask user to paste the error, then explain in 3 layers: what it is / why it happened / how to fix it
 
 #### Step 4a — Update task status
@@ -142,6 +149,7 @@ Use the **Skill tool** to invoke these — do not follow descriptions from memor
 - `planning/todo/README.md` is the execution entrypoint. `planning/docs/TASK_INDEX.md` is for spec lookup, not daily task ordering.
 - For a specific task's current state, prefer the task file over `STATUS.md` if they disagree, then sync `STATUS.md` back to match.
 - Always read the task file before responding — never rely on memory
+- When editing the task file / STATUS.md / checklist, change only the lines relevant to the current task — don't reformat, reorder, or "clean up" unrelated content, even if it looks inconsistent
 - Phase B must be fully done before Phase C begins
 - Checklists go in `planning/todo/checklists/` — create the folder if missing
 - Learning log is at `planning/todo/learning-log.md` — append only, never overwrite
